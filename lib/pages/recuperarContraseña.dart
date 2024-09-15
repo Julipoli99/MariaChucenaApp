@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:gestion_indumentaria/pages/recuperarContrase%C3%B1a.dart';
 import 'package:gestion_indumentaria/pages/registro.dart';
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+class RecuperacionScreen extends StatelessWidget {
+  const RecuperacionScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -42,27 +41,6 @@ class LoginScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 20.0),
-                          const TextField(
-                            decoration: InputDecoration(
-                              labelText: 'Contraseña',
-                              hintText: 'Mínimo 8',
-                              border: OutlineInputBorder(),
-                            ),
-                            obscureText: true,
-                          ),
-                          const SizedBox(height: 10.0),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const RecuperacionScreen()),
-                              );
-                            },
-                            child: const Text('¿Has olvidado tu contraseña?'),
-                          ),
-                          const SizedBox(height: 20.0),
                           ElevatedButton(
                             onPressed: () {
                               // Acción para iniciar sesión
@@ -72,33 +50,7 @@ class LoginScreen extends StatelessWidget {
                               minimumSize: const Size(double.infinity, 50),
                             ),
                           ),
-                          const SizedBox(height: 20.0),
-                          const Row(
-                            children: [
-                              Expanded(child: Divider()),
-                              Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 10.0),
-                                child: Text('Or'),
-                              ),
-                              Expanded(child: Divider()),
-                            ],
-                          ),
-                          const SizedBox(height: 20.0),
-                          ElevatedButton.icon(
-                            onPressed: () {
-                              // Acción para iniciar sesión con Google
-                            },
-                            icon: Image.asset(
-                              'imagen/logo-google.png', // Imagen de Google desde la carpeta 'imagenes'
-                              height: 24.0,
-                              width: 24.0,
-                            ),
-                            label: const Text('Sign in with Google'),
-                            style: ElevatedButton.styleFrom(
-                              side: const BorderSide(color: Colors.grey),
-                              minimumSize: const Size(double.infinity, 50),
-                            ),
-                          ),
+
                           const SizedBox(height: 20.0),
                           TextButton(
                             onPressed: () {
