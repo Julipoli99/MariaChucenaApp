@@ -21,12 +21,12 @@ class LoginScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     ConstrainedBox(
-                      constraints: BoxConstraints(maxWidth: 300),
+                      constraints: const BoxConstraints(maxWidth: 300),
                       child: Column(
                         children: [
                           // Limitar el ancho máximo
                           const Text(
-                            'Bienvenido A Maria Chucena',
+                            'Bienvenido A Maria sda',
                             style: TextStyle(
                               fontSize: 24.0,
                               fontWeight: FontWeight.bold,
@@ -60,7 +60,7 @@ class LoginScreen extends StatelessWidget {
                                         const RecuperacionScreen()),
                               );
                             },
-                            child: const Text('¿Has olvidado tu contraseña?'),
+                            child: const Text('¿Has olvidadooo tu contraseña?'),
                           ),
                           const SizedBox(height: 20.0),
                           ElevatedButton(

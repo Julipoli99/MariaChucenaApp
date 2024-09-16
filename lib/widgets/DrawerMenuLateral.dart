@@ -14,8 +14,28 @@ class DrawerMenuLateral extends StatelessWidget {
             children: [
               // logo
               DrawerHeader(
-                  child: Image.network(
-                      'https://www.split.io/wp-content/uploads/flutter.png')),
+                  child: 
+                  Container(
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage(
+                          'imagen/im.jpg'), // Imagen de fondo desde la carpeta 'imagenes'
+                      
+                    ),
+                  ),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset(
+                          'imagen/logo.png', // Logo desde la carpeta 'imagenes'
+                          height: 100,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                  ),
 
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 25.0),
