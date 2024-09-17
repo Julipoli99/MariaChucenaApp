@@ -26,7 +26,7 @@ class LoginScreen extends StatelessWidget {
                         children: [
                           // Limitar el ancho máximo
                           const Text(
-                            'Bienvenido A Maria sda',
+                            'Bienvenido A Maria Chucena',
                             style: TextStyle(
                               fontSize: 24.0,
                               fontWeight: FontWeight.bold,
@@ -60,7 +60,7 @@ class LoginScreen extends StatelessWidget {
                                         const RecuperacionScreen()),
                               );
                             },
-                            child: const Text('¿Has olvidadooo tu contraseña?'),
+                            child: const Text('¿Has olvidado tu contraseña?'),
                           ),
                           const SizedBox(height: 20.0),
                           ElevatedButton(
