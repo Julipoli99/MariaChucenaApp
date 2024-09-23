@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/pages/Home.dart';
 import 'package:gestion_indumentaria/pages/inicio.dart';
+import 'package:gestion_indumentaria/pages/principal.dart';
 
 void main() {
   runApp(const MainApp());
@@ -14,7 +15,7 @@ class MainApp extends StatelessWidget {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        body: Home(),
+        body: HomePage(),
       ),
     );
   }
