@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gestion_indumentaria/pages/ordenDeCorte.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
 
@@ -33,7 +34,7 @@ class HomePage extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        'Welcome to Maria Chucena ERP System',
+                        'Bienvenidos a Maria Chucena ERP System',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 22,
@@ -83,8 +84,12 @@ class HomePage extends StatelessWidget {
                             children: [
                               GestureDetector(
                                 onTap: () {
-                                  // Acción al pulsar el botón
-                                  print('Orden de Corte');
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const OrdenDeCorteScreen()),
+                                  );
                                 },
                                 child: buildOptionCard(
                                   'Orden de Corte',
@@ -155,8 +160,13 @@ class HomePage extends StatelessWidget {
                           width: 350, // Ancho ajustado
                           height: 250, // Alto ajustado
 
-                          child: buildResourceCard('Stock control',
-                              'Área textil', 'ver detalles', 250, 140),
+                          child: buildResourceCard(
+                              'Stock control',
+                              'Área textil',
+                              'ver detalles',
+                              250,
+                              140,
+                              'assets/imagen/stock.png'),
                         ),
                       ),
                       Padding(
@@ -165,8 +175,13 @@ class HomePage extends StatelessWidget {
                         child: SizedBox(
                           width: 350, // Ancho ajustado
                           height: 250, // Alto ajustado
-                          child: buildResourceCard('Creación de tizadas',
-                              'Administración', 'ver detalles', 250, 140),
+                          child: buildResourceCard(
+                              'Creación de tizadas',
+                              'Administración',
+                              'ver detalles',
+                              250,
+                              140,
+                              'assets/imagen/tizada.jpg'),
                         ),
                       ),
                     ],
@@ -181,8 +196,13 @@ class HomePage extends StatelessWidget {
                         child: SizedBox(
                           width: 350, // Ancho ajustado
                           height: 250, // Alto ajustado
-                          child: buildResourceCard('Registrados', 'Modelos',
-                              'ver detalles', 250, 140),
+                          child: buildResourceCard(
+                              'Registrados',
+                              'Modelos',
+                              'ver detalles',
+                              250,
+                              140,
+                              'assets/imagen/modelos.jpeg'),
                         ),
                       ),
                       Padding(
@@ -191,8 +211,13 @@ class HomePage extends StatelessWidget {
                         child: SizedBox(
                           width: 350, // Ancho ajustado
                           height: 250, // Alto ajustado
-                          child: buildResourceCard('Lista de proveedores',
-                              'Proveedores', 'ver detalles', 250, 140),
+                          child: buildResourceCard(
+                              'Lista de proveedores',
+                              'Proveedores',
+                              'ver detalles',
+                              250,
+                              140,
+                              'assets/imagen/provedores.jpeg'),
                         ),
                       ),
                     ],

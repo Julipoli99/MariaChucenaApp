@@ -59,42 +59,52 @@ Widget buildOptionCard(String title, String description, double width,
   );
 }
 
-Widget buildResourceCard(
-    //actualizar codigo para que funcionen los botones de ver mas y ir a otras pantallas
-    String title,
-    String subtitle,
-    String action,
-    double width,
-    double height) {
+Widget buildResourceCard(String title, String subtitle, String action,
+    double width, double height, String imagePath) {
   return Card(
     elevation: 2,
-    child: Container(
-      width: width,
-      height: height,
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            subtitle,
-            style: const TextStyle(fontSize: 12, color: Colors.grey),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Imagen en la parte superior
+        Image.asset(
+          imagePath,
+          width: width * 10,
+          height: height * 0.8, // La imagen ocupará el 60% del height del Card
+          fit: BoxFit
+              .cover, // Ajusta la imagen para cubrir todo el espacio disponible
+        ),
+        const SizedBox(height: 10),
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                subtitle,
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              const SizedBox(height: 15),
+              Text(
+                title,
+                style:
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              Align(
+                alignment: Alignment.bottomRight,
+                child: TextButton(
+                  onPressed: () {
+                    // Acción para el botón de "Ver más"
+                    print('Ver más presionado');
+                    // Aquí podrías navegar a otra pantalla
+                  },
+                  child: Text(action),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 10),
-          Text(
-            title,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-          ),
-          const Spacer(),
-          Align(
-            alignment: Alignment.bottomRight,
-            child: TextButton(
-              onPressed: () {},
-              child: Text(action),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     ),
   );
 }
