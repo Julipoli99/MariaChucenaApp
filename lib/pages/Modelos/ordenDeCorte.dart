@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:gestion_indumentaria/pages/Avios/nuevoAvios.dart';
 import 'package:gestion_indumentaria/pages/Modelos/NuevoModelo.dart';
+import 'package:gestion_indumentaria/pages/Telas/nuevaTela.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
 
@@ -211,13 +213,29 @@ class OrdenDeCorteScreen extends StatelessWidget {
             IconButton(
               icon: const Icon(Icons.add),
               onPressed: () {
-                // Navegar a nueva página para agregar un nuevo elemento
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const Nuevomodelo(),
-                  ),
-                );
+                // Navegar a la pantalla correspondiente según el label
+                if (label == 'Tipo de Tela') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const nuevasTelas(),
+                    ),
+                  );
+                } else if (label == 'Modelo a Cortar') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const Nuevomodelo(),
+                    ),
+                  );
+                } else if (label == 'Avíos') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const Nuevoavios(),
+                    ),
+                  );
+                }
               },
             ),
           ],
