@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gestion_indumentaria/pages/Avios/avios.dart';
+import 'package:gestion_indumentaria/pages/Calculos/Calculos-eficiencia.dart';
 import 'package:gestion_indumentaria/pages/Tizadas/CreacionTizadasPage.dart';
 import 'package:gestion_indumentaria/pages/Modelos/ModelosRegistradosPage.dart';
 import 'package:gestion_indumentaria/pages/Modelos/ordenDeCorte.dart';
@@ -106,8 +108,12 @@ class HomePage extends StatelessWidget {
                               const SizedBox(height: 10),
                               GestureDetector(
                                 onTap: () {
-                                  // Acción al pulsar el botón
-                                  print('Cálculo y Eficiencia');
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const CalculosYEficiencia()),
+                                  );
                                 },
                                 child: buildOptionCard(
                                   'Cálculo y Eficiencia',
@@ -120,8 +126,11 @@ class HomePage extends StatelessWidget {
                               const SizedBox(height: 10),
                               GestureDetector(
                                 onTap: () {
-                                  // Acción al pulsar el botón
-                                  print('Informe de Avíos');
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => const Avios()),
+                                  );
                                 },
                                 child: buildOptionCard(
                                   'Informe de Avíos',
