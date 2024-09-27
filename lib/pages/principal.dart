@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:gestion_indumentaria/pages/ordenDeCorte.dart';
+import 'package:gestion_indumentaria/pages/Tizadas/CreacionTizadasPage.dart';
+import 'package:gestion_indumentaria/pages/Modelos/ModelosRegistradosPage.dart';
+import 'package:gestion_indumentaria/pages/Modelos/ordenDeCorte.dart';
+import 'package:gestion_indumentaria/pages/Provedores/provedoresPage.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
+import 'package:gestion_indumentaria/pages/Stock/stock_Control_Page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -139,90 +143,141 @@ class HomePage extends StatelessWidget {
               const SizedBox(height: 60),
 
               // Dentro del widget donde muestras las tarjetas de Gestión de Recursos
-              // Gestión de Recursos
-              const Center(
-                child: Text(
-                  'Gestión de Recursos',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Center(
+                child: Column(
+                  children: [
+                    const Text(
+                      'Gestión de Recursos',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 10),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 1), // Margen
+                              child: SizedBox(
+                                width: 350, // Ancho ajustado
+                                height: 250, // Alto ajustado
+                                child: GestureDetector(
+                                  onTap: () {
+                                    // Navegar a la página de StockControlPage
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const Stockcontrolpage(),
+                                      ),
+                                    );
+                                  },
+                                  child: buildResourceCard(
+                                    'Stock control',
+                                    'Área textil',
+                                    250,
+                                    140,
+                                    'assets/imagen/stock.png',
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 1), // Margen
+                              child: SizedBox(
+                                width: 350, // Ancho ajustado
+                                height: 250, // Alto ajustado
+                                child: GestureDetector(
+                                  onTap: () {
+                                    // Navegar a la página de CreacionTizadasPage
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const Creaciontizadaspage(),
+                                      ),
+                                    );
+                                  },
+                                  child: buildResourceCard(
+                                    'Creación de tizadas',
+                                    'Administración',
+                                    250,
+                                    140,
+                                    'assets/imagen/tizada.jpg',
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10), // Espacio entre filas
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 1), // Margen
+                              child: SizedBox(
+                                width: 350, // Ancho ajustado
+                                height: 250, // Alto ajustado
+                                child: GestureDetector(
+                                  onTap: () {
+                                    // Navegar a la página de ModelosPage
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const Modelosregistradospage(),
+                                      ),
+                                    );
+                                  },
+                                  child: buildResourceCard(
+                                    'Registrados',
+                                    'Modelos',
+                                    250,
+                                    140,
+                                    'assets/imagen/modelos.jpeg',
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 1), // Margen
+                              child: SizedBox(
+                                width: 350, // Ancho ajustado
+                                height: 250, // Alto ajustado
+                                child: GestureDetector(
+                                  onTap: () {
+                                    // Navegar a la página de ProveedoresPage
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const Provedorespage(),
+                                      ),
+                                    );
+                                  },
+                                  child: buildResourceCard(
+                                    'Lista de proveedores',
+                                    'Proveedores',
+                                    250,
+                                    140,
+                                    'assets/imagen/provedores.jpeg',
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 10),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Padding(
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 1), // Margen
-                        child: SizedBox(
-                          width: 350, // Ancho ajustado
-                          height: 250, // Alto ajustado
-
-                          child: buildResourceCard(
-                              'Stock control',
-                              'Área textil',
-                              'ver detalles',
-                              250,
-                              140,
-                              'assets/imagen/stock.png'),
-                        ),
-                      ),
-                      Padding(
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 1), // Margen
-                        child: SizedBox(
-                          width: 350, // Ancho ajustado
-                          height: 250, // Alto ajustado
-                          child: buildResourceCard(
-                              'Creación de tizadas',
-                              'Administración',
-                              'ver detalles',
-                              250,
-                              140,
-                              'assets/imagen/tizada.jpg'),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10), // Espacio entre filas
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Padding(
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 1), // Margen
-                        child: SizedBox(
-                          width: 350, // Ancho ajustado
-                          height: 250, // Alto ajustado
-                          child: buildResourceCard(
-                              'Registrados',
-                              'Modelos',
-                              'ver detalles',
-                              250,
-                              140,
-                              'assets/imagen/modelos.jpeg'),
-                        ),
-                      ),
-                      Padding(
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 1), // Margen
-                        child: SizedBox(
-                          width: 350, // Ancho ajustado
-                          height: 250, // Alto ajustado
-                          child: buildResourceCard(
-                              'Lista de proveedores',
-                              'Proveedores',
-                              'ver detalles',
-                              250,
-                              140,
-                              'assets/imagen/provedores.jpeg'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
               ),
 
               const Divider(),

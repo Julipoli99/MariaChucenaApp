@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gestion_indumentaria/pages/recuperarContrase%C3%B1a.dart';
-import 'package:gestion_indumentaria/pages/registro.dart';
+import 'package:gestion_indumentaria/pages/Login/recuperarContrase%C3%B1a.dart';
+import 'package:gestion_indumentaria/pages/Login/registro.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});

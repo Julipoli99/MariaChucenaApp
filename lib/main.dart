@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/pages/Home.dart';
-import 'package:gestion_indumentaria/pages/inicio.dart';
+import 'package:gestion_indumentaria/pages/Login/inicio.dart';
 import 'package:gestion_indumentaria/pages/principal.dart';
 
 void main() {

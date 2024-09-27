@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gestion_indumentaria/pages/registro.dart';
+import 'package:gestion_indumentaria/pages/Login/registro.dart';
 
 class RecuperacionScreen extends StatelessWidget {
   const RecuperacionScreen({super.key});

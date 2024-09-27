@@ -59,18 +59,24 @@ Widget buildOptionCard(String title, String description, double width,
   );
 }
 
-Widget buildResourceCard(String title, String subtitle, String action,
-    double width, double height, String imagePath) {
+Widget buildResourceCard(
+  String title,
+  String subtitle,
+  double width,
+  double height,
+  String imagePath,
+) {
+  // Nuevo parámetro para manejar la navegación
   return Card(
     elevation: 2,
     child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         // Imagen en la parte superior
         Image.asset(
           imagePath,
           width: width * 10,
-          height: height * 0.8, // La imagen ocupará el 60% del height del Card
+          height: height * 0.8, // La imagen ocupará el 80% del height del Card
           fit: BoxFit
               .cover, // Ajusta la imagen para cubrir todo el espacio disponible
         ),
@@ -89,17 +95,6 @@ Widget buildResourceCard(String title, String subtitle, String action,
                 title,
                 style:
                     const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-              ),
-              Align(
-                alignment: Alignment.bottomRight,
-                child: TextButton(
-                  onPressed: () {
-                    // Acción para el botón de "Ver más"
-                    print('Ver más presionado');
-                    // Aquí podrías navegar a otra pantalla
-                  },
-                  child: Text(action),
-                ),
               ),
             ],
           ),
