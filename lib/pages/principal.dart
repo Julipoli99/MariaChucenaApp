@@ -94,7 +94,7 @@ class HomePage extends StatelessWidget {
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) =>
-                                            const OrdenDeCorteScreen()),
+                                            OrdenDeCorteScreen()),
                                   );
                                 },
                                 child: buildOptionCard(
