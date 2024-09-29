@@ -19,109 +19,111 @@ class Nuevomodelo extends StatelessWidget {
       drawer: const DrawerMenuLateral(),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Título principal
-            Container(
-              color: Colors.grey[800],
-              padding: const EdgeInsets.all(20.0),
-              child: const Center(
-                child: Column(
+            // Sección izquierda para el título y subtítulo
+            Expanded(
+              flex: 1,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: const Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Registrar Modelo',
                       style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
+                        fontSize: 32,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     SizedBox(height: 10),
                     Text(
                       'Complete todos los detalles relevantes del modelo',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 20),
+            // Sección derecha para el formulario
+            Expanded(
+              flex: 2,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildTextField('Nombre de Modelo', 'Ej: M001',
+                              'nombre del modelo'),
+                          const SizedBox(height: 15),
+                          _buildRadioGroup(
+                              'Tipo', ['Hombre', 'Mujer', 'Niños', 'Unisex']),
+                          const SizedBox(height: 15),
+                          _buildDropdown(
+                              'Prenda',
+                              ['Remera', 'Pantalón', 'Otro'],
+                              'Seleccione la prenda del modelo'),
+                          const SizedBox(height: 15),
+                          _buildRadioGroup(
+                              'Género', ['Masculino', 'Femenino', 'Otro']),
+                          const SizedBox(height: 15),
+                          _buildRadioGroup(
+                              'Telas', ['Secundaria', 'Terciaria']),
+                          const SizedBox(height: 15),
+                          _buildTextField('Observación', '', 'observación'),
+                          const SizedBox(height: 15),
+                          _buildTallesRow(),
+                          const SizedBox(height: 15),
+                          _buildTextField(
+                              'Avíos', 'Detalles adicionales del modelo', ''),
+                          const SizedBox(height: 15),
+                          _buildTextField(
+                              'Extras', 'Otros elementos del modelo', ''),
+                          const SizedBox(height: 20),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              ElevatedButton(
+                                onPressed: () {
+                                  // Acción para guardar el modelo
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  minimumSize:
+                                      const Size(140, 50), // Ajusta el tamaño
+                                ),
+                                child: const Text('Guardar Modelo'),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  // Acción para cargar foto
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  minimumSize:
+                                      const Size(140, 50), // Ajusta el tamaño
+                                ),
+                                child: const Text('Cargar Foto'),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
+                  ),
+                  const SizedBox(height: 50),
 
-            // Formulario para registrar modelo
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildTextField(
-                        'Nombre de Modelo', 'Ej: M001', 'nombre del modelo'),
-                    const SizedBox(height: 15),
-                    _buildDropdown(
-                        'Tipo',
-                        ['Hombre', 'Mujer', 'Niños', 'Unisex'],
-                        'Seleccione el tipo de modelo'),
-                    const SizedBox(height: 15),
-                    _buildDropdown('Prenda', ['Remera', 'Pantalón', 'Otro'],
-                        'Seleccione la prenda de modelo'),
-                    const SizedBox(height: 15),
-                    _buildDropdown('Género', ['Masculino', 'Femenino', 'Otro'],
-                        'Seleccione el género del modelo'),
-                    const SizedBox(height: 15),
-                    _buildDropdown('Telas', ['Secundaria', 'Terciaria'],
-                        'Seleccione el tipo de tela del modelo'),
-                    const SizedBox(height: 15),
-                    _buildTextField('Observación', '', 'observación'),
-                    const SizedBox(height: 15),
-                    _buildTextField(
-                        'Talles', 'Ingrese los talles disponibles', ''),
-                    const SizedBox(height: 15),
-                    _buildTextField(
-                        'Avíos', 'Detalles adicionales del modelo', ''),
-                    const SizedBox(height: 15),
-                    _buildTextField('Extras', 'Otros elementos del modelo', ''),
-                    const SizedBox(height: 30),
-
-                    // Botones de guardar y cargar foto
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            // Acción para guardar el modelo
-                          },
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: const Size(
-                                150, 50), // Ajusta el tamaño del botón
-                          ),
-                          child: const Text('Guardar Modelo'),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            // Acción para cargar foto
-                          },
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: const Size(
-                                150, 50), // Ajusta el tamaño del botón
-                          ),
-                          child: const Text('Cargar Foto'),
-                        ),
-                      ],
+                  // Pie de página
+                  const Center(
+                    child: Text(
+                      '© 2024 Maria Chucena ERP System. All rights reserved.',
+                      textAlign: TextAlign.center,
                     ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // Pie de página
-            const Center(
-              child: Text(
-                '© 2024 Maria Chucena ERP System. All rights reserved.',
+                  ),
+                ],
               ),
             ),
           ],
@@ -140,7 +142,7 @@ class Nuevomodelo extends StatelessWidget {
         ),
         TextField(
           decoration: InputDecoration(
-            border: OutlineInputBorder(),
+            border: const OutlineInputBorder(),
             hintText: hint,
             labelText: hintText,
             filled: true,
@@ -168,11 +170,62 @@ class Nuevomodelo extends StatelessWidget {
               .toList(),
           onChanged: (value) {},
           decoration: InputDecoration(
-            border: OutlineInputBorder(),
+            border: const OutlineInputBorder(),
             labelText: hint,
             filled: true,
             fillColor: Colors.grey[200], // Color de fondo del dropdown
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRadioGroup(String label, List<String> options) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        Wrap(
+          spacing: 10,
+          children: options.map((option) {
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Radio<String>(
+                  value: option,
+                  groupValue: null, // Manejador de estado requerido
+                  onChanged: (value) {},
+                ),
+                Text(option),
+              ],
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTallesRow() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Talles',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 10,
+          children: ['S', 'M', 'L', 'XL'].map((talle) {
+            return ChoiceChip(
+              label: Text(talle),
+              selected: false, // Manejar estado para seleccionar
+              onSelected: (selected) {},
+            );
+          }).toList(),
         ),
       ],
     );
