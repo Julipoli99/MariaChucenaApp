@@ -70,17 +70,11 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          _buildTextField('codigo de modelo ', 'Ej: M001',
+                              'codigo de modelo '),
+                          const SizedBox(height: 15),
                           _buildTextField('Nombre de Modelo', 'Ej: M001',
                               'nombre del modelo'),
-                          const SizedBox(height: 15),
-                          _buildRadioGroup(
-                              'Tipo',
-                              ['Hombre', 'Mujer', 'Niños', 'Unisex'],
-                              selectedTipo, (value) {
-                            setState(() {
-                              selectedTipo = value;
-                            });
-                          }),
                           const SizedBox(height: 15),
                           _buildDropdown(
                               'Prenda',
@@ -94,19 +88,14 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                           const SizedBox(height: 15),
                           _buildRadioGroup(
                               'Género',
-                              ['Masculino', 'Femenino', 'Otro'],
+                              ['MASCULINO', 'FEMENINO', 'UNISEX'],
                               selectedGenero, (value) {
                             setState(() {
                               selectedGenero = value;
                             });
                           }),
                           const SizedBox(height: 15),
-                          _buildRadioGroup('Telas', ['Secundaria', 'Terciaria'],
-                              selectedTela, (value) {
-                            setState(() {
-                              selectedTela = value;
-                            });
-                          }),
+                          _buillTelaRow(),
                           const SizedBox(height: 15),
                           _buildTextField('Observación', '', 'observación'),
                           const SizedBox(height: 15),
@@ -265,6 +254,37 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                     selectedTalles.add(talle);
                   } else {
                     selectedTalles.remove(talle);
+                  }
+                });
+              },
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buillTelaRow() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Telas',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 10,
+          children: ['Primaria', 'Secundaria'].map((telas) {
+            return ChoiceChip(
+              label: Text(telas),
+              selected: selectedTalles.contains(telas),
+              onSelected: (selected) {
+                setState(() {
+                  if (selected) {
+                    selectedTalles.add(telas);
+                  } else {
+                    selectedTalles.remove(telas);
                   }
                 });
               },
