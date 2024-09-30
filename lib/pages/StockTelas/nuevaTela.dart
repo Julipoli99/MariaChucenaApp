@@ -21,10 +21,10 @@ class nuevasTelas extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   // Columna izquierda para el título y descripción
                   const Expanded(
@@ -32,19 +32,20 @@ class nuevasTelas extends StatelessWidget {
                     child: Padding(
                       padding: EdgeInsets.only(right: 32.0),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
+                          SizedBox(height: 50), // Espacio inicial
                           Text(
                             'Registro de Telas',
                             style: TextStyle(
-                              fontSize: 28,
+                              fontSize: 32,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           SizedBox(height: 8),
                           Text(
                             'Complete todos los detalles relevantes de la tela',
-                            style: TextStyle(fontSize: 16),
+                            style: TextStyle(fontSize: 16, color: Colors.grey),
                           ),
                         ],
                       ),
@@ -98,7 +99,7 @@ class nuevasTelas extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 40),
               const Divider(),
               // Footer
               const Padding(
@@ -141,6 +142,7 @@ class nuevasTelas extends StatelessWidget {
               onChanged: (value) {},
               decoration: InputDecoration(
                 labelText: label,
+                labelStyle: const TextStyle(fontSize: 18),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -164,21 +166,22 @@ class nuevasTelas extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Expanded(
             child: ChoiceChip(
               label: const Text('Plano'),
               selected: false, // Cambiar según la lógica de selección
               onSelected: (selected) {},
+              labelStyle: const TextStyle(fontSize: 16),
             ),
           ),
-          const SizedBox(width: 10),
           Expanded(
             child: ChoiceChip(
               label: const Text('Tubular'),
               selected: false, // Cambiar según la lógica de selección
               onSelected: (selected) {},
+              labelStyle: const TextStyle(fontSize: 16),
             ),
           ),
         ],
@@ -193,7 +196,9 @@ class nuevasTelas extends StatelessWidget {
       child: TextField(
         decoration: InputDecoration(
           labelText: label,
+          labelStyle: const TextStyle(fontSize: 18),
           hintText: hint,
+          hintStyle: const TextStyle(color: Colors.grey),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
           ),
