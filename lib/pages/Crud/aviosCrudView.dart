@@ -6,9 +6,9 @@ class AviosCrudView extends StatelessWidget {
   AviosCrudView({super.key});
 
   final List<Avios> avios = [
-    Avios(id: "1", nombre: "Avios1", proveedores: "proveedor1"),
-    Avios(id: "2", nombre: "Avios2", proveedores: "proveedor2"),
-    Avios(id: "3", nombre: "Avios3", proveedores: "proveedor3"),
+    Avios(id: 1, nombre: "Avios1", proveedores: "proveedor1"),
+    Avios(id: 2, nombre: "Avios2", proveedores: "proveedor2"),
+    Avios(id: 3, nombre: "Avios3", proveedores: "proveedor3"),
   ];
 
   @override
@@ -24,74 +24,64 @@ class AviosCrudView extends StatelessWidget {
                 Row(
                   children: [
                     TextButton(
-                  onPressed: () {
-                
-                  },
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.blue[300],
-                    foregroundColor: Colors.white
-                  ), 
-                  child: const Text('Nuevo registro'),
-                  
-                  ),
-                  TextButton(
-                  onPressed: () {
-                
-                  },
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.blue[300],
-                    foregroundColor: Colors.white
-                  ), 
-                  child: const Text('Modificar stock'),
-                  
-                  ),
+                      onPressed: () {},
+                      style: TextButton.styleFrom(
+                          backgroundColor: Colors.blue[300],
+                          foregroundColor: Colors.white),
+                      child: const Text('Nuevo registro'),
+                    ),
+                    TextButton(
+                      onPressed: () {},
+                      style: TextButton.styleFrom(
+                          backgroundColor: Colors.blue[300],
+                          foregroundColor: Colors.white),
+                      child: const Text('Modificar stock'),
+                    ),
                   ],
                 ),
-                
-            
-                  TextButton(
-                  onPressed: () {
-                
-                  },
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    foregroundColor: Colors.white
-                  ), 
-                  child: const Text('Inicio')
-                  
-                  ),
+                TextButton(
+                    onPressed: () {},
+                    style: TextButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        foregroundColor: Colors.white),
+                    child: const Text('Inicio')),
               ],
             ),
-          )
-          ,
+          ),
           Expanded(
             child: TablaCrud<Avios>(
               // Titulo del appBar
               tituloAppBar: 'Avios',
-              encabezados: const ["ID", "NOMBRE", "PROVEEDORES", "OPCIONES"], // Encabezados
-              items: avios,   // Lista de avios
-              dataMapper: [ // Celdas/valores
-                (avio) => Text(avio.id),
+              encabezados: const [
+                "ID",
+                "NOMBRE",
+                "PROVEEDORES",
+                "OPCIONES"
+              ], // Encabezados
+              items: avios, // Lista de avios
+              dataMapper: [
+                // Celdas/valores
+                (avio) => Text(avio.id as String),
                 (avio) => Text(avio.nombre),
                 (avio) => Text(avio.proveedores),
                 //Parte de Opciones, se le pasa una funcion que retorna una List de Widgets en este caso Row.
                 (avio) => Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        print('Vista para avio: ${avio.nombre}');
-                      },
-                      icon: const Icon(Icons.remove_red_eye_outlined),
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            print('Vista para avio: ${avio.nombre}');
+                          },
+                          icon: const Icon(Icons.remove_red_eye_outlined),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            print('Avio borrado: ${avio.nombre}');
+                          },
+                          icon: const Icon(Icons.delete),
+                        ),
+                      ],
                     ),
-                    IconButton(
-                      onPressed: () {
-                        print('Avio borrado: ${avio.nombre}');
-                      },
-                      icon: const Icon(Icons.delete),
-                    ),
-                  ],
-                ),
               ],
             ),
           ),
