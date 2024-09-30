@@ -6,7 +6,7 @@ class AviosCrudView extends StatelessWidget {
   AviosCrudView({super.key});
 
   final List<Avios> avios = [
-    Avios(id: 1, nombre: "Avios1", proveedores: "proveedor1"),
+    Avios(id: 1, nombre: "Avios1", proveedores: "proveedor1 "),
     Avios(id: 2, nombre: "Avios2", proveedores: "proveedor2"),
     Avios(id: 3, nombre: "Avios3", proveedores: "proveedor3"),
   ];
