@@ -1,7 +1,8 @@
 class Avios {
   String id;
   String nombre;
-  String proveedores; // Puede ser un List<Proveedor>
+  String
+      proveedores; // Este campo puede ser un List<Proveedor> si deseas tener varios proveedores
 
   Avios({
     required this.id,
@@ -9,5 +10,23 @@ class Avios {
     required this.proveedores,
   });
 
-  
+  // Método para deserializar desde JSON
+  static Avios fromJson(Map<String, dynamic> json) {
+    return Avios(
+      id: json['id'] as String,
+      nombre: json['nombre'] as String,
+      proveedores: json['proveedores']
+          as String, // Si cambias a List<Proveedor>, cambia la lógica aquí
+    );
+  }
+
+  // Método para serializar a JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'nombre': nombre,
+      'proveedores':
+          proveedores, // Si es una lista de proveedores, cambia a proveedores.map((p) => p.toJson()).toList()
+    };
+  }
 }

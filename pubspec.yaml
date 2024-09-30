@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   crud_table: ^0.0.6
+  http: ^0.13.4
 
 dev_dependencies:
   flutter_test:
