@@ -45,28 +45,28 @@ class _ModelCrudViewState extends State<ModelCrudView> {
           //(model) => Text(model.tela),
           //Parte de Opciones, se le pasa una funcion que retorna una List de Widgets en este caso Row.
           (model) => Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              IconButton(
-                onPressed: () {
-                  print('Vista para usuario: ${model.codigo}');
-                },
-                icon: const Icon(Icons.remove_red_eye_outlined),
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      print('Vista para usuario: ${model.codigo}');
+                    },
+                    icon: const Icon(Icons.remove_red_eye_outlined),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      print('Edicion para usuario: ${model.codigo}');
+                    },
+                    icon: const Icon(Icons.edit),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      print('Usuario borrado: ${model.codigo}');
+                    },
+                    icon: const Icon(Icons.delete),
+                  ),
+                ],
               ),
-              IconButton(
-                onPressed: () {
-                  print('Edicion para usuario: ${model.codigo}');
-                },
-                icon: const Icon(Icons.edit),
-              ),
-              IconButton(
-                onPressed: () {
-                  print('Usuario borrado: ${model.codigo}');
-                },
-                icon: const Icon(Icons.delete),
-              ),
-            ],
-          ),
         ],
       ),
     );

@@ -1,3 +1,5 @@
+import 'package:gestion_indumentaria/models/Avios.dart';
+
 class Modelo {
   final String codigo;
   final String nombre;
