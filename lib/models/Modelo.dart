@@ -13,7 +13,7 @@ class Modelo {
   Genero genero;
 
   Modelo({
-    required this.id,
+    this.id = 0,
     required this.codigo,
     required this.nombre,
     required this.tieneTelaSecundaria,
@@ -74,14 +74,14 @@ enum Genero {
 // Clase AviosModelo
 class AviosModelo {
   late int id;
-  late Avios avio;
+  Avios avio;
   bool talle;
   bool color;
-  late List<Talle> talles;
+  List<Talle> talles;
   int cantidadRequerida;
 
   AviosModelo({
-    required this.id,
+    this.id = 0,
     required this.avio,
     required this.talle,
     required this.color,
