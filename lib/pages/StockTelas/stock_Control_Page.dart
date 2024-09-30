@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:gestion_indumentaria/pages/Crud/proveedorCrudView.dart';
+import 'package:gestion_indumentaria/pages/Crud/telaCrudView.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
 
-class Provedorespage extends StatelessWidget {
-  const Provedorespage({super.key});
+class Stockcontrolpage extends StatelessWidget {
+  const Stockcontrolpage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +34,7 @@ class Provedorespage extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        'Bienvenidos al sistema de Gestion de Provedores ',
+                        'Bienvenidos al sistema de Gestion de Stock ',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 22,
@@ -54,11 +54,10 @@ class Provedorespage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-
               // Aquí mostramos el AviosCrudView
               SizedBox(
                 height: 600, // Ajusta el alto según lo necesario
-                child: ProveedorCrudView(),
+                child: TelaCrudView(),
               ),
 
               const Divider(),

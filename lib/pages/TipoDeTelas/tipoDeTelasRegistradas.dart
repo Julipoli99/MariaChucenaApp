@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gestion_indumentaria/pages/Crud/tipoTelaCrudView.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
 
@@ -33,7 +34,7 @@ class Stockcontrolpage extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        'Bienvenidos al sistema de Gestion de Stock ',
+                        'Bienvenidos al sistema de Gestion de tipo de telas ',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 22,
@@ -53,6 +54,11 @@ class Stockcontrolpage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
+              // Aquí mostramos el AviosCrudView
+              SizedBox(
+                height: 600, // Ajusta el alto según lo necesario
+                child: TipoTelaCrudView(),
+              ),
 
               const Divider(),
               // Pie de página con usuario logueado

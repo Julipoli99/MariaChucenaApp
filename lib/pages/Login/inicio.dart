@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/pages/Login/recuperarContrase%C3%B1a.dart';
 import 'package:gestion_indumentaria/pages/Login/registro.dart';
+import 'package:gestion_indumentaria/pages/principal.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -65,7 +66,11 @@ class LoginScreen extends StatelessWidget {
                           const SizedBox(height: 20.0),
                           ElevatedButton(
                             onPressed: () {
-                              // Acción para iniciar sesión
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const HomePage()),
+                              );
                             },
                             child: const Text('Ingresar'),
                             style: ElevatedButton.styleFrom(

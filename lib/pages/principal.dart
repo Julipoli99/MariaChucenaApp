@@ -7,7 +7,7 @@ import 'package:gestion_indumentaria/pages/Modelos/ordenDeCorte.dart';
 import 'package:gestion_indumentaria/pages/Provedores/provedoresPage.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
-import 'package:gestion_indumentaria/pages/Stock/stock_Control_Page.dart';
+import 'package:gestion_indumentaria/pages/StockTelas/stock_Control_Page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);

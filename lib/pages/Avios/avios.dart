@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
+
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
+
+import '../Crud/aviosCrudView.dart'; // Importa el archivo de AviosCrudView
 
 class Avios extends StatelessWidget {
   const Avios({super.key});
@@ -13,66 +16,63 @@ class Avios extends StatelessWidget {
         title: const Text('Maria Chucena ERP System'),
         toolbarHeight: 80,
         actions: [
-          buildLoggedInUser('assets/imagen/logo.png',
-              'Supervisor'), //el tipo de rango lo tendria que traer de la base de datos
+          // Usuario logueado en la esquina superior derecha
+          buildLoggedInUser('assets/imagen/logo.png', 'Supervisor'),
         ],
       ),
       drawer: const DrawerMenuLateral(),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Título principal centrado con subtítulo
-              Container(
-                color: Colors.grey[800],
-                width: double.infinity,
-                padding: const EdgeInsets.all(20.0),
-                child: const Center(
-                  child: Column(
-                    children: [
-                      Text(
-                        'Bienvenidos al sistema de Gestion de Avios ',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      Text(
-                        'De Maria Chucena ERP System',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              const Divider(),
-              // Pie de página con usuario logueado
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Título principal centrado con subtítulo
+            Container(
+              color: Colors.grey[800],
+              width: double.infinity,
+              padding: const EdgeInsets.all(20.0),
+              child: const Center(
                 child: Column(
                   children: [
-                    Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16.0),
-                      child: Center(
-                        child: Text(
-                          '© 2024 Maria Chucena ERP System. All rights reserved.',
-                        ),
+                    Text(
+                      'Bienvenidos al sistema de Gestión de Avios',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      'De Maria Chucena ERP System',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
                       ),
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 20),
+
+            // Aquí mostramos el AviosCrudView
+            SizedBox(
+              height: 600, // Ajusta el alto según lo necesario
+              child: AviosCrudView(),
+            ),
+
+            const Divider(),
+
+            // Pie de página centrado
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Center(
+                child: Text(
+                  '© 2024 Maria Chucena ERP System. All rights reserved.',
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
