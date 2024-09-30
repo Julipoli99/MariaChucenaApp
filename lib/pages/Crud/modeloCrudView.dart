@@ -82,7 +82,7 @@ class _ModelCrudViewState extends State<ModelCrudView> {
     models = jsonData.map((json) {
       List<Avios> avios = (json['avios'] as List).map((av) {
         return Avios(
-          id: av['avio']['id'].toString(),
+          id: av['avio']['id'] as int,
           nombre: av['avio']['nombre'],
           proveedores: av['avio']['codigoProveedor'], // Puedes ajustar según la estructura de tu clase Avios
         );

@@ -6,9 +6,9 @@ class AviosCrudView extends StatelessWidget {
   AviosCrudView({super.key});
 
   final List<Avios> avios = [
-    Avios(id: "1", nombre: "Avios1", proveedores: "proveedor1"),
-    Avios(id: "2", nombre: "Avios2", proveedores: "proveedor2"),
-    Avios(id: "3", nombre: "Avios3", proveedores: "proveedor3"),
+    Avios(id: 1, nombre: "Avios1", proveedores: "proveedor1"),
+    Avios(id: 2, nombre: "Avios2", proveedores: "proveedor2"),
+    Avios(id: 3, nombre: "Avios3", proveedores: "proveedor3"),
   ];
 
   @override
@@ -71,7 +71,7 @@ class AviosCrudView extends StatelessWidget {
               encabezados: const ["ID", "NOMBRE", "PROVEEDORES", "OPCIONES"], // Encabezados
               items: avios,   // Lista de avios
               dataMapper: [ // Celdas/valores
-                (avio) => Text(avio.id),
+                (avio) => Text(avio.id.toString()),
                 (avio) => Text(avio.nombre),
                 (avio) => Text(avio.proveedores),
                 //Parte de Opciones, se le pasa una funcion que retorna una List de Widgets en este caso Row.
