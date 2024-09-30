@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gestion_indumentaria/pages/Login/usuariosRegistrados.dart';
+import 'package:gestion_indumentaria/pages/principal.dart';
 
 class DrawerMenuLateral extends StatelessWidget {
   const DrawerMenuLateral({super.key});
@@ -14,13 +16,11 @@ class DrawerMenuLateral extends StatelessWidget {
             children: [
               // logo
               DrawerHeader(
-                  child: 
-                  Container(
+                child: Container(
                   decoration: const BoxDecoration(
                     image: DecorationImage(
                       image: AssetImage(
                           'imagen/im.jpg'), // Imagen de fondo desde la carpeta 'imagenes'
-                      
                     ),
                   ),
                   child: Center(
@@ -35,7 +35,7 @@ class DrawerMenuLateral extends StatelessWidget {
                     ),
                   ),
                 ),
-                  ),
+              ),
 
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 25.0),
@@ -57,8 +57,10 @@ class DrawerMenuLateral extends StatelessWidget {
                     style: TextStyle(color: Colors.white),
                   ),
                   onTap: () {
-                    print('Presionado boton Home');
-                    //context.goNamed(Home.name);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const HomePage()),
+                    );
                   },
                 ),
               ),
@@ -98,8 +100,9 @@ class DrawerMenuLateral extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(left: 25.0),
                 child: ListTile(
-                  leading:
-                      const Icon(color: Colors.white, Icons.production_quantity_limits_sharp),
+                  leading: const Icon(
+                      color: Colors.white,
+                      Icons.production_quantity_limits_sharp),
                   title: const Text(
                     'Productos',
                     style: TextStyle(color: Colors.white),
@@ -114,14 +117,18 @@ class DrawerMenuLateral extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(left: 25.0),
                 child: ListTile(
-                  leading:
-                      const Icon(color: Colors.white, Icons.account_circle_outlined),
+                  leading: const Icon(
+                      color: Colors.white, Icons.account_circle_outlined),
                   title: const Text(
                     'Usuarios',
                     style: TextStyle(color: Colors.white),
                   ),
                   onTap: () {
-                    print('Presionado boton Usuarios');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const Usuariosregistrados()),
+                    );
                   },
                 ),
               ),

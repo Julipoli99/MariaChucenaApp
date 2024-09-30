@@ -3,8 +3,8 @@ import 'package:gestion_indumentaria/pages/Crud/usuarioCrudView.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
 
-class Stockcontrolpage extends StatelessWidget {
-  const Stockcontrolpage({super.key});
+class Usuariosregistrados extends StatelessWidget {
+  const Usuariosregistrados({super.key});
 
   @override
   Widget build(BuildContext context) {
