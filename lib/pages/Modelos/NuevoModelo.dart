@@ -2,8 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
 
-class Nuevomodelo extends StatelessWidget {
+class Nuevomodelo extends StatefulWidget {
   const Nuevomodelo({super.key});
+
+  @override
+  State<Nuevomodelo> createState() => _NuevomodeloState();
+}
+
+class _NuevomodeloState extends State<Nuevomodelo> {
+  // Variables de estado para las selecciones
+  String? selectedTipo;
+  String? selectedGenero;
+  String? selectedTela;
+  String? selectedPrenda;
+  List<String> selectedTalles = [];
 
   @override
   Widget build(BuildContext context) {
@@ -62,18 +74,39 @@ class Nuevomodelo extends StatelessWidget {
                               'nombre del modelo'),
                           const SizedBox(height: 15),
                           _buildRadioGroup(
-                              'Tipo', ['Hombre', 'Mujer', 'Niños', 'Unisex']),
+                              'Tipo',
+                              ['Hombre', 'Mujer', 'Niños', 'Unisex'],
+                              selectedTipo, (value) {
+                            setState(() {
+                              selectedTipo = value;
+                            });
+                          }),
                           const SizedBox(height: 15),
                           _buildDropdown(
                               'Prenda',
                               ['Remera', 'Pantalón', 'Otro'],
-                              'Seleccione la prenda del modelo'),
+                              'Seleccione la prenda del modelo',
+                              selectedPrenda, (value) {
+                            setState(() {
+                              selectedPrenda = value;
+                            });
+                          }),
                           const SizedBox(height: 15),
                           _buildRadioGroup(
-                              'Género', ['Masculino', 'Femenino', 'Otro']),
+                              'Género',
+                              ['Masculino', 'Femenino', 'Otro'],
+                              selectedGenero, (value) {
+                            setState(() {
+                              selectedGenero = value;
+                            });
+                          }),
                           const SizedBox(height: 15),
-                          _buildRadioGroup(
-                              'Telas', ['Secundaria', 'Terciaria']),
+                          _buildRadioGroup('Telas', ['Secundaria', 'Terciaria'],
+                              selectedTela, (value) {
+                            setState(() {
+                              selectedTela = value;
+                            });
+                          }),
                           const SizedBox(height: 15),
                           _buildTextField('Observación', '', 'observación'),
                           const SizedBox(height: 15),
@@ -153,7 +186,8 @@ class Nuevomodelo extends StatelessWidget {
     );
   }
 
-  Widget _buildDropdown(String label, List<String> items, String hint) {
+  Widget _buildDropdown(String label, List<String> items, String hint,
+      String? selectedItem, Function(String?) onChanged) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -162,13 +196,14 @@ class Nuevomodelo extends StatelessWidget {
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         DropdownButtonFormField<String>(
+          value: selectedItem,
           items: items
               .map((item) => DropdownMenuItem<String>(
                     value: item,
                     child: Text(item),
                   ))
               .toList(),
-          onChanged: (value) {},
+          onChanged: onChanged,
           decoration: InputDecoration(
             border: const OutlineInputBorder(),
             labelText: hint,
@@ -180,7 +215,8 @@ class Nuevomodelo extends StatelessWidget {
     );
   }
 
-  Widget _buildRadioGroup(String label, List<String> options) {
+  Widget _buildRadioGroup(String label, List<String> options,
+      String? groupValue, Function(String?) onChanged) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -196,8 +232,8 @@ class Nuevomodelo extends StatelessWidget {
               children: [
                 Radio<String>(
                   value: option,
-                  groupValue: null, // Manejador de estado requerido
-                  onChanged: (value) {},
+                  groupValue: groupValue, // Almacena la opción seleccionada
+                  onChanged: onChanged,
                 ),
                 Text(option),
               ],
@@ -222,8 +258,16 @@ class Nuevomodelo extends StatelessWidget {
           children: ['S', 'M', 'L', 'XL'].map((talle) {
             return ChoiceChip(
               label: Text(talle),
-              selected: false, // Manejar estado para seleccionar
-              onSelected: (selected) {},
+              selected: selectedTalles.contains(talle),
+              onSelected: (selected) {
+                setState(() {
+                  if (selected) {
+                    selectedTalles.add(talle);
+                  } else {
+                    selectedTalles.remove(talle);
+                  }
+                });
+              },
             );
           }).toList(),
         ),

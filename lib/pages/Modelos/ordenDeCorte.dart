@@ -5,25 +5,18 @@ import 'package:gestion_indumentaria/pages/StockTelas/nuevaTela.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
 
-class OrdenDeCorteScreen extends StatelessWidget {
-  final List<String> tiposDeTela = [
-    'Algodón',
-    'Poliéster',
-    'Lino'
-  ]; // Ejemplo de datos desde la base de datos
-  final List<String> modelosACortar = [
-    'Modelo A',
-    'Modelo B',
-    'Modelo C'
-  ]; // Ejemplo de datos desde la base de datos
-  final List<String> avios = [
-    'Botones',
-    'Cremalleras',
-    'Hilos'
-  ]; // Ejemplo de datos desde la base de datos
-  final List<String> talles = ['S', 'M', 'L', 'XL']; // Tipos de talles
+class OrdenDeCorteScreen extends StatefulWidget {
+  @override
+  _OrdenDeCorteScreenState createState() => _OrdenDeCorteScreenState();
+}
 
-  OrdenDeCorteScreen({super.key});
+class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
+  final List<String> tiposDeTela = ['Algodón', 'Poliéster', 'Lino'];
+  final List<String> modelosACortar = ['Modelo A', 'Modelo B', 'Modelo C'];
+  final List<String> avios = ['Botones', 'Cremalleras', 'Hilos'];
+  final List<String> talles = ['S', 'M', 'L', 'XL'];
+
+  String? selectedTalle;
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +36,6 @@ class OrdenDeCorteScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Encabezado
               Container(
                 color: Colors.grey[800],
                 width: double.infinity,
@@ -72,8 +64,6 @@ class OrdenDeCorteScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-
-              // Formulario
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -122,16 +112,13 @@ class OrdenDeCorteScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-
                   const SizedBox(width: 20),
-
-                  // Cuadro gris con lista de cosas cargadas
                   Expanded(
                     flex: 1,
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       color: Colors.grey[300],
-                      height: 400, // Ajuste del alto del cuadro
+                      height: 400,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -143,13 +130,11 @@ class OrdenDeCorteScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 10),
-                          // Aquí se pueden mostrar los datos cargados para el modelo
                           buildListItem('Tela: ${tiposDeTela[0]}', context),
                           buildListItem(
                               'Modelo: ${modelosACortar[0]}', context),
                           buildListItem('Avíos: ${avios[0]}', context),
                           const SizedBox(height: 10),
-                          // Mostrar más detalles tomados de la base de datos
                           const Text(
                             'Detalles adicionales:',
                             style: TextStyle(
@@ -165,10 +150,7 @@ class OrdenDeCorteScreen extends StatelessWidget {
                   ),
                 ],
               ),
-
               const SizedBox(height: 40),
-
-              // Pie de página
               const Center(
                 child: Text(
                   '© 2024 Maria Chucena ERP System. All rights reserved.',
@@ -181,7 +163,6 @@ class OrdenDeCorteScreen extends StatelessWidget {
     );
   }
 
-  // Widget para construir el dropdown con los datos
   Widget buildDropdownField(
       String label, List<String> items, BuildContext context) {
     return Column(
@@ -213,7 +194,6 @@ class OrdenDeCorteScreen extends StatelessWidget {
             IconButton(
               icon: const Icon(Icons.add),
               onPressed: () {
-                // Navegar a la pantalla correspondiente según el label
                 if (label == 'Tipo de Tela') {
                   Navigator.push(
                     context,
@@ -244,7 +224,6 @@ class OrdenDeCorteScreen extends StatelessWidget {
     );
   }
 
-  // Widget para construir el campo de texto
   Widget buildTextField(String label) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -266,7 +245,6 @@ class OrdenDeCorteScreen extends StatelessWidget {
     );
   }
 
-  // Widget para construir los botones de selección de talles
   Widget buildTalleSelector() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -276,15 +254,17 @@ class OrdenDeCorteScreen extends StatelessWidget {
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 5),
-        Row(
+        Wrap(
+          spacing: 10,
           children: List.generate(talles.length, (index) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 5.0),
-              child: ChoiceChip(
-                label: Text(talles[index]),
-                selected: false, // Cambiar según la lógica de selección
-                onSelected: (selected) {},
-              ),
+            return ChoiceChip(
+              label: Text(talles[index]),
+              selected: selectedTalle == talles[index],
+              onSelected: (selected) {
+                setState(() {
+                  selectedTalle = selected ? talles[index] : null;
+                });
+              },
             );
           }),
         ),
@@ -292,7 +272,6 @@ class OrdenDeCorteScreen extends StatelessWidget {
     );
   }
 
-  // Widget para construir un elemento de la lista con botón "x"
   Widget buildListItem(String text, BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -300,26 +279,9 @@ class OrdenDeCorteScreen extends StatelessWidget {
         Text(text),
         IconButton(
           icon: const Icon(Icons.close),
-          onPressed: () {
-            // Lógica para eliminar o navegar a una nueva pantalla si es necesario
-          },
+          onPressed: () {},
         ),
       ],
-    );
-  }
-}
-
-// Página de ejemplo para agregar un nuevo elemento
-class NewItemScreen extends StatelessWidget {
-  const NewItemScreen({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Agregar Nuevo Elemento')),
-      body: Center(
-        child: const Text('Aquí puedes agregar un nuevo elemento.'),
-      ),
     );
   }
 }
