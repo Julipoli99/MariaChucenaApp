@@ -110,6 +110,14 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
+
+
+
+
+                              // ********** Boton para guardar => POST https://maria-chucena-api-production.up.railway.app/modelo
+
+
+
                               ElevatedButton(
                                 onPressed: () {
                                   // Acción para guardar el modelo
@@ -121,7 +129,13 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                                 child: const Text('Guardar Modelo'),
                               ),
                               ElevatedButton(
+
+                                // INPUT FOTO
+
+
                                 onPressed: () {
+                                  // ###PENDIENTE###...
+
                                   // Acción para cargar foto
                                 },
                                 style: ElevatedButton.styleFrom(
@@ -163,6 +177,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         TextField(
+          controller: TextEditingController(),
           decoration: InputDecoration(
             border: const OutlineInputBorder(),
             hintText: hint,

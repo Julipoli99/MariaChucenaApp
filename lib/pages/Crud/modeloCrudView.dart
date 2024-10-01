@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Avios.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
+import 'package:gestion_indumentaria/widgets/boxDialog/BoxDialog.dart';
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
 import 'package:http/http.dart' as http;
 
@@ -29,14 +30,33 @@ class _ModelCrudViewState extends State<ModelCrudView> {
     fetchModels();
   }
 
+  // Muestra un diálogo con el mensaje proporcionado
+  void showBox(Modelo modelo) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return BoxDialog(
+          modelo: modelo,
+          onCancel: onCancel,
+        );
+      },
+    );
+  }
+
+  // Función de cancelación para cerrar el diálogo
+  void onCancel() {
+    Navigator.of(context).pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: TablaCrud<Modelo>(
         tituloAppBar: 'Modelos registrados', // Titulo del appBar
-        encabezados: const ["CODIGO", "NOMBRE", "GENERO", "TIPO", "OPCIONES"], // Encabezados
+        encabezados: const ["ID", "CODIGO", "NOMBRE", "GENERO", "TIPO", "OPCIONES"], // Encabezados
         items: models,   // Lista de modelos
         dataMapper: [ // Celdas/valores
+          (model) => Text(model.id.toString()),
           (model) => Text(model.codigo.toString()),
           (model) => Text(model.nombre),
           (model) => Text(model.genero),
@@ -49,19 +69,23 @@ class _ModelCrudViewState extends State<ModelCrudView> {
                 children: [
                   IconButton(
                     onPressed: () {
-                      print('Vista para usuario: ${model.codigo}');
+                      print('Vista para modelo con id: ${model.id}');
+
+                      // Muestra un pantallazo de los atributos restantes del modelo
+                      showBox(model);
+
                     },
                     icon: const Icon(Icons.remove_red_eye_outlined),
                   ),
                   IconButton(
                     onPressed: () {
-                      print('Edicion para usuario: ${model.codigo}');
+                      print('Edicion para modelo con id: ${model.id}');
                     },
                     icon: const Icon(Icons.edit),
                   ),
                   IconButton(
                     onPressed: () {
-                      print('Usuario borrado: ${model.codigo}');
+                      print('Modelo borrado: ${model.id}');
                     },
                     icon: const Icon(Icons.delete),
                   ),
@@ -89,6 +113,7 @@ class _ModelCrudViewState extends State<ModelCrudView> {
       }).toList();
 
       return Modelo(
+        id: json['id'],
         codigo: json['codigo'],
         genero: json['genero'], // Ajustando para usar el tipo de la categoría como prenda
         nombre: json['nombre'],

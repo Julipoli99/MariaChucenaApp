@@ -1,6 +1,7 @@
 import 'package:gestion_indumentaria/models/Avios.dart';
 
 class Modelo {
+  final int id;
   final String codigo;
   final String nombre;
   final bool tieneTelaSecundaria;
@@ -12,6 +13,7 @@ class Modelo {
   final String categoriaTipo;
 
   Modelo({
+    required this.id,
     required this.codigo,
     required this.nombre,
     required this.tieneTelaSecundaria,
@@ -25,6 +27,7 @@ class Modelo {
 
   factory Modelo.fromJson(Map<String, dynamic> json) {
     return Modelo(
+      id: json['id'],
       codigo: json['codigo'],
       nombre: json['nombre'],
       tieneTelaSecundaria: json['tieneTelaSecundaria'],
