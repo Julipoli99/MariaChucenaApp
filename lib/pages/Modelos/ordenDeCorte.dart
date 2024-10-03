@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/pages/Avios/nuevoAvios.dart';
 import 'package:gestion_indumentaria/pages/Modelos/NuevoModelo.dart';
 import 'package:gestion_indumentaria/pages/StockTelas/nuevaTela.dart';
+import 'package:gestion_indumentaria/pages/TipoDeTelas/NuevoTipoDeTela.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
 
@@ -198,7 +199,7 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const nuevasTelas(),
+                      builder: (context) => const Nuevotipodetela(),
                     ),
                   );
                 } else if (label == 'Modelo a Cortar') {

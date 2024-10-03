@@ -1,9 +1,52 @@
 import 'package:flutter/material.dart';
+import 'package:gestion_indumentaria/pages/Provedores/NuevoProvedor.dart';
+import 'package:gestion_indumentaria/pages/TipoDeTelas/NuevoTipoDeTela.dart';
+// import 'package:http/http.dart' as http; // Se comentan temporalmente para el ejemplo.
+// import 'dart:convert'; // Para trabajar con JSON, se comentan por ahora.
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
 
-class nuevasTelas extends StatelessWidget {
-  const nuevasTelas({super.key});
+class NuevasTelas extends StatefulWidget {
+  const NuevasTelas({super.key});
+
+  @override
+  _NuevasTelasState createState() => _NuevasTelasState();
+}
+
+class _NuevasTelasState extends State<NuevasTelas> {
+  // Lista para manejar los tipos de tejidos seleccionados
+  List<String> selectedTejidos = [];
+
+  // Listas simuladas para almacenar los datos en lugar de obtenerlos desde la API
+  List<String> tiposTela = ['Algodón', 'Lana', 'Poliéster', 'Seda'];
+  List<String> proveedores = ['Proveedor A', 'Proveedor B', 'Proveedor C'];
+
+  @override
+  void initState() {
+    super.initState();
+    // Comentar las llamadas a la API ya que estamos simulando los datos
+    // fetchTiposTela();
+    // fetchProveedores();
+  }
+
+  // Función simulada para cargar los tipos de tela
+  Future<void> fetchTiposTela() async {
+    // Simular un tiempo de carga como si viniera de una API
+    await Future.delayed(Duration(seconds: 1));
+    // Se usan datos estáticos para simular la respuesta
+    setState(() {
+      tiposTela = ['Algodón', 'Lana', 'Poliéster', 'Seda'];
+    });
+  }
+
+  // Función simulada para cargar los proveedores
+  Future<void> fetchProveedores() async {
+    // Simular un tiempo de carga como si viniera de una API
+    await Future.delayed(Duration(seconds: 1));
+    setState(() {
+      proveedores = ['Proveedor A', 'Proveedor B', 'Proveedor C'];
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +69,6 @@ class nuevasTelas extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Columna izquierda para el título y descripción
                   const Expanded(
                     flex: 2,
                     child: Padding(
@@ -51,17 +93,15 @@ class nuevasTelas extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // Columna derecha para el formulario
                   Expanded(
                     flex: 3,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        buildDropdownField('Tipo de tela',
-                            ['Elige una', 'Algodón', 'Poliéster', 'Lino']),
+                        buildDropdownField('Tipo de tela', tiposTela),
                         buildTipoTejidoSelector(),
-                        buildDropdownField('Proveedor',
-                            ['Elige uno', 'Proveedor A', 'Proveedor B']),
+                        const SizedBox(height: 10),
+                        buildDropdownField('Proveedor', proveedores),
                         buildTextField('Cantidad',
                             'Cantidad de tela registrada, en metros o kilos'),
                         buildTextField('Descripción',
@@ -101,7 +141,6 @@ class nuevasTelas extends StatelessWidget {
               ),
               const SizedBox(height: 40),
               const Divider(),
-              // Footer
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.0),
                 child: Column(
@@ -124,7 +163,6 @@ class nuevasTelas extends StatelessWidget {
     );
   }
 
-  // Widget para construir el dropdown con los datos
   Widget buildDropdownField(String label, List<String> items) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20.0),
@@ -153,7 +191,21 @@ class nuevasTelas extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () {
-              // Lógica para agregar nuevo elemento
+              if (label == 'Tipo de tela') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const Nuevotipodetela(),
+                  ),
+                );
+              } else if (label == 'Proveedor') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const Nuevoprovedor(),
+                  ),
+                );
+              }
             },
           ),
         ],
@@ -161,35 +213,38 @@ class nuevasTelas extends StatelessWidget {
     );
   }
 
-  // Widget para construir los botones de selección de tipo de tejido
   Widget buildTipoTejidoSelector() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Expanded(
-            child: ChoiceChip(
-              label: const Text('Plano'),
-              selected: false, // Cambiar según la lógica de selección
-              onSelected: (selected) {},
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Tipo de Tejido',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 10,
+          children: ['Plano', 'Tubular'].map((tipoTejido) {
+            return ChoiceChip(
+              label: Text(tipoTejido),
+              selected: selectedTejidos.contains(tipoTejido),
+              onSelected: (selected) {
+                setState(() {
+                  if (selected) {
+                    selectedTejidos.add(tipoTejido);
+                  } else {
+                    selectedTejidos.remove(tipoTejido);
+                  }
+                });
+              },
               labelStyle: const TextStyle(fontSize: 16),
-            ),
-          ),
-          Expanded(
-            child: ChoiceChip(
-              label: const Text('Tubular'),
-              selected: false, // Cambiar según la lógica de selección
-              onSelected: (selected) {},
-              labelStyle: const TextStyle(fontSize: 16),
-            ),
-          ),
-        ],
-      ),
+            );
+          }).toList(),
+        ),
+      ],
     );
   }
 
-  // Widget para construir los campos de texto
   Widget buildTextField(String label, String hint) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20.0),
