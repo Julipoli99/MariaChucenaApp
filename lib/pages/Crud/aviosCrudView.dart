@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Avios.dart';
+import 'package:gestion_indumentaria/pages/Avios/nuevoAvios.dart';
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
 
 class AviosCrudView extends StatelessWidget {
@@ -24,7 +25,14 @@ class AviosCrudView extends StatelessWidget {
                 Row(
                   children: [
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const Nuevoavios(),
+                          ),
+                        );
+                      },
                       style: TextButton.styleFrom(
                           backgroundColor: Colors.blue[300],
                           foregroundColor: Colors.white),

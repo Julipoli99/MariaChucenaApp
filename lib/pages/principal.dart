@@ -207,7 +207,7 @@ class HomePage extends StatelessWidget {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                            const Creaciontizadaspage(),
+                                            const CreacionTizadasPage(),
                                       ),
                                     );
                                   },
