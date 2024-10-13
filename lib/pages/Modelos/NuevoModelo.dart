@@ -288,12 +288,13 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   }
 
   // Función para mostrar el cuadro de diálogo con los botones "Talle" y "Color"
+  // Función para mostrar el cuadro de diálogo con los botones "Talle" y "Color"
   void _showAviosDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (BuildContext context, StateSetter setDialogState) {
             return AlertDialog(
               title: const Text('Seleccione el tipo de avios'),
               content: Column(
@@ -305,7 +306,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                     'Seleccione el tipo de avios',
                     selectedTipoAvioDialog,
                     (value) {
-                      setState(() {
+                      setDialogState(() {
                         selectedTipoAvioDialog = value;
                       });
                     },
@@ -313,16 +314,15 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                   const SizedBox(height: 15),
                   ElevatedButton(
                     onPressed: () {
-                      _showTalleSelectionDialog(setState);
+                      _showTalleSelectionDialog(setDialogState);
                     },
                     child: const Text('Seleccionar Talle'),
                   ),
                   const SizedBox(height: 15),
                   ElevatedButton(
                     onPressed: () {
-                      setState(() {
-                        selectedColorDialog =
-                            'color selecionado'; // Ejemplo directo
+                      setDialogState(() {
+                        selectedColorDialog = 'Color seleccionado'; // Ejemplo
                       });
                     },
                     child: const Text('Seleccionar Color'),
@@ -339,9 +339,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                     Wrap(
                       spacing: 8,
                       children: selectedTallesDialog
-                          .map((talle) => Chip(
-                                label: Text(talle),
-                              ))
+                          .map((talle) => Chip(label: Text(talle)))
                           .toList(),
                     ),
                 ],
@@ -350,12 +348,15 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                 ElevatedButton(
                   onPressed: () {
                     if (selectedTipoAvioDialog != null) {
+                      // Crear avio y actualizar lista
                       Avios avioCreado = Avios(
                         nombre: selectedTipoAvioDialog!,
                         proveedores: "Proveedor1",
                         talles: List.from(selectedTallesDialog),
                         color: selectedColorDialog,
                       );
+
+                      // Usar setState de la pantalla principal para actualizar la tabla
                       setState(() {
                         aviosSeleccionados.add(avioCreado);
                         // Limpiar las selecciones
@@ -363,10 +364,36 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                         selectedTallesDialog.clear();
                         selectedColorDialog = null;
                       });
-                      Navigator.of(context).pop();
+
+                      Navigator.of(context); // manda el formulario pero no lo cierra  
                     }
                   },
                   child: const Text('Agregar Avio'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    if (selectedTipoAvioDialog != null) {
+                      // Crear avio y actualizar lista
+                      Avios avioCreado = Avios(
+                        nombre: selectedTipoAvioDialog!,
+                        proveedores: "Proveedor1",
+                        talles: List.from(selectedTallesDialog),
+                        color: selectedColorDialog,
+                      );
+
+                      // Usar setState de la pantalla principal para actualizar la tabla
+                      setState(() {
+                        aviosSeleccionados.add(avioCreado);
+                        // Limpiar las selecciones
+                        selectedTipoAvioDialog = null;
+                        selectedTallesDialog.clear();
+                        selectedColorDialog = null;
+                      });
+
+                      Navigator.of(context).pop(); // Cerrar el diálogo
+                    }
+                  },
+                  child: const Text('finalizar'),
                 ),
               ],
             );
