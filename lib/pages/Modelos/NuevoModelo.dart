@@ -288,7 +288,6 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   }
 
   // Función para mostrar el cuadro de diálogo con los botones "Talle" y "Color"
-  // Función para mostrar el cuadro de diálogo con los botones "Talle" y "Color"
   void _showAviosDialog() {
     showDialog(
       context: context,
@@ -359,13 +358,17 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                       // Usar setState de la pantalla principal para actualizar la tabla
                       setState(() {
                         aviosSeleccionados.add(avioCreado);
-                        // Limpiar las selecciones
+                      });
+
+                      // usa el setDialogoState para limpiar el formulario para el proximo avios
+                      setDialogState(() {
                         selectedTipoAvioDialog = null;
                         selectedTallesDialog.clear();
                         selectedColorDialog = null;
                       });
 
-                      Navigator.of(context); // manda el formulario pero no lo cierra  
+                      Navigator.of(
+                          context); // manda el formulario pero no lo cierra
                     }
                   },
                   child: const Text('Agregar Avio'),
