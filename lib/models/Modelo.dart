@@ -4,6 +4,7 @@ class Modelo {
   final int id;
   final String codigo;
   final String nombre;
+ // final int categoriaId;
   final bool tieneTelaSecundaria;
   final bool tieneTelaAuxiliar;
   final String genero;
@@ -16,6 +17,7 @@ class Modelo {
     required this.id,
     required this.codigo,
     required this.nombre,
+   // required this.categoriaId,
     required this.tieneTelaSecundaria,
     required this.tieneTelaAuxiliar,
     required this.genero,
@@ -24,6 +26,28 @@ class Modelo {
     required this.curva,
     required this.categoriaTipo,
   });
+
+
+  // Método toJson para convertir el objeto a un mapa JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'codigo': codigo,
+      'nombre': nombre,
+      'categoriaId': 1,
+      'tieneTelaSecundaria': tieneTelaSecundaria,
+      'tieneTelaAuxiliar': tieneTelaAuxiliar,
+      'genero': genero,
+      'observaciones': observaciones, // Asegúrate de que el formato sea el adecuado
+      'avios': avios, // Asegúrate de que el formato sea el adecuado
+      'curva': curva, // Asegúrate de que el formato sea el adecuado
+      'categoria': {
+        'tipo': categoriaTipo,
+      },
+    };
+  }
+
+
 
   factory Modelo.fromJson(Map<String, dynamic> json) {
     return Modelo(

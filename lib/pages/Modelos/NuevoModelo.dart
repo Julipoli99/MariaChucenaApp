@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:gestion_indumentaria/models/Avios.dart';
+import 'package:gestion_indumentaria/models/Modelo.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
 
@@ -23,15 +25,98 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   List<String> selectedTallesForm =
       []; // Lista de talles en el formulario principal
 
+
+  String? codigoModelo;
+  String? nombreModelo;
+  List<String>? observacion;
+
+
+  // data para la parte de Avio
+  String? nombreAvio;
+  String? tipoTalleAvio;
+  List<String> selectedTallesDialog = [];
+  bool esPorTalle = true;
+  bool esPorColor = false;
+  final int cantRequerida = 2;
+  
+
   // Variables de estado para las selecciones dentro del cuadro de diálogo
   String?
       selectedTipoAvioDialog; // Variable para el tipo de avio en el cuadro de diálogo
-  List<String> selectedTallesDialog =
-      []; // Lista de talles en el cuadro de diálogo
+   // Lista de talles en el cuadro de diálogo
   String? selectedColorDialog; // Variable para el color en el cuadro de diálogo
 
   // Lista para almacenar los avios elegidos y sus detalles
-  List<Map<String, dynamic>> aviosSeleccionados = [];
+  List<Avios> aviosSeleccionados = [];
+
+
+  void _createPost(){
+    //Avios(nombre: selectedTipoAvioDialog!, proveedores: "Proveedor1");
+    Modelo modeloCreado = Modelo(id: 15, 
+          codigo: codigoModelo!, 
+          nombre: nombreModelo!, 
+          tieneTelaSecundaria: true, 
+          tieneTelaAuxiliar: true, 
+          
+          genero: selectedGenero!, 
+          observaciones: [], 
+          avios: aviosSeleccionados, 
+          curva: [{
+        "id": 1,
+        "talle": "T1"
+      },
+      {
+        "id": 2,
+        "talle": "T2"
+      },
+      {
+        "id": 3,
+        "talle": "T3"
+      },
+      {
+        "id": 4,
+        "talle": "T4"
+      },
+      {
+        "id": 5,
+        "talle": "T5"
+      }], 
+          categoriaTipo: selectedPrenda!);
+
+          print(modeloCreado.toJson());
+
+    // metodo post
+    _post(modeloCreado);
+  }
+
+  Future<void> _post(Modelo model) async {
+     // Convertir el modelo a JSON
+  Map<String, dynamic> modeloJson = model.toJson();
+
+  // URL de la API
+  const url = "https://maria-chucena-api-production.up.railway.app/modelo";  // Reemplaza con tu URL real
+  final uri = Uri.parse(url);
+
+  try {
+    // Realizar el POST
+    final response = await http.post(
+      uri,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode(modeloJson),  // Convertimos el modelo a JSON
+    );
+
+    // Verificar el estado de la respuesta
+    if (response.statusCode == 201) {
+      print("Modelo creado con éxito: ${response.body}");
+    } else {
+      print("Error al crear el modelo: ${response.statusCode} - ${response.body}");
+    }
+  } catch (e) {
+    print("Error en la solicitud: $e");
+  }
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +175,8 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                             
               onChanged: (value) {
                 setState(() {
-                  codigo = value;
+                  codigoModelo = value;
+                  print('Codigo del modelo: $codigoModelo');
                 });
               },
               decoration: const InputDecoration(labelText: 'Codigo de Modelo'),
@@ -99,7 +185,8 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                           TextField(
               onChanged: (value) {
                 setState(() {
-                  nombre = value;
+                  nombreModelo = value;
+                  print('Nombre del modelo: $nombreModelo');
                 });
               },
               decoration: const InputDecoration(labelText: 'Nombre de Modelo'),
@@ -113,6 +200,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                             (value) {
                               setState(() {
                                 selectedPrenda = value;
+                                print('Prenda del modelo seleccionada: $selectedPrenda');
                               });
                             },
                           ),
@@ -124,6 +212,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                             (value) {
                               setState(() {
                                 selectedGenero = value;
+                                 print('Genero del modelo: $selectedGenero');
                               });
                             },
                           ),
@@ -133,7 +222,8 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                           TextField(
               onChanged: (value) {
                 setState(() {
-                  observacion = value;
+                  observacion?.add(value);
+                  print(observacion);
                 });
               },
               decoration: const InputDecoration(labelText: 'Observacion'),
@@ -146,6 +236,8 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                             ['SI', 'NO'],
                             selectedAvios,
                             (value) {
+                             // print(value);
+
                               setState(() {
                                 selectedAvios = value;
                                 if (value == 'SI') {
@@ -158,7 +250,10 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                          // _buildTextField(
                          //     'Extras', 'Otros elementos del modelo', ''),
                           const SizedBox(height: 20),
-                          _buildAviosTable(), // Tabla de avios seleccionados
+                          Container(
+                            child: aviosSeleccionados.isNotEmpty ? _buildAviosTable() : const Text('No hay avios'),
+                          ),
+                           // Tabla de avios seleccionados
                           const SizedBox(height: 20),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -166,7 +261,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                               ElevatedButton(
                                 onPressed: () {
                                   // Acción para guardar el modelo
-                                  createPost();
+                                  _createPost();
                                 },
                                 style: ElevatedButton.styleFrom(
                                   minimumSize:
@@ -226,6 +321,9 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                     (value) {
                       setState(() {
                         selectedTipoAvioDialog = value;
+                       // Avios aviocreado = Avios(nombre: selectedTipoAvioDialog!, proveedores: "Proveedor1");
+                        print('Nombre de avio: $selectedTipoAvioDialog');
+                       // aviosSeleccionados.add(aviocreado);
                       });
                     },
                   ),
@@ -274,12 +372,9 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                   onPressed: () {
                     // Añadir avios seleccionados a la lista
                     if (selectedTipoAvioDialog != null) {
-                      aviosSeleccionados.add({
-                        'tipo': selectedTipoAvioDialog,
-                        'talles': List.from(
-                            selectedTallesDialog), // Clonar lista para evitar referencias
-                        'color': selectedColorDialog,
-                      });
+                      Avios avioCreado = Avios(nombre: selectedTipoAvioDialog!, proveedores: "Proveedor1");
+                      aviosSeleccionados.add(avioCreado);
+                      
                       // Limpiar selecciones del diálogo
                       setState(() {
                         selectedTipoAvioDialog = null;
@@ -317,7 +412,9 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                 onSelected: (selected) {
                   setState(() {
                     if (selected) {
+                      print('Talle seleccionado: $selected');
                       selectedTallesDialog.add(talle);
+                      print('Talles en total: $selectedTallesDialog');
                     } else {
                       selectedTallesDialog.remove(talle);
                     }
@@ -461,6 +558,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
             (value) {
               setState(() {
                 selectedTela = value;
+                print('Tela de modelo seleccionada: $selectedTela');
               });
             },
           ),
@@ -476,6 +574,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
             (value) {
               setState(() {
                 selectedTipo = value;
+                print('Tipo de tela: $selectedTipo');
               });
             },
           ),
@@ -498,9 +597,9 @@ class _NuevomodeloState extends State<Nuevomodelo> {
       ],
       rows: aviosSeleccionados.map((avio) {
         return DataRow(cells: [
-          DataCell(Text(avio['tipo'])),
-          DataCell(Text(avio['talles'].join(', '))),
-          DataCell(Text(avio['color'] ?? 'Ninguno')),
+          DataCell(Text(avio.nombre)),
+          DataCell(Text(selectedTallesDialog.toString())),
+          //DataCell(Text(avio['color'] ?? 'Ninguno')),
         ]);
       }).toList(),
     );
