@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
 
-class Nuevoavios extends StatelessWidget {
-  const Nuevoavios({super.key});
+class Modificadoravios extends StatelessWidget {
+  const Modificadoravios({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -82,11 +82,23 @@ class Nuevoavios extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const TextField(
-                            decoration: InputDecoration(
+                          DropdownButtonFormField<String>(
+                            decoration: const InputDecoration(
                               labelText: 'Tipo',
-                              hintText: 'nombre',
+                              hintText: 'Tipo de avios',
                             ),
+                            items: <String>['boton', 'piluso', 'manga']
+                                .map((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
+                            onChanged: (newValue) {
+                              // Acción al seleccionar un proveedor de prueba
+                              // Aquí puedes agregar cualquier acción temporal
+                              print('tipo de avios : $newValue');
+                            },
                           ),
                           const SizedBox(height: 20),
                           // Dropdown para Proveedores con valores de prueba
@@ -112,6 +124,8 @@ class Nuevoavios extends StatelessWidget {
                             },
                           ),
                           const SizedBox(height: 20),
+
+                          
                           ElevatedButton(
                             onPressed: () {
                               // Acción al guardar el avío

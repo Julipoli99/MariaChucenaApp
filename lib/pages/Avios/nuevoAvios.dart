@@ -112,6 +112,13 @@ class Nuevoavios extends StatelessWidget {
                             },
                           ),
                           const SizedBox(height: 20),
+                          const TextField(
+                            decoration: InputDecoration(
+                              labelText: 'Cantidad',
+                              hintText: 'Cantidad inicial ',
+                            ),
+                          ),
+                          const SizedBox(height: 20),
                           ElevatedButton(
                             onPressed: () {
                               // Acción al guardar el avío

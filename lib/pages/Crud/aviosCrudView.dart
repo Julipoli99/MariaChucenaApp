@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Avios.dart';
+import 'package:gestion_indumentaria/pages/Avios/modificadorAvios.dart';
 import 'package:gestion_indumentaria/pages/Avios/nuevoAvios.dart';
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
 
@@ -39,7 +40,14 @@ class AviosCrudView extends StatelessWidget {
                       child: const Text('Nuevo registro'),
                     ),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const Modificadoravios(),
+                          ),
+                        );
+                      },
                       style: TextButton.styleFrom(
                           backgroundColor: Colors.blue[300],
                           foregroundColor: Colors.white),
@@ -69,7 +77,7 @@ class AviosCrudView extends StatelessWidget {
               items: avios, // Lista de avios
               dataMapper: [
                 // Celdas/valores
-                (avio) => Text(avio.id as String),
+                (avio) => Text(avio.id.toString()),
                 (avio) => Text(avio.nombre),
                 (avio) => Text(avio.proveedores),
                 //Parte de Opciones, se le pasa una funcion que retorna una List de Widgets en este caso Row.
