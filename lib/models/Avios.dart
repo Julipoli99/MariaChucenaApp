@@ -11,7 +11,7 @@ class Avios {
     required this.nombre,
     required this.proveedores,
     this.talles,
-    this.color
+    this.color,
   });
 
   // Método para deserializar desde JSON
