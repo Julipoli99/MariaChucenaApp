@@ -26,6 +26,9 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   List<String> selectedTallesForm =
       []; // Lista de talles en el formulario principal
 
+
+  Widget tableContainer = Container();
+
   String? codigoModelo;
   String? nombreModelo;
   List<String>? observacion;
@@ -363,6 +366,8 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                         selectedTipoAvioDialog = null;
                         selectedTallesDialog.clear();
                         selectedColorDialog = null;
+
+                      
                         
                       });
                       Navigator.of(context).pop();
