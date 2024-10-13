@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
+
+import 'package:http/http.dart' as http;
 
 class Nuevomodelo extends StatefulWidget {
   const Nuevomodelo({super.key});
@@ -10,12 +14,60 @@ class Nuevomodelo extends StatefulWidget {
 }
 
 class _NuevomodeloState extends State<Nuevomodelo> {
+
+  // Función para crear el POST
+  Future<void> createPost() async {
+    const url = "https://maria-chucena-api-production.up.railway.app/modelo";
+    final uri = Uri.parse(url);
+
+    // Cuerpo de la petición con los datos del modelo
+    final Map<String, dynamic> body = {
+      'codigo': codigo,
+      'nombre': nombre,
+      'prenda': selectedPrenda,
+      'genero': selectedGenero,
+      'tieneTelaAuxiliar': true,
+      'tieneTelaSecundaria': selectedTelaSecundaria,
+      'talles': selectedTalles,
+    };
+
+    try {
+      final response = await http.post(
+        uri,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
+      );
+
+      if (response.statusCode == 201) {
+        // Petición exitosa
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Modelo guardado con éxito.')),
+        );
+      } else {
+        // Manejo de errores
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al guardar el modelo: ${response.body}')),
+        );
+      }
+    } catch (e) {
+      // Manejo de excepciones
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
+  }
+
+
+
   // Variables de estado para las selecciones
+  String? codigo;
+  String? nombre;
   String? selectedTipo;
   String? selectedGenero;
-  String? selectedTela;
+  bool? selectedTelaSecundaria = false;
   String? selectedPrenda;
-  List<String> selectedTalles = [];
+  List<String> selectedTalles = ["M", "S"];
+  String? observacion;
 
   @override
   Widget build(BuildContext context) {
@@ -70,11 +122,24 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildTextField('codigo de modelo ', 'Ej: M001',
-                              'codigo de modelo '),
+                          TextField(
+                            
+              onChanged: (value) {
+                setState(() {
+                  codigo = value;
+                });
+              },
+              decoration: const InputDecoration(labelText: 'Codigo de Modelo'),
+            ),
                           const SizedBox(height: 15),
-                          _buildTextField('Nombre de Modelo', 'Ej: M001',
-                              'nombre del modelo'),
+                          TextField(
+              onChanged: (value) {
+                setState(() {
+                  nombre = value;
+                });
+              },
+              decoration: const InputDecoration(labelText: 'Nombre de Modelo'),
+            ),
                           const SizedBox(height: 15),
                           _buildDropdown(
                               'Prenda',
@@ -97,15 +162,22 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                           const SizedBox(height: 15),
                           _buillTelaRow(),
                           const SizedBox(height: 15),
-                          _buildTextField('Observación', '', 'observación'),
+                          TextField(
+              onChanged: (value) {
+                setState(() {
+                  observacion = value;
+                });
+              },
+              decoration: const InputDecoration(labelText: 'Observacion'),
+            ),
                           const SizedBox(height: 15),
                           _buildTallesRow(),
                           const SizedBox(height: 15),
-                          _buildTextField(
-                              'Avíos', 'Detalles adicionales del modelo', ''),
+                          //_buildTextField(
+                           //   'Avíos', 'Detalles adicionales del modelo', ''),
                           const SizedBox(height: 15),
-                          _buildTextField(
-                              'Extras', 'Otros elementos del modelo', ''),
+                         // _buildTextField(
+                         //     'Extras', 'Otros elementos del modelo', ''),
                           const SizedBox(height: 20),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -121,6 +193,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                               ElevatedButton(
                                 onPressed: () {
                                   // Acción para guardar el modelo
+                                  createPost();
                                 },
                                 style: ElevatedButton.styleFrom(
                                   minimumSize:
@@ -168,7 +241,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
     );
   }
 
-  Widget _buildTextField(String label, String hint, String hintText) {
+  Widget _buildTextField(String label, String hint, String hintText, dynamic attribute) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -177,7 +250,11 @@ class _NuevomodeloState extends State<Nuevomodelo> {
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         TextField(
-          controller: TextEditingController(),
+          onChanged: (value) {
+            setState(() {
+              attribute = value;
+            });
+          },
           decoration: InputDecoration(
             border: const OutlineInputBorder(),
             hintText: hint,
@@ -264,9 +341,12 @@ class _NuevomodeloState extends State<Nuevomodelo> {
               label: Text(talle),
               selected: selectedTalles.contains(talle),
               onSelected: (selected) {
+              //  print(selected);
+                
                 setState(() {
                   if (selected) {
                     selectedTalles.add(talle);
+                    print(selectedTalles);
                   } else {
                     selectedTalles.remove(talle);
                   }
@@ -309,4 +389,8 @@ class _NuevomodeloState extends State<Nuevomodelo> {
       ],
     );
   }
+
+
+  
+
 }
