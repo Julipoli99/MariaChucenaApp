@@ -3,11 +3,15 @@ class Avios {
   String nombre;
   String
       proveedores; // Este campo puede ser un List<Proveedor> si deseas tener varios proveedores
+  List<String>? talles;
+  String? color;
 
   Avios({
     this.id = 0,
     required this.nombre,
     required this.proveedores,
+    this.talles,
+    this.color
   });
 
   // Método para deserializar desde JSON

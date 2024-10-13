@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Avios.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
+import 'package:gestion_indumentaria/models/Talle.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
 
@@ -57,7 +58,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
           nombre: nombreModelo!, 
           tieneTelaSecundaria: true, 
           tieneTelaAuxiliar: true, 
-          
+
           genero: selectedGenero!, 
           observaciones: [], 
           avios: aviosSeleccionados, 
@@ -373,6 +374,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                     // Añadir avios seleccionados a la lista
                     if (selectedTipoAvioDialog != null) {
                       Avios avioCreado = Avios(nombre: selectedTipoAvioDialog!, proveedores: "Proveedor1");
+                      Talle talleAgregado = Talle(avio: avioCreado, listaTalles: selectedTallesDialog);
                       aviosSeleccionados.add(avioCreado);
                       
                       // Limpiar selecciones del diálogo
@@ -380,6 +382,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                         selectedTipoAvioDialog = null;
                         selectedTallesDialog.clear();
                         selectedColorDialog = null;
+                        
                       });
                       Navigator.of(context)
                           .pop(); // Cerrar el cuadro de diálogo después de agregar
@@ -522,12 +525,12 @@ class _NuevomodeloState extends State<Nuevomodelo> {
         const SizedBox(height: 10),
         Wrap(
           spacing: 10,
-          children: ['S', 'M', 'L', 'XL'].map((talle) {
+          children: ['S', 'M', 'L'].map((talle) {
             return ChoiceChip(
               label: Text(talle),
               selected: selectedTallesForm.contains(talle),
               onSelected: (selected) {
-              //  print(selected);
+                print(selected);
                 
                 setState(() {
                   if (selected) {
@@ -599,7 +602,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
         return DataRow(cells: [
           DataCell(Text(avio.nombre)),
           DataCell(Text(selectedTallesDialog.toString())),
-          //DataCell(Text(avio['color'] ?? 'Ninguno')),
+          DataCell(Text(selectedColorDialog ?? 'Ninguno')),
         ]);
       }).toList(),
     );
