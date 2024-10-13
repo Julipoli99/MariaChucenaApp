@@ -25,11 +25,9 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   List<String> selectedTallesForm =
       []; // Lista de talles en el formulario principal
 
-
   String? codigoModelo;
   String? nombreModelo;
   List<String>? observacion;
-
 
   // data para la parte de Avio
   String? nombreAvio;
@@ -38,85 +36,70 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   bool esPorTalle = true;
   bool esPorColor = false;
   final int cantRequerida = 2;
-  
 
   // Variables de estado para las selecciones dentro del cuadro de diálogo
   String?
       selectedTipoAvioDialog; // Variable para el tipo de avio en el cuadro de diálogo
-   // Lista de talles en el cuadro de diálogo
+  // Lista de talles en el cuadro de diálogo
   String? selectedColorDialog; // Variable para el color en el cuadro de diálogo
 
   // Lista para almacenar los avios elegidos y sus detalles
   List<Avios> aviosSeleccionados = [];
 
-
-  void _createPost(){
+  void _createPost() {
     //Avios(nombre: selectedTipoAvioDialog!, proveedores: "Proveedor1");
-    Modelo modeloCreado = Modelo(id: 15, 
-          codigo: codigoModelo!, 
-          nombre: nombreModelo!, 
-          tieneTelaSecundaria: true, 
-          tieneTelaAuxiliar: true, 
-          
-          genero: selectedGenero!, 
-          observaciones: [], 
-          avios: aviosSeleccionados, 
-          curva: [{
-        "id": 1,
-        "talle": "T1"
-      },
-      {
-        "id": 2,
-        "talle": "T2"
-      },
-      {
-        "id": 3,
-        "talle": "T3"
-      },
-      {
-        "id": 4,
-        "talle": "T4"
-      },
-      {
-        "id": 5,
-        "talle": "T5"
-      }], 
-          categoriaTipo: selectedPrenda!);
+    Modelo modeloCreado = Modelo(
+        id: 15,
+        codigo: codigoModelo!,
+        nombre: nombreModelo!,
+        tieneTelaSecundaria: true,
+        tieneTelaAuxiliar: true,
+        genero: selectedGenero!,
+        observaciones: [],
+        avios: aviosSeleccionados,
+        curva: [
+          {"id": 1, "talle": "T1"},
+          {"id": 2, "talle": "T2"},
+          {"id": 3, "talle": "T3"},
+          {"id": 4, "talle": "T4"},
+          {"id": 5, "talle": "T5"}
+        ],
+        categoriaTipo: selectedPrenda!);
 
-          print(modeloCreado.toJson());
+    print(modeloCreado.toJson());
 
     // metodo post
     _post(modeloCreado);
   }
 
   Future<void> _post(Modelo model) async {
-     // Convertir el modelo a JSON
-  Map<String, dynamic> modeloJson = model.toJson();
+    // Convertir el modelo a JSON
+    Map<String, dynamic> modeloJson = model.toJson();
 
-  // URL de la API
-  const url = "https://maria-chucena-api-production.up.railway.app/modelo";  // Reemplaza con tu URL real
-  final uri = Uri.parse(url);
+    // URL de la API
+    const url =
+        "https://maria-chucena-api-production.up.railway.app/modelo"; // Reemplaza con tu URL real
+    final uri = Uri.parse(url);
 
-  try {
-    // Realizar el POST
-    final response = await http.post(
-      uri,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode(modeloJson),  // Convertimos el modelo a JSON
-    );
+    try {
+      // Realizar el POST
+      final response = await http.post(
+        uri,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(modeloJson), // Convertimos el modelo a JSON
+      );
 
-    // Verificar el estado de la respuesta
-    if (response.statusCode == 201) {
-      print("Modelo creado con éxito: ${response.body}");
-    } else {
-      print("Error al crear el modelo: ${response.statusCode} - ${response.body}");
+      // Verificar el estado de la respuesta
+      if (response.statusCode == 201) {
+        print("Modelo creado con éxito: ${response.body}");
+      } else {
+        print(
+            "Error al crear el modelo: ${response.statusCode} - ${response.body}");
+      }
+    } catch (e) {
+      print("Error en la solicitud: $e");
     }
-  } catch (e) {
-    print("Error en la solicitud: $e");
   }
-  }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -172,25 +155,26 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           TextField(
-                            
-              onChanged: (value) {
-                setState(() {
-                  codigoModelo = value;
-                  print('Codigo del modelo: $codigoModelo');
-                });
-              },
-              decoration: const InputDecoration(labelText: 'Codigo de Modelo'),
-            ),
+                            onChanged: (value) {
+                              setState(() {
+                                codigoModelo = value;
+                                print('Codigo del modelo: $codigoModelo');
+                              });
+                            },
+                            decoration: const InputDecoration(
+                                labelText: 'Codigo de Modelo'),
+                          ),
                           const SizedBox(height: 15),
                           TextField(
-              onChanged: (value) {
-                setState(() {
-                  nombreModelo = value;
-                  print('Nombre del modelo: $nombreModelo');
-                });
-              },
-              decoration: const InputDecoration(labelText: 'Nombre de Modelo'),
-            ),
+                            onChanged: (value) {
+                              setState(() {
+                                nombreModelo = value;
+                                print('Nombre del modelo: $nombreModelo');
+                              });
+                            },
+                            decoration: const InputDecoration(
+                                labelText: 'Nombre de Modelo'),
+                          ),
                           const SizedBox(height: 15),
                           _buildDropdown(
                             'Prenda',
@@ -200,7 +184,8 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                             (value) {
                               setState(() {
                                 selectedPrenda = value;
-                                print('Prenda del modelo seleccionada: $selectedPrenda');
+                                print(
+                                    'Prenda del modelo seleccionada: $selectedPrenda');
                               });
                             },
                           ),
@@ -212,7 +197,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                             (value) {
                               setState(() {
                                 selectedGenero = value;
-                                 print('Genero del modelo: $selectedGenero');
+                                print('Genero del modelo: $selectedGenero');
                               });
                             },
                           ),
@@ -220,14 +205,15 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                           _buildTelaRow(),
                           const SizedBox(height: 15),
                           TextField(
-              onChanged: (value) {
-                setState(() {
-                  observacion?.add(value);
-                  print(observacion);
-                });
-              },
-              decoration: const InputDecoration(labelText: 'Observacion'),
-            ),
+                            onChanged: (value) {
+                              setState(() {
+                                observacion?.add(value);
+                                print(observacion);
+                              });
+                            },
+                            decoration:
+                                const InputDecoration(labelText: 'Observacion'),
+                          ),
                           const SizedBox(height: 15),
                           _buildTallesRowForm(),
                           const SizedBox(height: 15),
@@ -236,8 +222,6 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                             ['SI', 'NO'],
                             selectedAvios,
                             (value) {
-                             // print(value);
-
                               setState(() {
                                 selectedAvios = value;
                                 if (value == 'SI') {
@@ -247,13 +231,15 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                             },
                           ),
                           const SizedBox(height: 15),
-                         // _buildTextField(
-                         //     'Extras', 'Otros elementos del modelo', ''),
+                          // _buildTextField(
+                          //     'Extras', 'Otros elementos del modelo', ''),
                           const SizedBox(height: 20),
                           Container(
-                            child: aviosSeleccionados.isNotEmpty ? _buildAviosTable() : const Text('No hay avios'),
+                            child: aviosSeleccionados.isNotEmpty
+                                ? _buildAviosTable()
+                                : const Text('No hay avios'),
                           ),
-                           // Tabla de avios seleccionados
+                          // Tabla de avios seleccionados
                           const SizedBox(height: 20),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -321,14 +307,10 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                     (value) {
                       setState(() {
                         selectedTipoAvioDialog = value;
-                       // Avios aviocreado = Avios(nombre: selectedTipoAvioDialog!, proveedores: "Proveedor1");
-                        print('Nombre de avio: $selectedTipoAvioDialog');
-                       // aviosSeleccionados.add(aviocreado);
                       });
                     },
                   ),
                   const SizedBox(height: 15),
-                  // Botón para seleccionar talles
                   ElevatedButton(
                     onPressed: () {
                       _showTalleSelectionDialog(setState);
@@ -336,18 +318,16 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                     child: const Text('Seleccionar Talle'),
                   ),
                   const SizedBox(height: 15),
-                  // Botón para seleccionar el color sin abrir un nuevo cuadro de diálogo
                   ElevatedButton(
                     onPressed: () {
                       setState(() {
                         selectedColorDialog =
-                            'Color seleccionado'; // Acción directa sin abrir otro diálogo
+                            'color selecionado'; // Ejemplo directo
                       });
                     },
                     child: const Text('Seleccionar Color'),
                   ),
                   const SizedBox(height: 10),
-                  // Mostrar el color seleccionado
                   if (selectedColorDialog != null)
                     Text(
                       'Color: $selectedColorDialog',
@@ -355,7 +335,6 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                           fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                   const SizedBox(height: 10),
-                  // Mostrar los talles seleccionados
                   if (selectedTallesDialog.isNotEmpty)
                     Wrap(
                       spacing: 8,
@@ -370,20 +349,21 @@ class _NuevomodeloState extends State<Nuevomodelo> {
               actions: [
                 ElevatedButton(
                   onPressed: () {
-                    // Añadir avios seleccionados a la lista
                     if (selectedTipoAvioDialog != null) {
-                      Avios avioCreado = Avios(nombre: selectedTipoAvioDialog!, proveedores: "Proveedor1");
-                      aviosSeleccionados.add(avioCreado);
-                      
-                      // Limpiar selecciones del diálogo
+                      Avios avioCreado = Avios(
+                        nombre: selectedTipoAvioDialog!,
+                        proveedores: "Proveedor1",
+                        talles: List.from(selectedTallesDialog),
+                        color: selectedColorDialog,
+                      );
                       setState(() {
+                        aviosSeleccionados.add(avioCreado);
+                        // Limpiar las selecciones
                         selectedTipoAvioDialog = null;
                         selectedTallesDialog.clear();
                         selectedColorDialog = null;
                       });
-                      Navigator.of(context)
-                          .pop(); // Cerrar el cuadro de diálogo después de agregar
-                      setState(() {}); // Actualizar la tabla en el formulario
+                      Navigator.of(context).pop();
                     }
                   },
                   child: const Text('Agregar Avio'),
@@ -405,7 +385,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
           title: const Text('Seleccione los talles'),
           content: Wrap(
             spacing: 10,
-            children: ['S', 'M', 'L', 'XL'].map((talle) {
+            children: ['T1', 'T2', 'T3', 'T4'].map((talle) {
               return ChoiceChip(
                 label: Text(talle),
                 selected: selectedTallesDialog.contains(talle),
@@ -522,13 +502,13 @@ class _NuevomodeloState extends State<Nuevomodelo> {
         const SizedBox(height: 10),
         Wrap(
           spacing: 10,
-          children: ['S', 'M', 'L', 'XL'].map((talle) {
+          children: ['T1', 'T2', 'T3', 'T4'].map((talle) {
             return ChoiceChip(
               label: Text(talle),
               selected: selectedTallesForm.contains(talle),
               onSelected: (selected) {
-              //  print(selected);
-                
+                //  print(selected);
+
                 setState(() {
                   if (selected) {
                     selectedTallesForm.add(talle);
@@ -598,8 +578,8 @@ class _NuevomodeloState extends State<Nuevomodelo> {
       rows: aviosSeleccionados.map((avio) {
         return DataRow(cells: [
           DataCell(Text(avio.nombre)),
-          DataCell(Text(selectedTallesDialog.toString())),
-          //DataCell(Text(avio['color'] ?? 'Ninguno')),
+          DataCell(Text(avio.talles.toString())),
+          DataCell(Text(avio.color ?? 'Ninguno')),
         ]);
       }).toList(),
     );
