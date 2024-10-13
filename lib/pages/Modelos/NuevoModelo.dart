@@ -14,60 +14,24 @@ class Nuevomodelo extends StatefulWidget {
 }
 
 class _NuevomodeloState extends State<Nuevomodelo> {
-
-  // Función para crear el POST
-  Future<void> createPost() async {
-    const url = "https://maria-chucena-api-production.up.railway.app/modelo";
-    final uri = Uri.parse(url);
-
-    // Cuerpo de la petición con los datos del modelo
-    final Map<String, dynamic> body = {
-      'codigo': codigo,
-      'nombre': nombre,
-      'prenda': selectedPrenda,
-      'genero': selectedGenero,
-      'tieneTelaAuxiliar': true,
-      'tieneTelaSecundaria': selectedTelaSecundaria,
-      'talles': selectedTalles,
-    };
-
-    try {
-      final response = await http.post(
-        uri,
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(body),
-      );
-
-      if (response.statusCode == 201) {
-        // Petición exitosa
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Modelo guardado con éxito.')),
-        );
-      } else {
-        // Manejo de errores
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al guardar el modelo: ${response.body}')),
-        );
-      }
-    } catch (e) {
-      // Manejo de excepciones
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
-    }
-  }
-
-
-
-  // Variables de estado para las selecciones
-  String? codigo;
-  String? nombre;
+  // Variables de estado para las selecciones del formulario principal
   String? selectedTipo;
   String? selectedGenero;
-  bool? selectedTelaSecundaria = false;
+  String? selectedAvios;
+  String? selectedTela;
   String? selectedPrenda;
-  List<String> selectedTalles = ["M", "S"];
-  String? observacion;
+  List<String> selectedTallesForm =
+      []; // Lista de talles en el formulario principal
+
+  // Variables de estado para las selecciones dentro del cuadro de diálogo
+  String?
+      selectedTipoAvioDialog; // Variable para el tipo de avio en el cuadro de diálogo
+  List<String> selectedTallesDialog =
+      []; // Lista de talles en el cuadro de diálogo
+  String? selectedColorDialog; // Variable para el color en el cuadro de diálogo
+
+  // Lista para almacenar los avios elegidos y sus detalles
+  List<Map<String, dynamic>> aviosSeleccionados = [];
 
   @override
   Widget build(BuildContext context) {
@@ -142,25 +106,29 @@ class _NuevomodeloState extends State<Nuevomodelo> {
             ),
                           const SizedBox(height: 15),
                           _buildDropdown(
-                              'Prenda',
-                              ['Remera', 'Pantalón', 'Otro'],
-                              'Seleccione la prenda del modelo',
-                              selectedPrenda, (value) {
-                            setState(() {
-                              selectedPrenda = value;
-                            });
-                          }),
+                            'Prenda',
+                            ['Remera', 'Pantalón', 'Otro'],
+                            'Seleccione la prenda del modelo',
+                            selectedPrenda,
+                            (value) {
+                              setState(() {
+                                selectedPrenda = value;
+                              });
+                            },
+                          ),
                           const SizedBox(height: 15),
                           _buildRadioGroup(
-                              'Género',
-                              ['MASCULINO', 'FEMENINO', 'UNISEX'],
-                              selectedGenero, (value) {
-                            setState(() {
-                              selectedGenero = value;
-                            });
-                          }),
+                            'Género',
+                            ['MASCULINO', 'FEMENINO', 'UNISEX'],
+                            selectedGenero,
+                            (value) {
+                              setState(() {
+                                selectedGenero = value;
+                              });
+                            },
+                          ),
                           const SizedBox(height: 15),
-                          _buillTelaRow(),
+                          _buildTelaRow(),
                           const SizedBox(height: 15),
                           TextField(
               onChanged: (value) {
@@ -171,25 +139,30 @@ class _NuevomodeloState extends State<Nuevomodelo> {
               decoration: const InputDecoration(labelText: 'Observacion'),
             ),
                           const SizedBox(height: 15),
-                          _buildTallesRow(),
+                          _buildTallesRowForm(),
                           const SizedBox(height: 15),
-                          //_buildTextField(
-                           //   'Avíos', 'Detalles adicionales del modelo', ''),
+                          _buildRadioGroup(
+                            'Tiene avios',
+                            ['SI', 'NO'],
+                            selectedAvios,
+                            (value) {
+                              setState(() {
+                                selectedAvios = value;
+                                if (value == 'SI') {
+                                  _showAviosDialog();
+                                }
+                              });
+                            },
+                          ),
                           const SizedBox(height: 15),
                          // _buildTextField(
                          //     'Extras', 'Otros elementos del modelo', ''),
                           const SizedBox(height: 20),
+                          _buildAviosTable(), // Tabla de avios seleccionados
+                          const SizedBox(height: 20),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-
-
-
-
-                              // ********** Boton para guardar => POST https://maria-chucena-api-production.up.railway.app/modelo
-
-
-
                               ElevatedButton(
                                 onPressed: () {
                                   // Acción para guardar el modelo
@@ -202,13 +175,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                                 child: const Text('Guardar Modelo'),
                               ),
                               ElevatedButton(
-
-                                // INPUT FOTO
-
-
                                 onPressed: () {
-                                  // ###PENDIENTE###...
-
                                   // Acción para cargar foto
                                 },
                                 style: ElevatedButton.styleFrom(
@@ -224,8 +191,6 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                     ),
                   ),
                   const SizedBox(height: 50),
-
-                  // Pie de página
                   const Center(
                     child: Text(
                       '© 2024 Maria Chucena ERP System. All rights reserved.',
@@ -241,83 +206,179 @@ class _NuevomodeloState extends State<Nuevomodelo> {
     );
   }
 
-  Widget _buildTextField(String label, String hint, String hintText, dynamic attribute) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        TextField(
-          onChanged: (value) {
-            setState(() {
-              attribute = value;
-            });
-          },
-          decoration: InputDecoration(
-            border: const OutlineInputBorder(),
-            hintText: hint,
-            labelText: hintText,
-            filled: true,
-            fillColor: Colors.grey[200], // Color de fondo del campo
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDropdown(String label, List<String> items, String hint,
-      String? selectedItem, Function(String?) onChanged) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        DropdownButtonFormField<String>(
-          value: selectedItem,
-          items: items
-              .map((item) => DropdownMenuItem<String>(
-                    value: item,
-                    child: Text(item),
-                  ))
-              .toList(),
-          onChanged: onChanged,
-          decoration: InputDecoration(
-            border: const OutlineInputBorder(),
-            labelText: hint,
-            filled: true,
-            fillColor: Colors.grey[200], // Color de fondo del dropdown
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildRadioGroup(String label, List<String> options,
-      String? groupValue, Function(String?) onChanged) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        Wrap(
-          spacing: 10,
-          children: options.map((option) {
-            return Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Radio<String>(
-                  value: option,
-                  groupValue: groupValue, // Almacena la opción seleccionada
-                  onChanged: onChanged,
+  // Función para mostrar el cuadro de diálogo con los botones "Talle" y "Color"
+  void _showAviosDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: const Text('Seleccione el tipo de avios'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildDropdown(
+                    'Tipo de Avios',
+                    ['Botón', 'Cierre', 'Etiqueta', 'Otro'],
+                    'Seleccione el tipo de avios',
+                    selectedTipoAvioDialog,
+                    (value) {
+                      setState(() {
+                        selectedTipoAvioDialog = value;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 15),
+                  // Botón para seleccionar talles
+                  ElevatedButton(
+                    onPressed: () {
+                      _showTalleSelectionDialog(setState);
+                    },
+                    child: const Text('Seleccionar Talle'),
+                  ),
+                  const SizedBox(height: 15),
+                  // Botón para seleccionar el color sin abrir un nuevo cuadro de diálogo
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        selectedColorDialog =
+                            'Color seleccionado'; // Acción directa sin abrir otro diálogo
+                      });
+                    },
+                    child: const Text('Seleccionar Color'),
+                  ),
+                  const SizedBox(height: 10),
+                  // Mostrar el color seleccionado
+                  if (selectedColorDialog != null)
+                    Text(
+                      'Color: $selectedColorDialog',
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  const SizedBox(height: 10),
+                  // Mostrar los talles seleccionados
+                  if (selectedTallesDialog.isNotEmpty)
+                    Wrap(
+                      spacing: 8,
+                      children: selectedTallesDialog
+                          .map((talle) => Chip(
+                                label: Text(talle),
+                              ))
+                          .toList(),
+                    ),
+                ],
+              ),
+              actions: [
+                ElevatedButton(
+                  onPressed: () {
+                    // Añadir avios seleccionados a la lista
+                    if (selectedTipoAvioDialog != null) {
+                      aviosSeleccionados.add({
+                        'tipo': selectedTipoAvioDialog,
+                        'talles': List.from(
+                            selectedTallesDialog), // Clonar lista para evitar referencias
+                        'color': selectedColorDialog,
+                      });
+                      // Limpiar selecciones del diálogo
+                      setState(() {
+                        selectedTipoAvioDialog = null;
+                        selectedTallesDialog.clear();
+                        selectedColorDialog = null;
+                      });
+                      Navigator.of(context)
+                          .pop(); // Cerrar el cuadro de diálogo después de agregar
+                      setState(() {}); // Actualizar la tabla en el formulario
+                    }
+                  },
+                  child: const Text('Agregar Avio'),
                 ),
-                Text(option),
               ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // Diálogo para seleccionar los talles
+  void _showTalleSelectionDialog(StateSetter setState) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Seleccione los talles'),
+          content: Wrap(
+            spacing: 10,
+            children: ['S', 'M', 'L', 'XL'].map((talle) {
+              return ChoiceChip(
+                label: Text(talle),
+                selected: selectedTallesDialog.contains(talle),
+                onSelected: (selected) {
+                  setState(() {
+                    if (selected) {
+                      selectedTallesDialog.add(talle);
+                    } else {
+                      selectedTallesDialog.remove(talle);
+                    }
+                  });
+                },
+              );
+            }).toList(),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Cerrar el diálogo
+              },
+              child: const Text('Aceptar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Widget para construir el campo de texto
+  Widget _buildTextField(String label, String hint, String key) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        TextField(
+          decoration: InputDecoration(
+            hintText: hint,
+            border: const OutlineInputBorder(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Widget para construir el grupo de botones de radio
+  Widget _buildRadioGroup(String title, List<String> options,
+      String? selectedValue, ValueChanged<String?> onChanged) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: options.map((option) {
+            return Expanded(
+              child: RadioListTile<String>(
+                title: Text(option),
+                value: option,
+                groupValue: selectedValue,
+                onChanged: onChanged,
+              ),
             );
           }).toList(),
         ),
@@ -325,12 +386,40 @@ class _NuevomodeloState extends State<Nuevomodelo> {
     );
   }
 
-  Widget _buildTallesRow() {
+  // Widget para construir el menú desplegable
+  Widget _buildDropdown(String label, List<String> items, String hint,
+      String? selectedItem, ValueChanged<String?> onChanged) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        DropdownButton<String>(
+          value: selectedItem,
+          hint: Text(hint),
+          isExpanded: true,
+          items: items.map((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(value),
+            );
+          }).toList(),
+          onChanged: onChanged,
+        ),
+      ],
+    );
+  }
+
+  // Widget para mostrar los talles en el formulario
+  Widget _buildTallesRowForm() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Talles',
+          'Seleccione los talles:',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 10),
@@ -339,16 +428,15 @@ class _NuevomodeloState extends State<Nuevomodelo> {
           children: ['S', 'M', 'L', 'XL'].map((talle) {
             return ChoiceChip(
               label: Text(talle),
-              selected: selectedTalles.contains(talle),
+              selected: selectedTallesForm.contains(talle),
               onSelected: (selected) {
               //  print(selected);
                 
                 setState(() {
                   if (selected) {
-                    selectedTalles.add(talle);
-                    print(selectedTalles);
+                    selectedTallesForm.add(talle);
                   } else {
-                    selectedTalles.remove(talle);
+                    selectedTallesForm.remove(talle);
                   }
                 });
               },
@@ -359,38 +447,62 @@ class _NuevomodeloState extends State<Nuevomodelo> {
     );
   }
 
-  Widget _buillTelaRow() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  // Widget para construir el menú desplegable de tela
+  Widget _buildTelaRow() {
+    return Row(
       children: [
-        const Text(
-          'Telas',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        Expanded(
+          flex: 3,
+          child: _buildDropdown(
+            'Tela',
+            ['Algodón', 'Lino', 'Poliéster', 'Seda'],
+            'Seleccione la tela',
+            selectedTela,
+            (value) {
+              setState(() {
+                selectedTela = value;
+              });
+            },
+          ),
         ),
-        const SizedBox(height: 10),
-        Wrap(
-          spacing: 10,
-          children: ['Primaria', 'Secundaria'].map((telas) {
-            return ChoiceChip(
-              label: Text(telas),
-              selected: selectedTalles.contains(telas),
-              onSelected: (selected) {
-                setState(() {
-                  if (selected) {
-                    selectedTalles.add(telas);
-                  } else {
-                    selectedTalles.remove(telas);
-                  }
-                });
-              },
-            );
-          }).toList(),
+        const SizedBox(width: 20),
+        Expanded(
+          flex: 3,
+          child: _buildDropdown(
+            'Tipo de tela',
+            ['Plano', 'Punto', 'Tejido', 'Otro'],
+            'Seleccione el tipo de tela',
+            selectedTipo,
+            (value) {
+              setState(() {
+                selectedTipo = value;
+              });
+            },
+          ),
         ),
       ],
     );
   }
 
+  // Widget para construir la tabla de avios seleccionados
+  Widget _buildAviosTable() {
+    if (aviosSeleccionados.isEmpty) {
+      return const Text('No hay avios seleccionados.');
+    }
 
-  
-
+    return DataTable(
+      columns: const [
+        DataColumn(label: Text('Tipo de Avio')),
+        DataColumn(label: Text('Talles')),
+        DataColumn(label: Text('Color')),
+      ],
+      rows: aviosSeleccionados.map((avio) {
+        return DataRow(cells: [
+          DataCell(Text(avio['tipo'])),
+          DataCell(Text(avio['talles'].join(', '))),
+          DataCell(Text(avio['color'] ?? 'Ninguno')),
+        ]);
+      }).toList(),
+    );
+  }
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/pages/Avios/avios.dart';
-import 'package:gestion_indumentaria/pages/Calculos/Calculos-eficiencia.dart';
 import 'package:gestion_indumentaria/pages/Tizadas/CreacionTizadasPage.dart';
 import 'package:gestion_indumentaria/pages/Modelos/ModelosRegistradosPage.dart';
 import 'package:gestion_indumentaria/pages/Modelos/ordenDeCorte.dart';
@@ -103,24 +102,6 @@ class HomePage extends StatelessWidget {
                                   250,
                                   80,
                                   'assets/imagen/orden.png',
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const CalculosYEficiencia()),
-                                  );
-                                },
-                                child: buildOptionCard(
-                                  'Cálculo y Eficiencia',
-                                  'Cálculos de eficiencia.',
-                                  250,
-                                  80,
-                                  'assets/imagen/calculo.png',
                                 ),
                               ),
                               const SizedBox(height: 10),
