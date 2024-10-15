@@ -5,6 +5,7 @@ class Avios {
       proveedores; // Este campo puede ser un List<Proveedor> si deseas tener varios proveedores
   List<String>? talles;
   String? color;
+  String? cantidad;
 
   Avios({
     this.id = 0,
@@ -12,6 +13,7 @@ class Avios {
     required this.proveedores,
     this.talles,
     this.color,
+    this.cantidad,
   });
 
   // Método para deserializar desde JSON

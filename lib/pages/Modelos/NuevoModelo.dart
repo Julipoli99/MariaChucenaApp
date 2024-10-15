@@ -24,10 +24,11 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   String? selectedPrenda;
   List<String> selectedTallesForm =
       []; // Lista de talles en el formulario principal
-
+  List<String> selectedTipoDeRolloForm = [];
   String? codigoModelo;
   String? nombreModelo;
   List<String>? observacion;
+  String? cantidad;
 
   // data para la parte de Avio
   String? nombreAvio;
@@ -41,8 +42,10 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   String?
       selectedTipoAvioDialog; // Variable para el tipo de avio en el cuadro de diálogo
   // Lista de talles en el cuadro de diálogo
-  String? selectedColorDialog; // Variable para el color en el cuadro de diálogo
-
+  String? selectedColorDialog;
+  final TextEditingController _cantidadController =
+      TextEditingController(); // Variable para el color en el cuadro de diálogo
+  String? cantidadAvioDialog;
   // Lista para almacenar los avios elegidos y sus detalles
   List<Avios> aviosSeleccionados = [];
 
@@ -202,7 +205,11 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                             },
                           ),
                           const SizedBox(height: 15),
+                          _buildindumentariaEdadRowForm(),
+                          const SizedBox(height: 15),
                           _buildTelaRow(),
+                          const SizedBox(height: 15),
+                          _buildTelaRowForm(),
                           const SizedBox(height: 15),
                           TextField(
                             onChanged: (value) {
@@ -287,7 +294,6 @@ class _NuevomodeloState extends State<Nuevomodelo> {
     );
   }
 
-  // Función para mostrar el cuadro de diálogo con los botones "Talle" y "Color"
   void _showAviosDialog() {
     showDialog(
       context: context,
@@ -327,6 +333,16 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                     child: const Text('Seleccionar Color'),
                   ),
                   const SizedBox(height: 10),
+                  TextField(
+                    controller: _cantidadController,
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) {
+                      setDialogState(() {
+                        cantidadAvioDialog = (value);
+                      });
+                    },
+                    decoration: const InputDecoration(labelText: 'Cantidad'),
+                  ),
                   if (selectedColorDialog != null)
                     Text(
                       'Color: $selectedColorDialog',
@@ -346,57 +362,65 @@ class _NuevomodeloState extends State<Nuevomodelo> {
               actions: [
                 ElevatedButton(
                   onPressed: () {
-                    if (selectedTipoAvioDialog != null) {
+                    if (selectedTipoAvioDialog != null &&
+                        cantidadAvioDialog != null &&
+                        cantidadAvioDialog!.isNotEmpty) {
                       // Crear avio y actualizar lista
                       Avios avioCreado = Avios(
                         nombre: selectedTipoAvioDialog!,
                         proveedores: "Proveedor1",
                         talles: List.from(selectedTallesDialog),
                         color: selectedColorDialog,
+                        cantidad: cantidadAvioDialog!,
                       );
 
-                      // Usar setState de la pantalla principal para actualizar la tabla
+                      // Usar setState para actualizar la tabla en la pantalla principal
                       setState(() {
                         aviosSeleccionados.add(avioCreado);
                       });
 
-                      // usa el setDialogoState para limpiar el formulario para el proximo avios
+                      // Limpiar el formulario para un próximo avio
                       setDialogState(() {
                         selectedTipoAvioDialog = null;
                         selectedTallesDialog.clear();
                         selectedColorDialog = null;
+                        cantidadAvioDialog = null;
+                        _cantidadController.clear();
                       });
 
-                      Navigator.of(
-                          context); // manda el formulario pero no lo cierra
+                      Navigator.of(context); // Cerrar el diálogo
                     }
                   },
                   child: const Text('Agregar Avio'),
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    if (selectedTipoAvioDialog != null) {
+                    if (selectedTipoAvioDialog != null &&
+                        cantidadAvioDialog != null &&
+                        cantidadAvioDialog!.isNotEmpty) {
                       // Crear avio y actualizar lista
                       Avios avioCreado = Avios(
                         nombre: selectedTipoAvioDialog!,
                         proveedores: "Proveedor1",
                         talles: List.from(selectedTallesDialog),
                         color: selectedColorDialog,
+                        cantidad: cantidadAvioDialog!,
                       );
 
-                      // Usar setState de la pantalla principal para actualizar la tabla
+                      // Usar setState para actualizar la tabla en la pantalla principal
                       setState(() {
                         aviosSeleccionados.add(avioCreado);
-                        // Limpiar las selecciones
                         selectedTipoAvioDialog = null;
                         selectedTallesDialog.clear();
                         selectedColorDialog = null;
+                        cantidadAvioDialog = null;
+                        _cantidadController.clear();
                       });
 
                       Navigator.of(context).pop(); // Cerrar el diálogo
                     }
                   },
-                  child: const Text('finalizar'),
+                  child: const Text('Finalizar'),
                 ),
               ],
             );
@@ -554,6 +578,74 @@ class _NuevomodeloState extends State<Nuevomodelo> {
     );
   }
 
+  // Widget para mostrar los Tipo de tela en el formulario
+  Widget _buildTelaRowForm() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Seleccione el tipo de tela :',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 10,
+          children: ['Plano', 'Punto'].map((tipoDeRollo) {
+            return ChoiceChip(
+              label: Text(tipoDeRollo),
+              selected: selectedTipoDeRolloForm.contains(tipoDeRollo),
+              onSelected: (selected) {
+                //  print(selected);
+
+                setState(() {
+                  if (selected) {
+                    selectedTipoDeRolloForm.add(tipoDeRollo);
+                  } else {
+                    selectedTipoDeRolloForm.remove(tipoDeRollo);
+                  }
+                });
+              },
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+// Widget para mostrar los tipos de indumentaria en el formulario
+  Widget _buildindumentariaEdadRowForm() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Seleccione el tipo de indumentaria para edad :',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 10,
+          children: ['bebe', 'niño', 'adulto'].map((tipoDeRollo) {
+            return ChoiceChip(
+              label: Text(tipoDeRollo),
+              selected: selectedTipoDeRolloForm.contains(tipoDeRollo),
+              onSelected: (selected) {
+                //  print(selected);
+
+                setState(() {
+                  if (selected) {
+                    selectedTipoDeRolloForm.add(tipoDeRollo);
+                  } else {
+                    selectedTipoDeRolloForm.remove(tipoDeRollo);
+                  }
+                });
+              },
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
   // Widget para construir el menú desplegable de tela
   Widget _buildTelaRow() {
     return Row(
@@ -574,21 +666,6 @@ class _NuevomodeloState extends State<Nuevomodelo> {
           ),
         ),
         const SizedBox(width: 20),
-        Expanded(
-          flex: 3,
-          child: _buildDropdown(
-            'Tipo de tela',
-            ['Plano', 'Punto', 'Tejido', 'Otro'],
-            'Seleccione el tipo de tela',
-            selectedTipo,
-            (value) {
-              setState(() {
-                selectedTipo = value;
-                print('Tipo de tela: $selectedTipo');
-              });
-            },
-          ),
-        ),
       ],
     );
   }
@@ -604,12 +681,14 @@ class _NuevomodeloState extends State<Nuevomodelo> {
         DataColumn(label: Text('Tipo de Avio')),
         DataColumn(label: Text('Talles')),
         DataColumn(label: Text('Color')),
+        DataColumn(label: Text('cantidad')),
       ],
       rows: aviosSeleccionados.map((avio) {
         return DataRow(cells: [
           DataCell(Text(avio.nombre)),
           DataCell(Text(avio.talles.toString())),
           DataCell(Text(avio.color ?? 'Ninguno')),
+          DataCell(Text(avio.cantidad ?? '0')),
         ]);
       }).toList(),
     );

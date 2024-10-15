@@ -15,7 +15,7 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
   final List<String> tiposDeTela = ['Algodón', 'Poliéster', 'Lino'];
   final List<String> modelosACortar = ['Modelo A', 'Modelo B', 'Modelo C'];
   final List<String> avios = ['Botones', 'Cremalleras', 'Hilos'];
-  final List<String> talles = ['S', 'M', 'L', 'XL'];
+  final List<String> talles = ['T1', 'T2', 'T3', 'T4'];
 
   String? selectedTalle;
 

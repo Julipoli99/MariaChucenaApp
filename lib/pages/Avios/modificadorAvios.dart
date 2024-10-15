@@ -67,7 +67,7 @@ class Modificadoravios extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            'Registro de avios',
+                            'modificar Stock de avios',
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -124,8 +124,62 @@ class Modificadoravios extends StatelessWidget {
                             },
                           ),
                           const SizedBox(height: 20),
+                          const Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              // Campo de "Cantidad Inicial"
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Cantidad Inicial',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                        height:
+                                            8), // Espacio entre título y campo
+                                    TextField(
+                                      enabled: false,
+                                      decoration: InputDecoration(
+                                        hintText: 'Cantidad inicial',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(
+                                  width: 16), // Separación entre los campos
 
-                          
+                              // Campo de "Cantidad Actual"
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Cantidad Actual',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                        height:
+                                            8), // Espacio entre título y campo
+                                    TextField(
+                                      decoration: InputDecoration(
+                                        hintText: 'Cantidad actual',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
                           ElevatedButton(
                             onPressed: () {
                               // Acción al guardar el avío
