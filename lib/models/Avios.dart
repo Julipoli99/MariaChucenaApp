@@ -1,8 +1,10 @@
+import 'package:gestion_indumentaria/models/Proveedor.dart';
+
 class Avios {
   int id;
   String nombre;
   String
-      proveedores; // Este campo puede ser un List<Proveedor> si deseas tener varios proveedores
+      proveedores; // Por ahora lo dejamos como String, pero podría ser List<Proveedor>
   List<String>? talles;
   String? color;
   String? cantidad;
@@ -16,23 +18,27 @@ class Avios {
     this.cantidad,
   });
 
-  // Método para deserializar desde JSON
-  static Avios fromJson(Map<String, dynamic> json) {
+  /// **Fábrica para crear un Avios desde JSON**
+  factory Avios.fromJson(Map<String, dynamic> json) {
     return Avios(
-      id: json['id'] as int,
-      nombre: json['nombre'] as String,
-      proveedores: json['proveedores']
-          as String, // Si cambias a List<Proveedor>, cambia la lógica aquí
+      id: json['id'] ?? 0, // Valor por defecto si 'id' es nulo
+      nombre: json['nombre'] ?? 'Sin nombre',
+      proveedores: json['codigoProvedor'] ?? 'Sin proveedor',
+      cantidad: json['stock']?.toString() ?? '0', // Convertimos stock a String
+      color: json['color'] ?? 'Sin color',
+      talles: (json['talles'] as List?)?.map((t) => t.toString()).toList(),
     );
   }
 
-  // Método para serializar a JSON
+  /// **Método para convertir un Avios a JSON**
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'nombre': nombre,
-      'proveedores':
-          proveedores, // Si es una lista de proveedores, cambia a proveedores.map((p) => p.toJson()).toList()
+      'codigoProvedor': proveedores,
+      'stock': cantidad,
+      'color': color,
+      'talles': talles,
     };
   }
 }

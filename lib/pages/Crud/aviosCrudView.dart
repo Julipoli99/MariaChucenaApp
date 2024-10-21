@@ -1,17 +1,45 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Avios.dart';
 import 'package:gestion_indumentaria/pages/Avios/modificadorAvios.dart';
 import 'package:gestion_indumentaria/pages/Avios/nuevoAvios.dart';
+import 'package:gestion_indumentaria/widgets/boxDialog/BoxDialogoAvios.dart';
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
+import 'package:http/http.dart' as http;
 
-class AviosCrudView extends StatelessWidget {
-  AviosCrudView({super.key});
+class Avioscrudview extends StatefulWidget {
+  Avioscrudview({super.key});
 
-  final List<Avios> avios = [
-    Avios(id: 1, nombre: "Avios1", proveedores: "proveedor1 "),
-    Avios(id: 2, nombre: "Avios2", proveedores: "proveedor2"),
-    Avios(id: 3, nombre: "Avios3", proveedores: "proveedor3"),
-  ];
+  @override
+  State<Avioscrudview> createState() => _AvioCrudViewState();
+}
+
+class _AvioCrudViewState extends State<Avioscrudview> {
+  List<Avios> avios = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchModels();
+  }
+
+  // Muestra un diálogo con el mensaje proporcionado
+  /*void showBox(Avios avio) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return BoxDialogAvios(
+          avio: avio,
+          onCancel: onCancel,
+        );
+      },
+    );
+  }*/
+
+  // Función de cancelación para cerrar el diálogo
+  void onCancel() {
+    Navigator.of(context).pop();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,8 +63,9 @@ class AviosCrudView extends StatelessWidget {
                         );
                       },
                       style: TextButton.styleFrom(
-                          backgroundColor: Colors.blue[300],
-                          foregroundColor: Colors.white),
+                        backgroundColor: Colors.blue[300],
+                        foregroundColor: Colors.white,
+                      ),
                       child: const Text('Nuevo registro'),
                     ),
                     TextButton(
@@ -49,38 +78,40 @@ class AviosCrudView extends StatelessWidget {
                         );
                       },
                       style: TextButton.styleFrom(
-                          backgroundColor: Colors.blue[300],
-                          foregroundColor: Colors.white),
+                        backgroundColor: Colors.blue[300],
+                        foregroundColor: Colors.white,
+                      ),
                       child: const Text('Modificar stock'),
                     ),
                   ],
                 ),
                 TextButton(
-                    onPressed: () {},
-                    style: TextButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        foregroundColor: Colors.white),
-                    child: const Text('Inicio')),
+                  onPressed: () {},
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('Inicio'),
+                ),
               ],
             ),
           ),
           Expanded(
             child: TablaCrud<Avios>(
-              // Titulo del appBar
               tituloAppBar: 'Avios',
               encabezados: const [
                 "ID",
                 "NOMBRE",
                 "PROVEEDORES",
-                "OPCIONES"
-              ], // Encabezados
-              items: avios, // Lista de avios
+                "Stock",
+                "OPCIONES",
+              ],
+              items: avios,
               dataMapper: [
-                // Celdas/valores
                 (avio) => Text(avio.id.toString()),
                 (avio) => Text(avio.nombre),
                 (avio) => Text(avio.proveedores),
-                //Parte de Opciones, se le pasa una funcion que retorna una List de Widgets en este caso Row.
+                (avio) => Text(avio.cantidad.toString()),
                 (avio) => Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
@@ -104,5 +135,58 @@ class AviosCrudView extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> fetchModels() async {
+    const url = "https://maria-chucena-api-production.up.railway.app/avio";
+    final uri = Uri.parse(url);
+
+    try {
+      final response = await http.get(uri);
+
+      if (response.statusCode == 200) {
+        final body = response.body;
+
+        // Verificamos que la respuesta no esté vacía
+        if (body.isEmpty) {
+          print("Error: La respuesta de la API está vacía.");
+          return;
+        }
+
+        final List<dynamic> jsonData = jsonDecode(body);
+
+        // Verificamos si jsonData es realmente una lista
+        if (jsonData is! List) {
+          print("Error: La respuesta no es una lista válida.");
+          return;
+        }
+
+        setState(() {
+          avios = jsonData.map((json) {
+            try {
+              return Avios(
+                id: json['id'] ?? 0,
+                nombre: json['nombre'] ?? 'Sin nombre',
+                proveedores: json['codigoProveedor'] ?? 'Sin proveedor',
+                cantidad: (json['stock'] ?? 0).toString(),
+              );
+            } catch (e) {
+              print("Error al mapear un avio: $e");
+              return Avios(
+                  id: 0,
+                  nombre: 'Desconocido',
+                  proveedores: 'N/A',
+                  cantidad: '0');
+            }
+          }).toList();
+        });
+
+        print("Avios cargados correctamente.");
+      } else {
+        print("Error: Código de estado ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error al cargar los datos: $e");
+    }
   }
 }

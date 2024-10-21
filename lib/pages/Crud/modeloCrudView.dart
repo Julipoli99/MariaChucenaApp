@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Avios.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
-import 'package:gestion_indumentaria/widgets/boxDialog/BoxDialog.dart';
+import 'package:gestion_indumentaria/widgets/boxDialog/BoxDialogModelo.dart';
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
 import 'package:http/http.dart' as http;
 
@@ -15,13 +15,10 @@ class ModelCrudView extends StatefulWidget {
 }
 
 class _ModelCrudViewState extends State<ModelCrudView> {
-  
   List<dynamic> modelos = [];
 
   // Ejemplo para el crud de Modelos
-   List<Modelo> models = [
-    
-  ];
+  List<Modelo> models = [];
 
   @override
   void initState() {
@@ -35,7 +32,7 @@ class _ModelCrudViewState extends State<ModelCrudView> {
     showDialog(
       context: context,
       builder: (context) {
-        return BoxDialog(
+        return BoxDialogModelo(
           modelo: modelo,
           onCancel: onCancel,
         );
@@ -53,9 +50,17 @@ class _ModelCrudViewState extends State<ModelCrudView> {
     return Scaffold(
       body: TablaCrud<Modelo>(
         tituloAppBar: 'Modelos registrados', // Titulo del appBar
-        encabezados: const ["ID", "CODIGO", "NOMBRE", "GENERO", "TIPO", "OPCIONES"], // Encabezados
-        items: models,   // Lista de modelos
-        dataMapper: [ // Celdas/valores
+        encabezados: const [
+          "ID",
+          "CODIGO",
+          "NOMBRE",
+          "GENERO",
+          "TIPO",
+          "OPCIONES"
+        ], // Encabezados
+        items: models, // Lista de modelos
+        dataMapper: [
+          // Celdas/valores
           (model) => Text(model.id.toString()),
           (model) => Text(model.codigo.toString()),
           (model) => Text(model.nombre),
@@ -73,7 +78,6 @@ class _ModelCrudViewState extends State<ModelCrudView> {
 
                       // Muestra un pantallazo de los atributos restantes del modelo
                       showBox(model);
-
                     },
                     icon: const Icon(Icons.remove_red_eye_outlined),
                   ),
@@ -97,36 +101,38 @@ class _ModelCrudViewState extends State<ModelCrudView> {
   }
 
   void fetchModels() async {
-  const url = "https://maria-chucena-api-production.up.railway.app/modelo";
-  final uri = Uri.parse(url);
-  final response = await http.get(uri);
-  final List<dynamic> jsonData = jsonDecode(response.body);
+    const url = "https://maria-chucena-api-production.up.railway.app/modelo";
+    final uri = Uri.parse(url);
+    final response = await http.get(uri);
+    final List<dynamic> jsonData = jsonDecode(response.body);
 
-  setState(() {
-    models = jsonData.map((json) {
-      List<Avios> avios = (json['avios'] as List).map((av) {
-        return Avios(
-          id: av['avio']['id'] as int,
-          nombre: av['avio']['nombre'],
-          proveedores: av['avio']['codigoProveedor'], // Puedes ajustar según la estructura de tu clase Avios
-        );
+    setState(() {
+      models = jsonData.map((json) {
+        List<Avios> avios = (json['avios'] as List).map((av) {
+          return Avios(
+              id: av['avio']['id'] as int,
+              nombre: av['avio']['nombre'],
+              proveedores: av['avio']['codigoProveedor'],
+              cantidad: av[
+                  'stock'] // Puedes ajustar según la estructura de tu clase Avios
+              );
+        }).toList();
+
+        return Modelo(
+            id: json['id'],
+            codigo: json['codigo'],
+            genero: json[
+                'genero'], // Ajustando para usar el tipo de la categoría como prenda
+            nombre: json['nombre'],
+            tieneTelaSecundaria: json['tieneTelaSecundaria'],
+            tieneTelaAuxiliar: json['tieneTelaAuxiliar'],
+            avios: avios,
+            curva: json['curva'],
+            categoriaTipo: json['categoria']['tipo'],
+            observaciones: json['observaciones']);
       }).toList();
+    });
 
-      return Modelo(
-        id: json['id'],
-        codigo: json['codigo'],
-        genero: json['genero'], // Ajustando para usar el tipo de la categoría como prenda
-        nombre: json['nombre'],
-        tieneTelaSecundaria: json['tieneTelaSecundaria'],
-        tieneTelaAuxiliar: json['tieneTelaAuxiliar'],
-        avios: avios,
-        curva: json['curva'],
-        categoriaTipo: json['categoria']['tipo'],
-        observaciones: json['observaciones']
-      );
-    }).toList();
-  });
-
-  print("Modelos cargados");
-}
+    print("Modelos cargados");
+  }
 }

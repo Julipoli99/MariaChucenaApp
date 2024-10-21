@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
 
-class BoxDialog extends StatelessWidget {
-  const BoxDialog({super.key, required this.modelo, required this.onCancel});
+class BoxDialogModelo extends StatelessWidget {
+  const BoxDialogModelo({super.key, required this.modelo, required this.onCancel});
 
   final Modelo modelo;
   final VoidCallback onCancel;

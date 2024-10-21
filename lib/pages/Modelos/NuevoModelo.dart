@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Avios.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
+import 'package:gestion_indumentaria/models/TipoTela.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
 
@@ -19,6 +20,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   // Variables de estado para las selecciones del formulario principal
   String? selectedTipo;
   String? selectedGenero;
+  String? selectedEdad;
   String? selectedAvios;
   String? selectedTela;
   String? selectedPrenda;
@@ -29,6 +31,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   String? nombreModelo;
   List<String>? observacion;
   String? cantidad;
+  String? tipoEdad;
 
   // data para la parte de Avio
   String? nombreAvio;
@@ -205,7 +208,17 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                             },
                           ),
                           const SizedBox(height: 15),
-                          _buildindumentariaEdadRowForm(),
+                          _buildRadioGroup(
+                            'edad de la tela',
+                            ['BEBE', 'chico', 'adulto'],
+                            selectedEdad,
+                            (value) {
+                              setState(() {
+                                selectedEdad = value;
+                                print('Genero del modelo: $selectedEdad');
+                              });
+                            },
+                          ),
                           const SizedBox(height: 15),
                           _buildTelaRow(),
                           const SizedBox(height: 15),
@@ -591,40 +604,6 @@ class _NuevomodeloState extends State<Nuevomodelo> {
         Wrap(
           spacing: 10,
           children: ['Plano', 'Punto'].map((tipoDeRollo) {
-            return ChoiceChip(
-              label: Text(tipoDeRollo),
-              selected: selectedTipoDeRolloForm.contains(tipoDeRollo),
-              onSelected: (selected) {
-                //  print(selected);
-
-                setState(() {
-                  if (selected) {
-                    selectedTipoDeRolloForm.add(tipoDeRollo);
-                  } else {
-                    selectedTipoDeRolloForm.remove(tipoDeRollo);
-                  }
-                });
-              },
-            );
-          }).toList(),
-        ),
-      ],
-    );
-  }
-
-// Widget para mostrar los tipos de indumentaria en el formulario
-  Widget _buildindumentariaEdadRowForm() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Seleccione el tipo de indumentaria para edad :',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 10),
-        Wrap(
-          spacing: 10,
-          children: ['bebe', 'niño', 'adulto'].map((tipoDeRollo) {
             return ChoiceChip(
               label: Text(tipoDeRollo),
               selected: selectedTipoDeRolloForm.contains(tipoDeRollo),
