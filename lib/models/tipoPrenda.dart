@@ -14,12 +14,4 @@ class prenda {
       nombre: json['tipo'] ?? 'Sin nombre',
     );
   }
-
-  /// **Método para convertir un Avios a JSON**
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'nombre': nombre,
-    };
-  }
 }

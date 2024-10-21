@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Avios.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
 import 'package:gestion_indumentaria/models/TipoTela.dart';
+import 'package:gestion_indumentaria/models/tipoPrenda.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
 import 'package:gestion_indumentaria/widgets/TalleSelectorWidget.dart';
+import 'package:gestion_indumentaria/widgets/prendaSelectorWidget.dart';
 
 import 'package:http/http.dart' as http;
 
@@ -32,6 +34,12 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   List<String>? observacion;
   String? cantidad;
   String? tipoEdad;
+  String? titulo;
+  String? subtitulo;
+  List<String> selectedAuxForm = [];
+  List<String> selectedPrimForm = [];
+  final List<String> auxOptions = ['auxiliar'];
+  final List<String> primOptions = ['primaria'];
 
   // data para la parte de Avio
   String? nombreAvio;
@@ -61,7 +69,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
         tieneTelaSecundaria: true,
         tieneTelaAuxiliar: true,
         genero: selectedGenero!,
-        observaciones: [],
+        observaciones: [titulo, subtitulo],
         avios: aviosSeleccionados,
         curva: [
           {"id": 1, "talle": "T1"},
@@ -182,16 +190,11 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                                 labelText: 'Nombre de Modelo'),
                           ),
                           const SizedBox(height: 15),
-                          _buildDropdown(
-                            'Prenda',
-                            ['Remera', 'Pantalón', 'Otro'],
-                            'Seleccione la prenda del modelo',
-                            selectedPrenda,
-                            (value) {
+                          Prendaselectorwidget(
+                            selectedprenda: selectedPrenda,
+                            onPrendaSelected: (prenda) {
                               setState(() {
-                                selectedPrenda = value;
-                                print(
-                                    'Prenda del modelo seleccionada: $selectedPrenda');
+                                selectedPrenda = prenda;
                               });
                             },
                           ),
@@ -220,20 +223,41 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                             },
                           ),
                           const SizedBox(height: 15),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildAuxSelection(),
+                              const SizedBox(height: 15),
+                              _buildPrimSelection(),
+                            ],
+                          ),
+                          const SizedBox(height: 15),
                           _buildTelaRow(),
                           const SizedBox(height: 15),
                           _buildTelaRowForm(),
                           const SizedBox(height: 15),
+
                           TextField(
                             onChanged: (value) {
                               setState(() {
-                                observacion?.add(value);
-                                print(observacion);
+                                titulo = value;
+                                print('Título: $titulo');
                               });
                             },
                             decoration:
-                                const InputDecoration(labelText: 'Observacion'),
+                                const InputDecoration(labelText: 'Título'),
                           ),
+                          TextField(
+                            onChanged: (value) {
+                              setState(() {
+                                subtitulo = value;
+                                print('Subtítulo: $subtitulo');
+                              });
+                            },
+                            decoration:
+                                const InputDecoration(labelText: 'Descripción'),
+                          ),
+
                           const SizedBox(height: 15),
                           TalleSelector(
                             selectedTalle: selectedTallesForm,
@@ -451,80 +475,80 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   }
 
   // Diálogo para seleccionar los talles
- void _showTalleSelectionDialog(StateSetter setState) async {
-  List<String> talles = [];
-  bool isLoading = true;
+  void _showTalleSelectionDialog(StateSetter setState) async {
+    List<String> talles = [];
+    bool isLoading = true;
 
-  // Llamada a la API para obtener los talles
-  const String apiUrl = 'https://maria-chucena-api-production.up.railway.app/talle';
-  try {
-    final response = await http.get(Uri.parse(apiUrl));
-    if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.body);
-      talles = data.map((talle) => talle["talle"].toString()).toList();
-      isLoading = false;
-    } else {
-      _showErrorDialog('Error al obtener los talles: ${response.statusCode}');
+    // Llamada a la API para obtener los talles
+    const String apiUrl =
+        'https://maria-chucena-api-production.up.railway.app/talle';
+    try {
+      final response = await http.get(Uri.parse(apiUrl));
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        talles = data.map((talle) => talle["talle"].toString()).toList();
+        isLoading = false;
+      } else {
+        _showErrorDialog('Error al obtener los talles: ${response.statusCode}');
+      }
+    } catch (e) {
+      _showErrorDialog('Error de conexión: $e');
     }
-  } catch (e) {
-    _showErrorDialog('Error de conexión: $e');
+
+    // Mostrar el diálogo con los talles cargados
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Seleccione los talles'),
+          content: isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : Wrap(
+                  spacing: 10,
+                  children: talles.map((talle) {
+                    return ChoiceChip(
+                      label: Text(talle),
+                      selected: selectedTallesDialog.contains(talle),
+                      onSelected: (selected) {
+                        setState(() {
+                          if (selected) {
+                            selectedTallesDialog.add(talle);
+                          } else {
+                            selectedTallesDialog.remove(talle);
+                          }
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Cerrar el diálogo
+              },
+              child: const Text('Aceptar'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
-  // Mostrar el diálogo con los talles cargados
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('Seleccione los talles'),
-        content: isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : Wrap(
-                spacing: 10,
-                children: talles.map((talle) {
-                  return ChoiceChip(
-                    label: Text(talle),
-                    selected: selectedTallesDialog.contains(talle),
-                    onSelected: (selected) {
-                      setState(() {
-                        if (selected) {
-                          selectedTallesDialog.add(talle);
-                        } else {
-                          selectedTallesDialog.remove(talle);
-                        }
-                      });
-                    },
-                  );
-                }).toList(),
-              ),
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Error'),
+        content: Text(message),
         actions: [
           TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(); // Cerrar el diálogo
-            },
+            onPressed: () => Navigator.of(context).pop(),
             child: const Text('Aceptar'),
           ),
         ],
-      );
-    },
-  );
-}
-
-void _showErrorDialog(String message) {
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('Error'),
-      content: Text(message),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Aceptar'),
-        ),
-      ],
-    ),
-  );
-}
-
+      ),
+    );
+  }
 
   // Widget para construir el campo de texto
   Widget _buildTextField(String label, String hint, String key) {
@@ -624,6 +648,68 @@ void _showErrorDialog(String message) {
                     selectedTipoDeRolloForm.add(tipoDeRollo);
                   } else {
                     selectedTipoDeRolloForm.remove(tipoDeRollo);
+                  }
+                });
+              },
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAuxSelection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Seleccione si es tela auxiliar:',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 10,
+          children: auxOptions.map((aux) {
+            return ChoiceChip(
+              label: Text(aux),
+              selected: selectedAuxForm.contains(aux),
+              onSelected: (selected) {
+                setState(() {
+                  if (selected) {
+                    selectedAuxForm = [aux]; // Solo permitir una selección
+                  } else {
+                    selectedAuxForm.remove(aux);
+                  }
+                });
+              },
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPrimSelection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Seleccione si es tela primaria:',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 10,
+          children: primOptions.map((prim) {
+            return ChoiceChip(
+              label: Text(prim),
+              selected: selectedPrimForm.contains(prim),
+              onSelected: (selected) {
+                setState(() {
+                  if (selected) {
+                    selectedPrimForm = [prim]; // Solo permitir una selección
+                  } else {
+                    selectedPrimForm.remove(prim);
                   }
                 });
               },
