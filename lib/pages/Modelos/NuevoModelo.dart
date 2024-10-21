@@ -6,6 +6,7 @@ import 'package:gestion_indumentaria/models/Modelo.dart';
 import 'package:gestion_indumentaria/models/TipoTela.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
+import 'package:gestion_indumentaria/widgets/TalleSelectorWidget.dart';
 
 import 'package:http/http.dart' as http;
 
@@ -24,8 +25,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   String? selectedAvios;
   String? selectedTela;
   String? selectedPrenda;
-  List<String> selectedTallesForm =
-      []; // Lista de talles en el formulario principal
+  String? selectedTallesForm; // Lista de talles en el formulario principal
   List<String> selectedTipoDeRolloForm = [];
   String? codigoModelo;
   String? nombreModelo;
@@ -235,7 +235,14 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                                 const InputDecoration(labelText: 'Observacion'),
                           ),
                           const SizedBox(height: 15),
-                          _buildTallesRowForm(),
+                          TalleSelector(
+                            selectedTalle: selectedTallesForm,
+                            onTalleSelected: (talle) {
+                              setState(() {
+                                selectedTallesForm = talle;
+                              });
+                            },
+                          ),
                           const SizedBox(height: 15),
                           _buildRadioGroup(
                             'Tiene avios',
@@ -444,44 +451,80 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   }
 
   // Diálogo para seleccionar los talles
-  void _showTalleSelectionDialog(StateSetter setState) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Seleccione los talles'),
-          content: Wrap(
-            spacing: 10,
-            children: ['T1', 'T2', 'T3', 'T4'].map((talle) {
-              return ChoiceChip(
-                label: Text(talle),
-                selected: selectedTallesDialog.contains(talle),
-                onSelected: (selected) {
-                  setState(() {
-                    if (selected) {
-                      print('Talle seleccionado: $selected');
-                      selectedTallesDialog.add(talle);
-                      print('Talles en total: $selectedTallesDialog');
-                    } else {
-                      selectedTallesDialog.remove(talle);
-                    }
-                  });
-                },
-              );
-            }).toList(),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Cerrar el diálogo
-              },
-              child: const Text('Aceptar'),
-            ),
-          ],
-        );
-      },
-    );
+ void _showTalleSelectionDialog(StateSetter setState) async {
+  List<String> talles = [];
+  bool isLoading = true;
+
+  // Llamada a la API para obtener los talles
+  const String apiUrl = 'https://maria-chucena-api-production.up.railway.app/talle';
+  try {
+    final response = await http.get(Uri.parse(apiUrl));
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      talles = data.map((talle) => talle["talle"].toString()).toList();
+      isLoading = false;
+    } else {
+      _showErrorDialog('Error al obtener los talles: ${response.statusCode}');
+    }
+  } catch (e) {
+    _showErrorDialog('Error de conexión: $e');
   }
+
+  // Mostrar el diálogo con los talles cargados
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Seleccione los talles'),
+        content: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : Wrap(
+                spacing: 10,
+                children: talles.map((talle) {
+                  return ChoiceChip(
+                    label: Text(talle),
+                    selected: selectedTallesDialog.contains(talle),
+                    onSelected: (selected) {
+                      setState(() {
+                        if (selected) {
+                          selectedTallesDialog.add(talle);
+                        } else {
+                          selectedTallesDialog.remove(talle);
+                        }
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Cerrar el diálogo
+            },
+            child: const Text('Aceptar'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+void _showErrorDialog(String message) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Error'),
+      content: Text(message),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Aceptar'),
+        ),
+      ],
+    ),
+  );
+}
+
 
   // Widget para construir el campo de texto
   Widget _buildTextField(String label, String hint, String key) {
@@ -552,40 +595,6 @@ class _NuevomodeloState extends State<Nuevomodelo> {
             );
           }).toList(),
           onChanged: onChanged,
-        ),
-      ],
-    );
-  }
-
-  // Widget para mostrar los talles en el formulario
-  Widget _buildTallesRowForm() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Seleccione los talles:',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 10),
-        Wrap(
-          spacing: 10,
-          children: ['T1', 'T2', 'T3', 'T4'].map((talle) {
-            return ChoiceChip(
-              label: Text(talle),
-              selected: selectedTallesForm.contains(talle),
-              onSelected: (selected) {
-                //  print(selected);
-
-                setState(() {
-                  if (selected) {
-                    selectedTallesForm.add(talle);
-                  } else {
-                    selectedTallesForm.remove(talle);
-                  }
-                });
-              },
-            );
-          }).toList(),
         ),
       ],
     );
