@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:gestion_indumentaria/models/Avios.dart';
+import 'package:gestion_indumentaria/models/AviosModel.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
-import 'package:gestion_indumentaria/models/Observacion.dart'; // Asegúrate de que este archivo exista
-import 'package:gestion_indumentaria/models/Talle.dart'; // Asegúrate de que este archivo exista
+import 'package:gestion_indumentaria/models/observacion.dart';
+import 'package:gestion_indumentaria/models/talle.dart';
 import 'package:gestion_indumentaria/widgets/boxDialog/BoxDialogModelo.dart';
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
 import 'package:http/http.dart' as http;
@@ -31,10 +31,6 @@ class _ModelCrudViewState extends State<ModelCrudView> {
         return BoxDialogModelo(
           modelo: modelo,
           onCancel: onCancel,
-          onUpdate: (updatedModelo) {
-            updateModel(updatedModelo);
-            Navigator.of(context).pop();
-          },
         );
       },
     );
@@ -47,18 +43,6 @@ class _ModelCrudViewState extends State<ModelCrudView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Modelos registrados'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              // Aquí puedes abrir un diálogo para agregar un nuevo modelo
-              // showDialog para agregar un nuevo modelo
-            },
-          ),
-        ],
-      ),
       body: TablaCrud<Modelo>(
         tituloAppBar: 'Modelos registrados',
         encabezados: const [
@@ -117,17 +101,17 @@ class _ModelCrudViewState extends State<ModelCrudView> {
 
         setState(() {
           models = jsonData.map((json) {
-            List<Avios> avios = (json['avios'] as List<dynamic>).map((av) {
-              return Avios.fromJson(av); // Convierte cada elemento a Avios
+            List<AviosModel> avio = (json['avios'] as List<dynamic>).map((av) {
+              return AviosModel.fromJson(av); // Convierte cada elemento a Avios
             }).toList();
 
-            List<Talle> curva = (json['curva'] as List<dynamic>).map((t) {
-              return Talle.fromJson(t);
+            List<talle> curva = (json['curva'] as List<dynamic>).map((t) {
+              return talle.fromJson(t);
             }).toList();
 
-            List<Observacion> observaciones =
+            List<ObservacionModel> observaciones =
                 (json['observaciones'] as List<dynamic>).map((obs) {
-              return Observacion.fromJson(obs);
+              return ObservacionModel.fromJson(obs);
             }).toList();
 
             return Modelo(
@@ -137,7 +121,7 @@ class _ModelCrudViewState extends State<ModelCrudView> {
               nombre: json['nombre'],
               tieneTelaSecundaria: json['tieneTelaSecundaria'],
               tieneTelaAuxiliar: json['tieneTelaAuxiliar'],
-              avios: avios,
+              avios: avio,
               curva: curva,
               categoriaTipo: json['categoria']['tipo'],
               observaciones: observaciones,

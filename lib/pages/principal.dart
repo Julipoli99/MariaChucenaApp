@@ -137,7 +137,7 @@ class HomePage extends StatelessWidget {
                                   'Detalles de prendas registradas.',
                                   250,
                                   80,
-                                  'assets/imagen/avios.png',
+                                  'assets/imagen/prenda.png',
                                 ),
                               ),
                             ],

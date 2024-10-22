@@ -1,6 +1,9 @@
+import 'package:gestion_indumentaria/models/AviosModel.dart';
+
+
 import 'observacion.dart'; // Asegúrate de que este archivo exista
 import 'talle.dart'; // Asegúrate de que este archivo exista
-import 'avios.dart'; // Asegúrate de que este archivo exista
+// Asegúrate de que este archivo exista
 
 class Modelo {
   final int id;
@@ -8,9 +11,9 @@ class Modelo {
   final String nombre;
   final bool tieneTelaSecundaria;
   final bool tieneTelaAuxiliar;
-  final List<Observacion>? observaciones; // Lista opcional
-  final List<Avios>? avios; // Lista opcional
-  final List<Talle>
+  final List<ObservacionModel>? observaciones; // Lista opcional
+  final List<AviosModel>? avios; // Lista opcional
+  final List<talle>
       curva; // Representa los talles como una lista de objetos Talle
   final String genero;
   final String categoriaTipo;
@@ -29,14 +32,14 @@ class Modelo {
   });
 
   factory Modelo.fromJson(Map<String, dynamic> json) {
-    List<Observacion>? observaciones =
+    List<ObservacionModel>? observaciones =
         (json['observaciones'] as List?)?.map((obs) {
-      return Observacion.fromJson(obs);
+      return ObservacionModel.fromJson(obs);
     }).toList();
 
-    List<Talle> talles = (json['curva'] as List).map((t) {
-      return Talle.fromJson(
-          t); // Asumiendo que la API devuelve talles en formato JSON
+    List<talle> talles = (json['curva'] as List).map((t) {
+      return talle
+          .fromJson(t); // Asumiendo que la API devuelve talles en formato JSON
     }).toList();
 
     return Modelo(
@@ -47,7 +50,7 @@ class Modelo {
       tieneTelaAuxiliar: json['tieneTelaAuxiliar'],
       observaciones: observaciones,
       avios: (json['avios'] as List?)?.map((av) {
-        return Avios.fromJson(
+        return AviosModel.fromJson(
             av); // Asegúrate de que tu clase Avios tenga este método
       }).toList(),
       curva: talles,

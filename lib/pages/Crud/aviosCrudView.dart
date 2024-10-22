@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:gestion_indumentaria/models/Avios.dart';
+import 'package:gestion_indumentaria/models/AviosModel.dart';
+
 import 'package:gestion_indumentaria/pages/Avios/modificadorAvios.dart';
 import 'package:gestion_indumentaria/pages/Avios/nuevoAvios.dart';
 import 'package:gestion_indumentaria/widgets/boxDialog/BoxDialogoAvios.dart';
@@ -15,7 +16,7 @@ class Avioscrudview extends StatefulWidget {
 }
 
 class _AvioCrudViewState extends State<Avioscrudview> {
-  List<Avios> avios = [];
+  List<AviosModel> avios = [];
 
   @override
   void initState() {
@@ -97,7 +98,7 @@ class _AvioCrudViewState extends State<Avioscrudview> {
             ),
           ),
           Expanded(
-            child: TablaCrud<Avios>(
+            child: TablaCrud<AviosModel>(
               tituloAppBar: 'Avios',
               encabezados: const [
                 "ID",
@@ -163,7 +164,7 @@ class _AvioCrudViewState extends State<Avioscrudview> {
 
         setState(() {
           avios = jsonData.map((json) {
-            return Avios(
+            return AviosModel(
               id: json['id'] ?? 0,
               nombre: json['nombre'] ?? 'Sin nombre',
               proveedores: json['codigoProveedor'] ?? 'Sin proveedor',

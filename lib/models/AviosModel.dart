@@ -1,6 +1,7 @@
 import 'package:gestion_indumentaria/models/Proveedor.dart';
 
-class Avios {
+// ignore: camel_case_types
+class AviosModel {
   int id;
   String nombre;
   String
@@ -9,7 +10,7 @@ class Avios {
   String? color;
   String? cantidad;
 
-  Avios({
+  AviosModel({
     this.id = 0,
     required this.nombre,
     required this.proveedores,
@@ -19,8 +20,8 @@ class Avios {
   });
 
   /// **Fábrica para crear un Avios desde JSON**
-  factory Avios.fromJson(Map<String, dynamic> json) {
-    return Avios(
+  factory AviosModel.fromJson(Map<String, dynamic> json) {
+    return AviosModel(
       id: json['id'] ?? 0, // Valor por defecto si 'id' es nulo
       nombre: json['nombre'] ?? 'Sin nombre',
       proveedores: json['codigoProvedor'] ?? 'Sin proveedor',

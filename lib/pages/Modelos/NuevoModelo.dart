@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:gestion_indumentaria/models/Avios.dart';
+import 'package:gestion_indumentaria/models/AviosModel.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
 import 'package:gestion_indumentaria/models/TipoTela.dart';
 import 'package:gestion_indumentaria/models/observacion.dart';
@@ -32,7 +32,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   List<String> selectedTipoDeRolloForm = [];
   String? codigoModelo;
   String? nombreModelo;
-  List<Observacion>? observacion;
+  List<ObservacionModel>? observacion;
   String? cantidad;
   String? tipoEdad;
   String? titulo;
@@ -59,7 +59,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
       TextEditingController(); // Variable para el color en el cuadro de diálogo
   String? cantidadAvioDialog;
   // Lista para almacenar los avios elegidos y sus detalles
-  List<Avios> aviosSeleccionados = [];
+  List<AviosModel> aviosSeleccionados = [];
 
   void _createPost() {
     //Avios(nombre: selectedTipoAvioDialog!, proveedores: "Proveedor1");
@@ -71,7 +71,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
         tieneTelaAuxiliar: selectedAuxForm!,
         genero: selectedGenero!,
         observaciones: [],
-       // avios: aviosSeleccionados,
+        // avios: aviosSeleccionados,
         curva: [],
         categoriaTipo: selectedPrenda!);
 
@@ -405,7 +405,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                         cantidadAvioDialog != null &&
                         cantidadAvioDialog!.isNotEmpty) {
                       // Crear avio y actualizar lista
-                      Avios avioCreado = Avios(
+                      AviosModel avioCreado = AviosModel(
                         nombre: selectedTipoAvioDialog!,
                         proveedores: "Proveedor1",
                         talles: List.from(selectedTallesDialog),
@@ -438,7 +438,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                         cantidadAvioDialog != null &&
                         cantidadAvioDialog!.isNotEmpty) {
                       // Crear avio y actualizar lista
-                      Avios avioCreado = Avios(
+                      AviosModel avioCreado = AviosModel(
                         nombre: selectedTipoAvioDialog!,
                         proveedores: "Proveedor1",
                         talles: List.from(selectedTallesDialog),

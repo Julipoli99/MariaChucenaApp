@@ -1,9 +1,9 @@
-class Observacion {
+class ObservacionModel {
   final int id;
   final String titulo;
   final String descripcion;
 
-  Observacion({
+  ObservacionModel({
     required this.id,
     required this.titulo,
     required this.descripcion,
@@ -17,8 +17,8 @@ class Observacion {
     };
   }
 
-  factory Observacion.fromJson(Map<String, dynamic> json) {
-    return Observacion(
+  factory ObservacionModel.fromJson(Map<String, dynamic> json) {
+    return ObservacionModel(
       id: json['id'],
       titulo: json['titulo'],
       descripcion: json['descripcion'],
