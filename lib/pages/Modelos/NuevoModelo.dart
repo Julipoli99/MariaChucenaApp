@@ -71,7 +71,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
         tieneTelaAuxiliar: selectedAuxForm!,
         genero: selectedGenero!,
         observaciones: [],
-        avios: aviosSeleccionados,
+       // avios: aviosSeleccionados,
         curva: [],
         categoriaTipo: selectedPrenda!);
 

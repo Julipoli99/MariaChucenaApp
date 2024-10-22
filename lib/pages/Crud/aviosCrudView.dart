@@ -149,7 +149,6 @@ class _AvioCrudViewState extends State<Avioscrudview> {
       if (response.statusCode == 200) {
         final body = response.body;
 
-        // Verificamos que la respuesta no esté vacía
         if (body.isEmpty) {
           print("Error: La respuesta de la API está vacía.");
           return;
@@ -157,7 +156,6 @@ class _AvioCrudViewState extends State<Avioscrudview> {
 
         final List<dynamic> jsonData = jsonDecode(body);
 
-        // Verificamos si jsonData es realmente una lista
         if (jsonData is! List) {
           print("Error: La respuesta no es una lista válida.");
           return;
@@ -165,21 +163,12 @@ class _AvioCrudViewState extends State<Avioscrudview> {
 
         setState(() {
           avios = jsonData.map((json) {
-            try {
-              return Avios(
-                id: json['id'] ?? 0,
-                nombre: json['nombre'] ?? 'Sin nombre',
-                proveedores: json['codigoProveedor'] ?? 'Sin proveedor',
-                cantidad: (json['stock'] ?? 0).toString(),
-              );
-            } catch (e) {
-              print("Error al mapear un avio: $e");
-              return Avios(
-                  id: 0,
-                  nombre: 'Desconocido',
-                  proveedores: 'N/A',
-                  cantidad: '0');
-            }
+            return Avios(
+              id: json['id'] ?? 0,
+              nombre: json['nombre'] ?? 'Sin nombre',
+              proveedores: json['codigoProveedor'] ?? 'Sin proveedor',
+              cantidad: (json['stock'] ?? 0).toString(),
+            );
           }).toList();
         });
 
@@ -200,17 +189,17 @@ class _AvioCrudViewState extends State<Avioscrudview> {
     try {
       final response = await http.delete(uri);
 
-      if (response.statusCode == 200 || response.statusCode == 204) {
+      if (response.statusCode == 204) {
         setState(() {
           avios.removeWhere((avio) => avio.id == id); // Remover avio localmente
         });
-        print('Avio eliminado correctamente.');
+        print('avio eliminado correctamente.');
       } else {
         print(
             'Error: No se pudo eliminar el avio. Código de estado ${response.statusCode}');
       }
     } catch (e) {
-      print('Error al eliminar el avio: $e');
+      print('Error al eliminar la avio: $e');
     }
   }
 
@@ -228,9 +217,10 @@ class _AvioCrudViewState extends State<Avioscrudview> {
               child: const Text('Cancelar'),
             ),
             ElevatedButton(
-              onPressed: () {
-                deleteAvio(id); // Llama a la función para eliminar el avio
-                Navigator.of(context).pop(); // Cierra el diálogo
+              onPressed: () async {
+                await deleteAvio(id); // Esperar a que se elimine el avio
+                Navigator.of(context)
+                    .pop(); // Cierra el diálogo después de la eliminación
               },
               child: const Text('Eliminar'),
             ),

@@ -1,8 +1,9 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Avios.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
+import 'package:gestion_indumentaria/models/Observacion.dart'; // Asegúrate de que este archivo exista
+import 'package:gestion_indumentaria/models/Talle.dart'; // Asegúrate de que este archivo exista
 import 'package:gestion_indumentaria/widgets/boxDialog/BoxDialogModelo.dart';
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
 import 'package:http/http.dart' as http;
@@ -15,19 +16,14 @@ class ModelCrudView extends StatefulWidget {
 }
 
 class _ModelCrudViewState extends State<ModelCrudView> {
-  List<dynamic> modelos = [];
-
-  // Ejemplo para el crud de Modelos
   List<Modelo> models = [];
 
   @override
   void initState() {
     super.initState();
-    // Llamamos al fetch cuando la página se carga
-    fetchModels();
+    fetchModels(); // Llamamos al fetch cuando la página se carga
   }
 
-  // Muestra un diálogo con el mensaje proporcionado
   void showBox(Modelo modelo) {
     showDialog(
       context: context,
@@ -35,12 +31,15 @@ class _ModelCrudViewState extends State<ModelCrudView> {
         return BoxDialogModelo(
           modelo: modelo,
           onCancel: onCancel,
+          onUpdate: (updatedModelo) {
+            updateModel(updatedModelo);
+            Navigator.of(context).pop();
+          },
         );
       },
     );
   }
 
-  // Función de cancelación para cerrar el diálogo
   void onCancel() {
     Navigator.of(context).pop();
   }
@@ -48,8 +47,20 @@ class _ModelCrudViewState extends State<ModelCrudView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Modelos registrados'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () {
+              // Aquí puedes abrir un diálogo para agregar un nuevo modelo
+              // showDialog para agregar un nuevo modelo
+            },
+          ),
+        ],
+      ),
       body: TablaCrud<Modelo>(
-        tituloAppBar: 'Modelos registrados', // Titulo del appBar
+        tituloAppBar: 'Modelos registrados',
         encabezados: const [
           "ID",
           "CODIGO",
@@ -57,39 +68,33 @@ class _ModelCrudViewState extends State<ModelCrudView> {
           "GENERO",
           "TIPO",
           "OPCIONES"
-        ], // Encabezados
-        items: models, // Lista de modelos
+        ],
+        items: models,
         dataMapper: [
-          // Celdas/valores
           (model) => Text(model.id.toString()),
           (model) => Text(model.codigo.toString()),
           (model) => Text(model.nombre),
           (model) => Text(model.genero),
           (model) => Text(model.categoriaTipo),
-          //(model) => Text(model.tipo),
-          //(model) => Text(model.tela),
-          //Parte de Opciones, se le pasa una funcion que retorna una List de Widgets en este caso Row.
           (model) => Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   IconButton(
                     onPressed: () {
-                      print('Vista para modelo con id: ${model.id}');
-
-                      // Muestra un pantallazo de los atributos restantes del modelo
                       showBox(model);
                     },
                     icon: const Icon(Icons.remove_red_eye_outlined),
                   ),
                   IconButton(
                     onPressed: () {
-                      print('Edicion para modelo con id: ${model.id}');
+                      print('Edición para modelo con id: ${model.id}');
+                      // Aquí podrías abrir un diálogo similar para editar el modelo
                     },
                     icon: const Icon(Icons.edit),
                   ),
                   IconButton(
                     onPressed: () {
-                      print('Modelo borrado: ${model.id}');
+                      deleteModel(model.id);
                     },
                     icon: const Icon(Icons.delete),
                   ),
@@ -103,36 +108,86 @@ class _ModelCrudViewState extends State<ModelCrudView> {
   void fetchModels() async {
     const url = "https://maria-chucena-api-production.up.railway.app/modelo";
     final uri = Uri.parse(url);
-    final response = await http.get(uri);
-    final List<dynamic> jsonData = jsonDecode(response.body);
 
-    setState(() {
-      models = jsonData.map((json) {
-        List<Avios> avios = (json['avios'] as List).map((av) {
-          return Avios(
-              id: av['avio']['id'] as int,
-              nombre: av['avio']['nombre'],
-              proveedores: av['avio']['codigoProveedor'],
-              cantidad: av[
-                  'stock'] // Puedes ajustar según la estructura de tu clase Avios
-              );
-        }).toList();
+    try {
+      final response = await http.get(uri);
 
-        return Modelo(
-            id: json['id'],
-            codigo: json['codigo'],
-            genero: json[
-                'genero'], // Ajustando para usar el tipo de la categoría como prenda
-            nombre: json['nombre'],
-            tieneTelaSecundaria: json['tieneTelaSecundaria'],
-            tieneTelaAuxiliar: json['tieneTelaAuxiliar'],
-            avios: avios,
-            curva: json['curva'],
-            categoriaTipo: json['categoria']['tipo'],
-            observaciones: json['observaciones']);
-      }).toList();
-    });
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonData = jsonDecode(response.body);
 
-    print("Modelos cargados");
+        setState(() {
+          models = jsonData.map((json) {
+            List<Avios> avios = (json['avios'] as List<dynamic>).map((av) {
+              return Avios.fromJson(av); // Convierte cada elemento a Avios
+            }).toList();
+
+            List<Talle> curva = (json['curva'] as List<dynamic>).map((t) {
+              return Talle.fromJson(t);
+            }).toList();
+
+            List<Observacion> observaciones =
+                (json['observaciones'] as List<dynamic>).map((obs) {
+              return Observacion.fromJson(obs);
+            }).toList();
+
+            return Modelo(
+              id: json['id'],
+              codigo: json['codigo'],
+              genero: json['genero'],
+              nombre: json['nombre'],
+              tieneTelaSecundaria: json['tieneTelaSecundaria'],
+              tieneTelaAuxiliar: json['tieneTelaAuxiliar'],
+              avios: avios,
+              curva: curva,
+              categoriaTipo: json['categoria']['tipo'],
+              observaciones: observaciones,
+            );
+          }).toList();
+        });
+
+        print("Modelos cargados");
+      } else {
+        print("Error al cargar modelos: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error al hacer la petición: $e");
+    }
+  }
+
+  void deleteModel(int id) async {
+    final url =
+        'https://maria-chucena-api-production.up.railway.app/modelo/$id';
+    final response = await http.delete(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      setState(() {
+        models.removeWhere((model) => model.id == id);
+      });
+      print("Modelo eliminado");
+    } else {
+      print("Error al eliminar modelo: ${response.statusCode}");
+    }
+  }
+
+  void updateModel(Modelo updatedModelo) async {
+    final url =
+        'https://maria-chucena-api-production.up.railway.app/modelo/${updatedModelo.id}';
+    final response = await http.put(
+      Uri.parse(url),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode(updatedModelo.toJson()),
+    );
+
+    if (response.statusCode == 200) {
+      setState(() {
+        int index = models.indexWhere((model) => model.id == updatedModelo.id);
+        if (index != -1) {
+          models[index] = updatedModelo; // Actualiza el modelo en la lista
+        }
+      });
+      print("Modelo actualizado");
+    } else {
+      print("Error al actualizar modelo: ${response.statusCode}");
+    }
   }
 }

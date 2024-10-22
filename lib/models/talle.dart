@@ -14,4 +14,10 @@ class Talle {
       nombre: json['talle'] ?? 'Sin talle',
     );
   }
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'nombre': nombre,
+    };
+  }
 }
