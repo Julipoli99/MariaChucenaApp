@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Avios.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
 import 'package:gestion_indumentaria/models/TipoTela.dart';
+import 'package:gestion_indumentaria/models/observacion.dart';
 import 'package:gestion_indumentaria/models/tipoPrenda.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
@@ -31,13 +32,13 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   List<String> selectedTipoDeRolloForm = [];
   String? codigoModelo;
   String? nombreModelo;
-  List<String>? observacion;
+  List<Observacion>? observacion;
   String? cantidad;
   String? tipoEdad;
   String? titulo;
-  String? subtitulo;
-  List<String> selectedAuxForm = [];
-  List<String> selectedPrimForm = [];
+  String? descripcion;
+  bool? selectedAuxForm;
+  bool? selectedPrimForm;
   final List<String> auxOptions = ['auxiliar'];
   final List<String> primOptions = ['primaria'];
 
@@ -66,18 +67,12 @@ class _NuevomodeloState extends State<Nuevomodelo> {
         id: 15,
         codigo: codigoModelo!,
         nombre: nombreModelo!,
-        tieneTelaSecundaria: true,
-        tieneTelaAuxiliar: true,
+        tieneTelaSecundaria: selectedPrimForm!,
+        tieneTelaAuxiliar: selectedAuxForm!,
         genero: selectedGenero!,
-        observaciones: [titulo, subtitulo],
+        observaciones: [],
         avios: aviosSeleccionados,
-        curva: [
-          {"id": 1, "talle": "T1"},
-          {"id": 2, "talle": "T2"},
-          {"id": 3, "talle": "T3"},
-          {"id": 4, "talle": "T4"},
-          {"id": 5, "talle": "T5"}
-        ],
+        curva: [],
         categoriaTipo: selectedPrenda!);
 
     print(modeloCreado.toJson());
@@ -250,8 +245,8 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                           TextField(
                             onChanged: (value) {
                               setState(() {
-                                subtitulo = value;
-                                print('Subtítulo: $subtitulo');
+                                descripcion = value;
+                                print('Subtítulo: $descripcion');
                               });
                             },
                             decoration:
@@ -672,13 +667,13 @@ class _NuevomodeloState extends State<Nuevomodelo> {
           children: auxOptions.map((aux) {
             return ChoiceChip(
               label: Text(aux),
-              selected: selectedAuxForm.contains(aux),
+              selected: selectedAuxForm = false,
               onSelected: (selected) {
                 setState(() {
                   if (selected) {
-                    selectedAuxForm = [aux]; // Solo permitir una selección
+                    selectedAuxForm = true; // Solo permitir una selección
                   } else {
-                    selectedAuxForm.remove(aux);
+                    selectedAuxForm = false;
                   }
                 });
               },
@@ -703,13 +698,13 @@ class _NuevomodeloState extends State<Nuevomodelo> {
           children: primOptions.map((prim) {
             return ChoiceChip(
               label: Text(prim),
-              selected: selectedPrimForm.contains(prim),
+              selected: selectedPrimForm = false,
               onSelected: (selected) {
                 setState(() {
                   if (selected) {
-                    selectedPrimForm = [prim]; // Solo permitir una selección
+                    selectedPrimForm = true; // Solo permitir una selección
                   } else {
-                    selectedPrimForm.remove(prim);
+                    selectedPrimForm = false;
                   }
                 });
               },

@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
 
 class BoxDialogModelo extends StatelessWidget {
-  const BoxDialogModelo({super.key, required this.modelo, required this.onCancel});
+  const BoxDialogModelo(
+      {super.key, required this.modelo, required this.onCancel});
 
   final Modelo modelo;
   final VoidCallback onCancel;
@@ -14,21 +15,23 @@ class BoxDialogModelo extends StatelessWidget {
       title: Text('Detalles del Modelo: ${modelo.nombre}'),
       content: SizedBox(
         height: 400, // Altura total del contenido del diálogo
-        width: 500,  // Ajusta el ancho si es necesario
+        width: 500, // Ajusta el ancho si es necesario
         child: Column(
           children: [
             // Observaciones
-            const Text('Observaciones:', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text('Observaciones:',
+                style: TextStyle(fontWeight: FontWeight.bold)),
             Flexible(
               child: Scrollbar(
                 thumbVisibility: true, // Hace visible la scrollbar
                 child: ListView.builder(
-                  itemCount: modelo.observaciones.length,
+                  itemCount: modelo.observaciones?.length,
                   itemBuilder: (context, index) {
-                    final observacion = modelo.observaciones[index];
+                    final observacion = modelo.observaciones?[index];
                     return ListTile(
-                      title: Text('Observación: ${observacion['titulo']}'),
-                      subtitle: Text('Descripción: ${observacion['descripcion']}'),
+                      title: Text('Observación: ${observacion?.titulo}'),
+                      subtitle:
+                          Text('Descripción: ${observacion?.descripcion}'),
                     );
                   },
                 ),
@@ -38,7 +41,7 @@ class BoxDialogModelo extends StatelessWidget {
 
             // Avios
             Text(
-              'Avios (${modelo.avios.length}):',  // Muestra la cantidad de avios
+              'Avios (${modelo.avios.length}):', // Muestra la cantidad de avios
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             Flexible(
@@ -60,7 +63,7 @@ class BoxDialogModelo extends StatelessWidget {
 
             // Curva
             Text(
-              'Curva (${modelo.curva.length}):',  // Muestra la cantidad de ítems en la curva
+              'Curva (${modelo.curva.length}):', // Muestra la cantidad de ítems en la curva
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             Flexible(

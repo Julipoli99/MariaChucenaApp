@@ -50,6 +50,8 @@ class _PrendaCrudViewState extends State<Prendacrudview> {
                   ),
                   IconButton(
                     onPressed: () {
+                      _confirmDelete(
+                          context, prenda.id); // Confirmación antes de eliminar
                       print('Prenda borrada: ${prenda.id}');
                     },
                     icon: const Icon(Icons.delete),
@@ -81,5 +83,54 @@ class _PrendaCrudViewState extends State<Prendacrudview> {
     });
 
     print("Prendas cargadas");
+  }
+
+  Future<void> deletePrenda(int id) async {
+    final url =
+        'https://maria-chucena-api-production.up.railway.app/categoria/$id'; // Endpoint para eliminar un avio
+    final uri = Uri.parse(url);
+
+    try {
+      final response = await http.delete(uri);
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        setState(() {
+          prendas.removeWhere(
+              (prenda) => prenda.id == id); // Remover avio localmente
+        });
+        print('prenda eliminado correctamente.');
+      } else {
+        print(
+            'Error: No se pudo eliminar el prenda. Código de estado ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error al eliminar la prenda: $e');
+    }
+  }
+
+  void _confirmDelete(BuildContext context, int id) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirmar eliminación'),
+          content:
+              const Text('¿Estás seguro de que deseas eliminar esta prenda?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                deletePrenda(id); // Llama a la función para eliminar el avio
+                Navigator.of(context).pop(); // Cierra el diálogo
+              },
+              child: const Text('Eliminar'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

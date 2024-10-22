@@ -1,4 +1,5 @@
 import 'package:gestion_indumentaria/models/Avios.dart';
+import 'package:gestion_indumentaria/models/observacion.dart';
 
 class Modelo {
   final int id;
@@ -8,7 +9,7 @@ class Modelo {
   final bool tieneTelaSecundaria;
   final bool tieneTelaAuxiliar;
   final String genero;
-  final List<dynamic> observaciones;
+   List<Observacion>? observaciones;
   final List<dynamic> avios;
   final List<dynamic> curva;
   final String categoriaTipo;
@@ -21,7 +22,7 @@ class Modelo {
     required this.tieneTelaSecundaria,
     required this.tieneTelaAuxiliar,
     required this.genero,
-    required this.observaciones,
+    this.observaciones,
     required this.avios,
     required this.curva,
     required this.categoriaTipo,

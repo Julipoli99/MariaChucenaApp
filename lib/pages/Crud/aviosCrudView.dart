@@ -123,6 +123,8 @@ class _AvioCrudViewState extends State<Avioscrudview> {
                         ),
                         IconButton(
                           onPressed: () {
+                            _confirmDelete(context,
+                                avio.id); // Confirmación antes de eliminar
                             print('Avio borrado: ${avio.nombre}');
                           },
                           icon: const Icon(Icons.delete),
@@ -188,5 +190,53 @@ class _AvioCrudViewState extends State<Avioscrudview> {
     } catch (e) {
       print("Error al cargar los datos: $e");
     }
+  }
+
+  Future<void> deleteAvio(int id) async {
+    final url =
+        'https://maria-chucena-api-production.up.railway.app/avio/$id'; // Endpoint para eliminar un avio
+    final uri = Uri.parse(url);
+
+    try {
+      final response = await http.delete(uri);
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        setState(() {
+          avios.removeWhere((avio) => avio.id == id); // Remover avio localmente
+        });
+        print('Avio eliminado correctamente.');
+      } else {
+        print(
+            'Error: No se pudo eliminar el avio. Código de estado ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error al eliminar el avio: $e');
+    }
+  }
+
+  void _confirmDelete(BuildContext context, int id) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirmar eliminación'),
+          content:
+              const Text('¿Estás seguro de que deseas eliminar este avio?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                deleteAvio(id); // Llama a la función para eliminar el avio
+                Navigator.of(context).pop(); // Cierra el diálogo
+              },
+              child: const Text('Eliminar'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
