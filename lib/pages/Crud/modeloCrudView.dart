@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/AviosModel.dart';
+import 'package:gestion_indumentaria/models/AviosModelo.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
 import 'package:gestion_indumentaria/models/observacion.dart';
 import 'package:gestion_indumentaria/models/talle.dart';
@@ -101,8 +102,8 @@ class _ModelCrudViewState extends State<ModelCrudView> {
 
         setState(() {
           models = jsonData.map((json) {
-            List<AviosModel> avio = (json['avios'] as List<dynamic>).map((av) {
-              return AviosModel.fromJson(av); // Convierte cada elemento a Avios
+            List<AvioModelo> avio = (json['avios'] as List<dynamic>).map((av) {
+              return AvioModelo.fromJson(av); // Convierte cada elemento a Avios
             }).toList();
 
             List<talle> curva = (json['curva'] as List<dynamic>).map((t) {

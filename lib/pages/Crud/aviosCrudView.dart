@@ -1,10 +1,9 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/AviosModel.dart';
-
 import 'package:gestion_indumentaria/pages/Avios/modificadorAvios.dart';
 import 'package:gestion_indumentaria/pages/Avios/nuevoAvios.dart';
-import 'package:gestion_indumentaria/widgets/boxDialog/BoxDialogoAvios.dart';
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
 import 'package:http/http.dart' as http;
 
@@ -16,30 +15,12 @@ class Avioscrudview extends StatefulWidget {
 }
 
 class _AvioCrudViewState extends State<Avioscrudview> {
-  List<AviosModel> avios = [];
+  List<Avio> avios = [];
 
   @override
   void initState() {
     super.initState();
     fetchModels();
-  }
-
-  // Muestra un diálogo con el mensaje proporcionado
-  /*void showBox(Avios avio) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return BoxDialogAvios(
-          avio: avio,
-          onCancel: onCancel,
-        );
-      },
-    );
-  }*/
-
-  // Función de cancelación para cerrar el diálogo
-  void onCancel() {
-    Navigator.of(context).pop();
   }
 
   @override
@@ -98,7 +79,7 @@ class _AvioCrudViewState extends State<Avioscrudview> {
             ),
           ),
           Expanded(
-            child: TablaCrud<AviosModel>(
+            child: TablaCrud<Avio>(
               tituloAppBar: 'Avios',
               encabezados: const [
                 "ID",
@@ -111,8 +92,8 @@ class _AvioCrudViewState extends State<Avioscrudview> {
               dataMapper: [
                 (avio) => Text(avio.id.toString()),
                 (avio) => Text(avio.nombre),
-                (avio) => Text(avio.proveedores),
-                (avio) => Text(avio.cantidad.toString()),
+                (avio) => Text(avio.codigoProveedor),
+                (avio) => Text(avio.stock.toString()),
                 (avio) => Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
@@ -124,8 +105,7 @@ class _AvioCrudViewState extends State<Avioscrudview> {
                         ),
                         IconButton(
                           onPressed: () {
-                            _confirmDelete(context,
-                                avio.id); // Confirmación antes de eliminar
+                            _confirmDelete(context, avio.id);
                             print('Avio borrado: ${avio.nombre}');
                           },
                           icon: const Icon(Icons.delete),
@@ -163,14 +143,7 @@ class _AvioCrudViewState extends State<Avioscrudview> {
         }
 
         setState(() {
-          avios = jsonData.map((json) {
-            return AviosModel(
-              id: json['id'] ?? 0,
-              nombre: json['nombre'] ?? 'Sin nombre',
-              proveedores: json['codigoProveedor'] ?? 'Sin proveedor',
-              cantidad: (json['stock'] ?? 0).toString(),
-            );
-          }).toList();
+          avios = jsonData.map((json) => Avio.fromJson(json)).toList();
         });
 
         print("Avios cargados correctamente.");

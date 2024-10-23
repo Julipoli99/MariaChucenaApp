@@ -2,9 +2,11 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/AviosModel.dart';
+import 'package:gestion_indumentaria/models/AviosModelo.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
 import 'package:gestion_indumentaria/models/TipoTela.dart';
 import 'package:gestion_indumentaria/models/observacion.dart';
+import 'package:gestion_indumentaria/models/talle.dart';
 import 'package:gestion_indumentaria/models/tipoPrenda.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
@@ -59,7 +61,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
       TextEditingController(); // Variable para el color en el cuadro de diálogo
   String? cantidadAvioDialog;
   // Lista para almacenar los avios elegidos y sus detalles
-  List<AviosModel> aviosSeleccionados = [];
+  List<AvioModelo> aviosSeleccionados = [];
 
   void _createPost() {
     //Avios(nombre: selectedTipoAvioDialog!, proveedores: "Proveedor1");
@@ -337,132 +339,148 @@ class _NuevomodeloState extends State<Nuevomodelo> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setDialogState) {
-            return AlertDialog(
-              title: const Text('Seleccione el tipo de avios'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _buildDropdown(
-                    'Tipo de Avios',
-                    ['Botón', 'Cierre', 'Etiqueta', 'Otro'],
-                    'Seleccione el tipo de avios',
-                    selectedTipoAvioDialog,
-                    (value) {
-                      setDialogState(() {
-                        selectedTipoAvioDialog = value;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 15),
+        return FutureBuilder<List<Map<String, dynamic>>>(
+          future: fetchAviosFromApi(), // Llama a la API para obtener avíos
+          builder: (BuildContext context,
+              AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return AlertDialog(
+                title: const Text('Error'),
+                content: Text('Error al cargar los avíos: ${snapshot.error}'),
+                actions: [
                   ElevatedButton(
                     onPressed: () {
-                      _showTalleSelectionDialog(setDialogState);
+                      Navigator.of(context).pop(); // Cierra el diálogo
                     },
-                    child: const Text('Seleccionar Talle'),
+                    child: const Text('Cerrar'),
                   ),
-                  const SizedBox(height: 15),
-                  ElevatedButton(
-                    onPressed: () {
-                      setDialogState(() {
-                        selectedColorDialog = 'Color seleccionado'; // Ejemplo
-                      });
-                    },
-                    child: const Text('Seleccionar Color'),
-                  ),
-                  const SizedBox(height: 10),
-                  TextField(
-                    controller: _cantidadController,
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) {
-                      setDialogState(() {
-                        cantidadAvioDialog = (value);
-                      });
-                    },
-                    decoration: const InputDecoration(labelText: 'Cantidad'),
-                  ),
-                  if (selectedColorDialog != null)
-                    Text(
-                      'Color: $selectedColorDialog',
-                      style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                  const SizedBox(height: 10),
-                  if (selectedTallesDialog.isNotEmpty)
-                    Wrap(
-                      spacing: 8,
-                      children: selectedTallesDialog
-                          .map((talle) => Chip(label: Text(talle)))
-                          .toList(),
-                    ),
                 ],
-              ),
-              actions: [
-                ElevatedButton(
-                  onPressed: () {
-                    if (selectedTipoAvioDialog != null &&
-                        cantidadAvioDialog != null &&
-                        cantidadAvioDialog!.isNotEmpty) {
-                      // Crear avio y actualizar lista
-                      AviosModel avioCreado = AviosModel(
-                        nombre: selectedTipoAvioDialog!,
-                        proveedores: "Proveedor1",
-                        talles: List.from(selectedTallesDialog),
-                        color: selectedColorDialog,
-                        cantidad: cantidadAvioDialog!,
-                      );
+              );
+            } else {
+              List<Map<String, dynamic>> aviosData = snapshot.data!;
 
-                      // Usar setState para actualizar la tabla en la pantalla principal
-                      setState(() {
-                        aviosSeleccionados.add(avioCreado);
-                      });
+              return StatefulBuilder(
+                builder: (BuildContext context, StateSetter setDialogState) {
+                  return AlertDialog(
+                    title: const Text('Seleccione el tipo de avios'),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Construir dropdown para seleccionar avío
+                        _buildDropdown(
+                          'Tipo de Avios',
+                          aviosData
+                              .map((avio) => avio['Avio'] != null
+                                  ? avio['Avio']['nombre'] as String
+                                  : 'Desconocido')
+                              .toList(),
+                          // Mostrar nombre del avío
+                          'Seleccione el tipo de avios',
+                          selectedTipoAvioDialog,
+                          (value) {
+                            setDialogState(() {
+                              selectedTipoAvioDialog = value;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 15),
+                        ElevatedButton(
+                          onPressed: () {
+                            _showTalleSelectionDialog(setDialogState);
+                          },
+                          child: const Text('Seleccionar Talle'),
+                        ),
+                        const SizedBox(height: 15),
+                        ElevatedButton(
+                          onPressed: () {
+                            setDialogState(() {
+                              selectedColorDialog =
+                                  'Color seleccionado'; // Simulación de selección de color
+                            });
+                          },
+                          child: const Text('Seleccionar Color'),
+                        ),
+                        const SizedBox(height: 10),
+                        TextField(
+                          controller: _cantidadController,
+                          keyboardType: TextInputType.number,
+                          onChanged: (value) {
+                            setDialogState(() {
+                              cantidadAvioDialog = value;
+                            });
+                          },
+                          decoration:
+                              const InputDecoration(labelText: 'Cantidad'),
+                        ),
 
-                      // Limpiar el formulario para un próximo avio
-                      setDialogState(() {
-                        selectedTipoAvioDialog = null;
-                        selectedTallesDialog.clear();
-                        selectedColorDialog = null;
-                        cantidadAvioDialog = null;
-                        _cantidadController.clear();
-                      });
+                        const SizedBox(height: 10),
+                        if (selectedColorDialog != null)
+                          Text(
+                            'Color: $selectedColorDialog',
+                            style: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                        const SizedBox(height: 10),
+                        if (selectedTallesDialog.isNotEmpty)
+                          Wrap(
+                            spacing: 8,
+                            children: selectedTallesDialog
+                                .map((talle) => Chip(label: Text(talle)))
+                                .toList(),
+                          ),
+                      ],
+                    ),
+                    actions: [
+                      ElevatedButton(
+                        onPressed: () {
+                          if (selectedTipoAvioDialog != null &&
+                              cantidadAvioDialog != null &&
+                              cantidadAvioDialog!.isNotEmpty) {
+                            // Crear avio y actualizar lista
+                            AvioModelo avioCreado = AvioModelo(
+                              avioId: aviosData.firstWhere((av) =>
+                                  av['avio']['nombre'] ==
+                                  selectedTipoAvioDialog)['avio']['id'],
+                              esPorTalle: selectedTallesDialog.isNotEmpty,
+                              esPorColor: selectedColorDialog != null,
+                              talles: selectedTallesDialog
+                                  .map((t) => talle(nombre: t))
+                                  .toList(),
+                              cantidadRequerida: int.parse(cantidadAvioDialog!),
+                            );
 
-                      Navigator.of(context); // Cerrar el diálogo
-                    }
-                  },
-                  child: const Text('Agregar Avio'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    if (selectedTipoAvioDialog != null &&
-                        cantidadAvioDialog != null &&
-                        cantidadAvioDialog!.isNotEmpty) {
-                      // Crear avio y actualizar lista
-                      AviosModel avioCreado = AviosModel(
-                        nombre: selectedTipoAvioDialog!,
-                        proveedores: "Proveedor1",
-                        talles: List.from(selectedTallesDialog),
-                        color: selectedColorDialog,
-                        cantidad: cantidadAvioDialog!,
-                      );
+                            // Usar setState para actualizar la tabla en la pantalla principal
+                            setState(() {
+                              aviosSeleccionados.add(avioCreado);
+                            });
 
-                      // Usar setState para actualizar la tabla en la pantalla principal
-                      setState(() {
-                        aviosSeleccionados.add(avioCreado);
-                        selectedTipoAvioDialog = null;
-                        selectedTallesDialog.clear();
-                        selectedColorDialog = null;
-                        cantidadAvioDialog = null;
-                        _cantidadController.clear();
-                      });
+                            // Limpiar el formulario para un próximo avio
+                            setDialogState(() {
+                              selectedTipoAvioDialog = null;
+                              selectedTallesDialog.clear();
+                              selectedColorDialog = null;
+                              cantidadAvioDialog = null;
+                              _cantidadController.clear();
+                            });
 
-                      Navigator.of(context).pop(); // Cerrar el diálogo
-                    }
-                  },
-                  child: const Text('Finalizar'),
-                ),
-              ],
-            );
+                            Navigator.of(context).pop(); // Cerrar el diálogo
+                          }
+                        },
+                        child: const Text('Agregar Avio'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(); // Cerrar el diálogo
+                        },
+                        child: const Text('Cancelar'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            }
           },
         );
       },
@@ -752,14 +770,36 @@ class _NuevomodeloState extends State<Nuevomodelo> {
         DataColumn(label: Text('Color')),
         DataColumn(label: Text('cantidad')),
       ],
-      rows: aviosSeleccionados.map((avio) {
+      rows: aviosSeleccionados.map((AvioModelo) {
         return DataRow(cells: [
-          DataCell(Text(avio.nombre)),
-          DataCell(Text(avio.talles.toString())),
-          DataCell(Text(avio.color ?? 'Ninguno')),
-          DataCell(Text(avio.cantidad ?? '0')),
+          DataCell(Text(AvioModelo.avioId.toString())),
+          DataCell(Text(AvioModelo.talles.toString())),
+          DataCell(Text(AvioModelo.esPorColor.toString())),
+          DataCell(Text(AvioModelo.cantidadRequerida.toString())),
         ]);
       }).toList(),
     );
+  }
+
+// Función para obtener los avíos desde la API
+  Future<List<Map<String, dynamic>>> fetchAviosFromApi() async {
+    const String apiUrl =
+        'https://maria-chucena-api-production.up.railway.app/avio'; // URL de la API
+
+    try {
+      final response = await http.get(Uri.parse(apiUrl));
+
+      if (response.statusCode == 200) {
+        // Decodificar la respuesta JSON
+        final List<dynamic> data = jsonDecode(response.body);
+
+        // Convertir la lista dinámica en una lista de mapas
+        return data.map((avio) => avio as Map<String, dynamic>).toList();
+      } else {
+        throw Exception('Error al cargar los avíos: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error de conexión: $e');
+    }
   }
 }

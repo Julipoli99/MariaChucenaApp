@@ -48,7 +48,7 @@ class BoxDialogModelo extends StatelessWidget {
               'Avios (${modelo.avios?.length}):', // Muestra la cantidad de avios
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            Flexible(
+            /*Flexible(
               child: Scrollbar(
                 thumbVisibility: true, // Hace visible la scrollbar
                 child: ListView.builder(
@@ -62,7 +62,7 @@ class BoxDialogModelo extends StatelessWidget {
                   },
                 ),
               ),
-            ),
+            ),*/
             const SizedBox(height: 10), // Espaciado entre secciones
 
             // Curva

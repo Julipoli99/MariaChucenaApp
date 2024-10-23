@@ -1,45 +1,47 @@
 import 'package:gestion_indumentaria/models/Proveedor.dart';
+import 'package:gestion_indumentaria/models/talle.dart';
 
 // ignore: camel_case_types
-class AviosModel {
-  int id;
-  String nombre;
-  String
-      proveedores; // Por ahora lo dejamos como String, pero podría ser List<Proveedor>
-  List<String>? talles;
-  String? color;
-  String? cantidad;
+class Avio {
+  final int id;
+  final String codigoProveedor;
+  final int proveedorId;
+  final int tipoProductoId;
+  final String nombre;
+  final int stock;
+  final Proveedor provedor;
 
-  AviosModel({
-    this.id = 0,
+  Avio({
+    required this.id,
+    required this.codigoProveedor,
+    required this.proveedorId,
+    required this.tipoProductoId,
     required this.nombre,
-    required this.proveedores,
-    this.talles,
-    this.color,
-    this.cantidad,
+    required this.stock,
+    required this.provedor,
   });
 
-  /// **Fábrica para crear un Avios desde JSON**
-  factory AviosModel.fromJson(Map<String, dynamic> json) {
-    return AviosModel(
-      id: json['id'] ?? 0, // Valor por defecto si 'id' es nulo
+  factory Avio.fromJson(Map<String, dynamic> json) {
+    return Avio(
+      id: json['id'] ?? 0,
+      codigoProveedor: json['codigoProveedor'] ?? '',
+      proveedorId: json['proveedorId'] ?? 0,
+      tipoProductoId: json['tipoProductoId'] ?? 0,
       nombre: json['nombre'] ?? 'Sin nombre',
-      proveedores: json['codigoProvedor'] ?? 'Sin proveedor',
-      cantidad: json['stock']?.toString() ?? '0', // Convertimos stock a String
-      color: json['color'] ?? 'Sin color',
-      talles: (json['talles'] as List?)?.map((t) => t.toString()).toList(),
+      stock: json['stock'] ?? 0,
+      provedor: json['proveedor'] ?? " ",
     );
   }
 
-  /// **Método para convertir un Avios a JSON**
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'nombre': nombre,
-      'codigoProvedor': proveedores,
-      'stock': cantidad,
-      'color': color,
-      'talles': talles,
+      'codigoProveedor': codigoProveedor,
+      'proveedorId': proveedorId,
+      'tipoProductoId': tipoProductoId,
+      'stock': stock,
+      'provedor': Proveedor,
     };
   }
 }
