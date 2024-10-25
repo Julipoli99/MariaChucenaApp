@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:gestion_indumentaria/models/tipoPrenda.dart';
 import 'package:http/http.dart' as http;
 
 class AddPrendaDialog extends StatefulWidget {

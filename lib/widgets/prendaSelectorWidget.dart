@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:gestion_indumentaria/models/tipoPrenda.dart';
 import 'package:gestion_indumentaria/widgets/boxDialog/boxdialogoPrenda.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert'; // Para decodificar JSON
-import 'package:gestion_indumentaria/widgets/boxDialog/boxdialogoTalle.dart';
 
 class Prendaselectorwidget extends StatefulWidget {
   final String? selectedprenda;

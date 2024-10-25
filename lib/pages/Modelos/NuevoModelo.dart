@@ -1,13 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:gestion_indumentaria/models/AviosModel.dart';
 import 'package:gestion_indumentaria/models/AviosModelo.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
-import 'package:gestion_indumentaria/models/TipoTela.dart';
 import 'package:gestion_indumentaria/models/observacion.dart';
 import 'package:gestion_indumentaria/models/Talle.dart';
-import 'package:gestion_indumentaria/models/tipoPrenda.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
 import 'package:gestion_indumentaria/widgets/TalleSelectorWidget.dart';
