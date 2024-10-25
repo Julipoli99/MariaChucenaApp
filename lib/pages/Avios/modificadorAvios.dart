@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
 
-class Nuevoavios extends StatelessWidget {
-  const Nuevoavios({super.key});
+class Modificadoravios extends StatelessWidget {
+  const Modificadoravios({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +67,7 @@ class Nuevoavios extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            'Registro de avios',
+                            'modificar Stock de avios',
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -82,11 +82,23 @@ class Nuevoavios extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const TextField(
-                            decoration: InputDecoration(
+                          DropdownButtonFormField<String>(
+                            decoration: const InputDecoration(
                               labelText: 'Tipo',
-                              hintText: 'nombre',
+                              hintText: 'Tipo de avios',
                             ),
+                            items: <String>['boton', 'piluso', 'manga']
+                                .map((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
+                            onChanged: (newValue) {
+                              // Acción al seleccionar un proveedor de prueba
+                              // Aquí puedes agregar cualquier acción temporal
+                              print('tipo de avios : $newValue');
+                            },
                           ),
                           const SizedBox(height: 20),
                           // Dropdown para Proveedores con valores de prueba
@@ -110,6 +122,62 @@ class Nuevoavios extends StatelessWidget {
                               // Aquí puedes agregar cualquier acción temporal
                               print('Proveedor seleccionado: $newValue');
                             },
+                          ),
+                          const SizedBox(height: 20),
+                          const Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              // Campo de "Cantidad Inicial"
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Cantidad Inicial',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                        height:
+                                            8), // Espacio entre título y campo
+                                    TextField(
+                                      enabled: false,
+                                      decoration: InputDecoration(
+                                        hintText: 'Cantidad inicial',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(
+                                  width: 16), // Separación entre los campos
+
+                              // Campo de "Cantidad Actual"
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Cantidad Actual',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                        height:
+                                            8), // Espacio entre título y campo
+                                    TextField(
+                                      decoration: InputDecoration(
+                                        hintText: 'Cantidad actual',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
                           const SizedBox(height: 20),
                           ElevatedButton(

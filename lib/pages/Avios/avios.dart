@@ -58,7 +58,7 @@ class Avios extends StatelessWidget {
             // Aquí mostramos el AviosCrudView
             SizedBox(
               height: 600, // Ajusta el alto según lo necesario
-              child: AviosCrudView(),
+              child: Avioscrudview(),
             ),
 
             const Divider(),

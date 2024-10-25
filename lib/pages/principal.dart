@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/pages/Avios/avios.dart';
+import 'package:gestion_indumentaria/pages/Modelos/tipodePrendaRegistrada.dart';
 import 'package:gestion_indumentaria/pages/Tizadas/CreacionTizadasPage.dart';
 import 'package:gestion_indumentaria/pages/Modelos/ModelosRegistradosPage.dart';
 import 'package:gestion_indumentaria/pages/Modelos/ordenDeCorte.dart';
@@ -119,6 +120,24 @@ class HomePage extends StatelessWidget {
                                   250,
                                   80,
                                   'assets/imagen/avios.png',
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const Prendasregistradospage()),
+                                  );
+                                },
+                                child: buildOptionCard(
+                                  'Informe de prendas',
+                                  'Detalles de prendas registradas.',
+                                  250,
+                                  80,
+                                  'assets/imagen/prenda.png',
                                 ),
                               ),
                             ],

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:gestion_indumentaria/pages/Crud/telaCrudView.dart';
+import 'package:gestion_indumentaria/pages/Crud/modeloCrudView.dart';
+import 'package:gestion_indumentaria/pages/Crud/prendaCrudView.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
 
-class Stockcontrolpage extends StatelessWidget {
-  const Stockcontrolpage({super.key});
+class Prendasregistradospage extends StatelessWidget {
+  const Prendasregistradospage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +35,7 @@ class Stockcontrolpage extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        'Bienvenidos al sistema de Gestion de Stock ',
+                        'Bienvenidos al sistema de Gestion de prendas Registradas ',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 22,
@@ -55,9 +56,9 @@ class Stockcontrolpage extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               // Aquí mostramos el AviosCrudView
-              const SizedBox(
+              SizedBox(
                 height: 600, // Ajusta el alto según lo necesario
-                child: Telacrudview(),
+                child: Prendacrudview(),
               ),
 
               const Divider(),

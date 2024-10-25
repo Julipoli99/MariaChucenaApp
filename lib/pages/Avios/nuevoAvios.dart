@@ -1,9 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:gestion_indumentaria/pages/Avios/avios.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class Nuevoavios extends StatelessWidget {
+class Nuevoavios extends StatefulWidget {
   const Nuevoavios({super.key});
+
+  @override
+  _NuevoaviosState createState() => _NuevoaviosState();
+}
+
+class _NuevoaviosState extends State<Nuevoavios> {
+  final TextEditingController _tipoController = TextEditingController();
+  final TextEditingController _cantidadController = TextEditingController();
+  String? _selectedProveedor;
 
   @override
   Widget build(BuildContext context) {
@@ -13,8 +25,7 @@ class Nuevoavios extends StatelessWidget {
         title: const Text('Maria Chucena ERP System'),
         toolbarHeight: 80,
         actions: [
-          buildLoggedInUser('assets/imagen/logo.png',
-              'Supervisor'), //el tipo de rango lo tendria que traer de la base de datos
+          buildLoggedInUser('assets/imagen/logo.png', 'Supervisor'),
         ],
       ),
       drawer: const DrawerMenuLateral(),
@@ -82,8 +93,9 @@ class Nuevoavios extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const TextField(
-                            decoration: InputDecoration(
+                          TextField(
+                            controller: _tipoController,
+                            decoration: const InputDecoration(
                               labelText: 'Tipo',
                               hintText: 'nombre',
                             ),
@@ -106,18 +118,23 @@ class Nuevoavios extends StatelessWidget {
                               );
                             }).toList(),
                             onChanged: (newValue) {
-                              // Acción al seleccionar un proveedor de prueba
-                              // Aquí puedes agregar cualquier acción temporal
-                              print('Proveedor seleccionado: $newValue');
+                              setState(() {
+                                _selectedProveedor = newValue;
+                              });
                             },
                           ),
                           const SizedBox(height: 20),
+                          TextField(
+                            controller: _cantidadController,
+                            decoration: const InputDecoration(
+                              labelText: 'Cantidad',
+                              hintText: 'Cantidad inicial ',
+                            ),
+                            keyboardType: TextInputType.number,
+                          ),
+                          const SizedBox(height: 20),
                           ElevatedButton(
-                            onPressed: () {
-                              // Acción al guardar el avío
-                              // Agrega cualquier acción temporal para probar
-                              print('Avíos guardados');
-                            },
+                            onPressed: _guardarAvios,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.black,
                               padding: const EdgeInsets.symmetric(
@@ -161,5 +178,36 @@ class Nuevoavios extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _guardarAvios() async {
+    const String url =
+        'https://maria-chucena-api-production.up.railway.app/avio';
+
+    final Map<String, dynamic> avioData = {
+      "codigoProveedor": _selectedProveedor ?? '',
+      "nombre": _tipoController.text,
+      "stock": int.tryParse(_cantidadController.text) ?? 0,
+    };
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(avioData),
+    );
+
+    if (response.statusCode == 201) {
+      // Navegar a la pantalla de CRUD de avíos
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+            builder: (context) => Avios()), // Cambia a la pantalla que desees
+      );
+    } else {
+      // Manejo de errores
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al guardar los avíos: ${response.body}')),
+      );
+    }
   }
 }

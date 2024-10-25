@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
 
-class BoxDialog extends StatelessWidget {
-  const BoxDialog({super.key, required this.modelo, required this.onCancel});
+class BoxDialogModelo extends StatelessWidget {
+  const BoxDialogModelo({
+    super.key,
+    required this.modelo,
+    required this.onCancel,
+  });
 
   final Modelo modelo;
   final VoidCallback onCancel;
@@ -14,21 +18,24 @@ class BoxDialog extends StatelessWidget {
       title: Text('Detalles del Modelo: ${modelo.nombre}'),
       content: SizedBox(
         height: 400, // Altura total del contenido del diálogo
-        width: 500,  // Ajusta el ancho si es necesario
+        width: 500, // Ajusta el ancho si es necesario
         child: Column(
           children: [
             // Observaciones
-            const Text('Observaciones:', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text('Observaciones:',
+                style: TextStyle(fontWeight: FontWeight.bold)),
             Flexible(
               child: Scrollbar(
                 thumbVisibility: true, // Hace visible la scrollbar
                 child: ListView.builder(
-                  itemCount: modelo.observaciones.length,
+                  itemCount: modelo.observaciones?.length ?? 0,
                   itemBuilder: (context, index) {
-                    final observacion = modelo.observaciones[index];
+                    final observacion = modelo.observaciones?[index];
                     return ListTile(
-                      title: Text('Observación: ${observacion['titulo']}'),
-                      subtitle: Text('Descripción: ${observacion['descripcion']}'),
+                      title: Text(
+                          'Observación: ${observacion?.titulo ?? 'Sin título'}'),
+                      subtitle: Text(
+                          'Descripción: ${observacion?.descripcion ?? 'Sin descripción'}'),
                     );
                   },
                 ),
@@ -38,29 +45,29 @@ class BoxDialog extends StatelessWidget {
 
             // Avios
             Text(
-              'Avios (${modelo.avios.length}):',  // Muestra la cantidad de avios
+              'Avios (${modelo.avios?.length}):', // Muestra la cantidad de avios
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            Flexible(
+            /*Flexible(
               child: Scrollbar(
                 thumbVisibility: true, // Hace visible la scrollbar
                 child: ListView.builder(
-                  itemCount: modelo.avios.length,
+                  itemCount: modelo.avios?.length,
                   itemBuilder: (context, index) {
-                    final avio = modelo.avios[index];
+                    final avio = modelo.avios?[index];
                     return ListTile(
-                      title: Text('Avio: ${avio.nombre}'),
-                      subtitle: Text('Proveedores: ${avio.proveedores}'),
+                      title: Text('Avio: ${avio?.nombre}'),
+                      subtitle: Text('Proveedores: ${avio?.proveedores}'),
                     );
                   },
                 ),
               ),
-            ),
+            ),*/
             const SizedBox(height: 10), // Espaciado entre secciones
 
             // Curva
             Text(
-              'Curva (${modelo.curva.length}):',  // Muestra la cantidad de ítems en la curva
+              'Curva (${modelo.curva.length}):', // Muestra la cantidad de ítems en la curva
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             Flexible(
@@ -69,9 +76,10 @@ class BoxDialog extends StatelessWidget {
                 child: ListView.builder(
                   itemCount: modelo.curva.length,
                   itemBuilder: (context, index) {
-                    final curva = modelo.curva[index];
+                    final talle = modelo.curva[index];
                     return ListTile(
-                      title: Text('Curva: ${curva['talle']}'),
+                      title: Text(
+                          'Talle: ${talle.nombre}'), // Asumiendo que talle es de tipo Talle
                     );
                   },
                 ),

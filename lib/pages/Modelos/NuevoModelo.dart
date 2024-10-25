@@ -1,11 +1,17 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:gestion_indumentaria/models/Avios.dart';
+import 'package:gestion_indumentaria/models/AviosModel.dart';
+import 'package:gestion_indumentaria/models/AviosModelo.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
-import 'package:gestion_indumentaria/models/Talle.dart';
+import 'package:gestion_indumentaria/models/TipoTela.dart';
+import 'package:gestion_indumentaria/models/observacion.dart';
+import 'package:gestion_indumentaria/models/talle.dart';
+import 'package:gestion_indumentaria/models/tipoPrenda.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
+import 'package:gestion_indumentaria/widgets/TalleSelectorWidget.dart';
+import 'package:gestion_indumentaria/widgets/prendaSelectorWidget.dart';
 
 import 'package:http/http.dart' as http;
 
@@ -20,18 +26,23 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   // Variables de estado para las selecciones del formulario principal
   String? selectedTipo;
   String? selectedGenero;
+  String? selectedEdad;
   String? selectedAvios;
   String? selectedTela;
   String? selectedPrenda;
-  List<String> selectedTallesForm =
-      []; // Lista de talles en el formulario principal
-
-
-  Widget tableContainer = Container();
-
+  String? selectedTallesForm; // Lista de talles en el formulario principal
+  List<String> selectedTipoDeRolloForm = [];
   String? codigoModelo;
   String? nombreModelo;
-  List<String>? observacion;
+  List<ObservacionModel>? observacion;
+  String? cantidad;
+  String? tipoEdad;
+  String? titulo;
+  String? descripcion;
+  bool? selectedAuxForm;
+  bool? selectedPrimForm;
+  final List<String> auxOptions = ['auxiliar'];
+  final List<String> primOptions = ['primaria'];
 
   // data para la parte de Avio
   String? nombreAvio;
@@ -45,10 +56,12 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   String?
       selectedTipoAvioDialog; // Variable para el tipo de avio en el cuadro de diálogo
   // Lista de talles en el cuadro de diálogo
-  String? selectedColorDialog; // Variable para el color en el cuadro de diálogo
-
+  String? selectedColorDialog;
+  final TextEditingController _cantidadController =
+      TextEditingController(); // Variable para el color en el cuadro de diálogo
+  String? cantidadAvioDialog;
   // Lista para almacenar los avios elegidos y sus detalles
-  List<Avios> aviosSeleccionados = [];
+  List<AvioModelo> aviosSeleccionados = [];
 
   void _createPost() {
     //Avios(nombre: selectedTipoAvioDialog!, proveedores: "Proveedor1");
@@ -56,18 +69,12 @@ class _NuevomodeloState extends State<Nuevomodelo> {
         id: 15,
         codigo: codigoModelo!,
         nombre: nombreModelo!,
-        tieneTelaSecundaria: true,
-        tieneTelaAuxiliar: true,
+        tieneTelaSecundaria: selectedPrimForm!,
+        tieneTelaAuxiliar: selectedAuxForm!,
         genero: selectedGenero!,
         observaciones: [],
-        avios: aviosSeleccionados,
-        curva: [
-          {"id": 1, "talle": "T1"},
-          {"id": 2, "talle": "T2"},
-          {"id": 3, "talle": "T3"},
-          {"id": 4, "talle": "T4"},
-          {"id": 5, "talle": "T5"}
-        ],
+        // avios: aviosSeleccionados,
+        curva: [],
         categoriaTipo: selectedPrenda!);
 
     print(modeloCreado.toJson());
@@ -180,16 +187,11 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                                 labelText: 'Nombre de Modelo'),
                           ),
                           const SizedBox(height: 15),
-                          _buildDropdown(
-                            'Prenda',
-                            ['Remera', 'Pantalón', 'Otro'],
-                            'Seleccione la prenda del modelo',
-                            selectedPrenda,
-                            (value) {
+                          Prendaselectorwidget(
+                            selectedprenda: selectedPrenda,
+                            onPrendaSelected: (prenda) {
                               setState(() {
-                                selectedPrenda = value;
-                                print(
-                                    'Prenda del modelo seleccionada: $selectedPrenda');
+                                selectedPrenda = prenda;
                               });
                             },
                           ),
@@ -206,20 +208,62 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                             },
                           ),
                           const SizedBox(height: 15),
+                          _buildRadioGroup(
+                            'edad de la tela',
+                            ['BEBE', 'chico', 'adulto'],
+                            selectedEdad,
+                            (value) {
+                              setState(() {
+                                selectedEdad = value;
+                                print('Genero del modelo: $selectedEdad');
+                              });
+                            },
+                          ),
+                          const SizedBox(height: 15),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildAuxSelection(),
+                              const SizedBox(height: 15),
+                              _buildPrimSelection(),
+                            ],
+                          ),
+                          const SizedBox(height: 15),
                           _buildTelaRow(),
                           const SizedBox(height: 15),
+                          _buildTelaRowForm(),
+                          const SizedBox(height: 15),
+
                           TextField(
                             onChanged: (value) {
                               setState(() {
-                                observacion?.add(value);
-                                print(observacion);
+                                titulo = value;
+                                print('Título: $titulo');
                               });
                             },
                             decoration:
-                                const InputDecoration(labelText: 'Observacion'),
+                                const InputDecoration(labelText: 'Título'),
                           ),
+                          TextField(
+                            onChanged: (value) {
+                              setState(() {
+                                descripcion = value;
+                                print('Subtítulo: $descripcion');
+                              });
+                            },
+                            decoration:
+                                const InputDecoration(labelText: 'Descripción'),
+                          ),
+
                           const SizedBox(height: 15),
-                          _buildTallesRowForm(),
+                          TalleSelector(
+                            selectedTalle: selectedTallesForm,
+                            onTalleSelected: (talle) {
+                              setState(() {
+                                selectedTallesForm = talle;
+                              });
+                            },
+                          ),
                           const SizedBox(height: 15),
                           _buildRadioGroup(
                             'Tiene avios',
@@ -291,119 +335,152 @@ class _NuevomodeloState extends State<Nuevomodelo> {
     );
   }
 
-  // Función para mostrar el cuadro de diálogo con los botones "Talle" y "Color"
-  // Función para mostrar el cuadro de diálogo con los botones "Talle" y "Color"
   void _showAviosDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setDialogState) {
-            return AlertDialog(
-              title: const Text('Seleccione el tipo de avios'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _buildDropdown(
-                    'Tipo de Avios',
-                    ['Botón', 'Cierre', 'Etiqueta', 'Otro'],
-                    'Seleccione el tipo de avios',
-                    selectedTipoAvioDialog,
-                    (value) {
-                      setDialogState(() {
-                        selectedTipoAvioDialog = value;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 15),
+        return FutureBuilder<List<Map<String, dynamic>>>(
+          future: fetchAviosFromApi(), // Llama a la API para obtener avíos
+          builder: (BuildContext context,
+              AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return AlertDialog(
+                title: const Text('Error'),
+                content: Text('Error al cargar los avíos: ${snapshot.error}'),
+                actions: [
                   ElevatedButton(
                     onPressed: () {
-                      _showTalleSelectionDialog(setDialogState);
+                      Navigator.of(context).pop(); // Cierra el diálogo
                     },
-                    child: const Text('Seleccionar Talle'),
+                    child: const Text('Cerrar'),
                   ),
-                  const SizedBox(height: 15),
-                  ElevatedButton(
-                    onPressed: () {
-                      setDialogState(() {
-                        selectedColorDialog = 'Color seleccionado'; // Ejemplo
-                      });
-                    },
-                    child: const Text('Seleccionar Color'),
-                  ),
-                  const SizedBox(height: 10),
-                  if (selectedColorDialog != null)
-                    Text(
-                      'Color: $selectedColorDialog',
-                      style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                  const SizedBox(height: 10),
-                  if (selectedTallesDialog.isNotEmpty)
-                    Wrap(
-                      spacing: 8,
-                      children: selectedTallesDialog
-                          .map((talle) => Chip(label: Text(talle)))
-                          .toList(),
-                    ),
                 ],
-              ),
-              actions: [
-                ElevatedButton(
-                  onPressed: () {
-                    if (selectedTipoAvioDialog != null) {
-                      // Crear avio y actualizar lista
-                      Avios avioCreado = Avios(
-                        nombre: selectedTipoAvioDialog!,
-                        proveedores: "Proveedor1",
-                        talles: List.from(selectedTallesDialog),
-                        color: selectedColorDialog,
-                      );
+              );
+            } else {
+              List<Map<String, dynamic>> aviosData = snapshot.data!;
 
-                      // Usar setState de la pantalla principal para actualizar la tabla
-                      setState(() {
-                        aviosSeleccionados.add(avioCreado);
-                        // Limpiar las selecciones
-                        selectedTipoAvioDialog = null;
-                        selectedTallesDialog.clear();
-                        selectedColorDialog = null;
+              return StatefulBuilder(
+                builder: (BuildContext context, StateSetter setDialogState) {
+                  return AlertDialog(
+                    title: const Text('Seleccione el tipo de avios'),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Construir dropdown para seleccionar avío
+                        _buildDropdown(
+                          'Tipo de Avios',
+                          aviosData
+                              .map((avio) => avio['Avio'] != null
+                                  ? avio['Avio']['nombre'] as String
+                                  : 'Desconocido')
+                              .toList(),
+                          // Mostrar nombre del avío
+                          'Seleccione el tipo de avios',
+                          selectedTipoAvioDialog,
+                          (value) {
+                            setDialogState(() {
+                              selectedTipoAvioDialog = value;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 15),
+                        ElevatedButton(
+                          onPressed: () {
+                            _showTalleSelectionDialog(setDialogState);
+                          },
+                          child: const Text('Seleccionar Talle'),
+                        ),
+                        const SizedBox(height: 15),
+                        ElevatedButton(
+                          onPressed: () {
+                            setDialogState(() {
+                              selectedColorDialog =
+                                  'Color seleccionado'; // Simulación de selección de color
+                            });
+                          },
+                          child: const Text('Seleccionar Color'),
+                        ),
+                        const SizedBox(height: 10),
+                        TextField(
+                          controller: _cantidadController,
+                          keyboardType: TextInputType.number,
+                          onChanged: (value) {
+                            setDialogState(() {
+                              cantidadAvioDialog = value;
+                            });
+                          },
+                          decoration:
+                              const InputDecoration(labelText: 'Cantidad'),
+                        ),
 
-                      
-                        
-                      });
+                        const SizedBox(height: 10),
+                        if (selectedColorDialog != null)
+                          Text(
+                            'Color: $selectedColorDialog',
+                            style: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                        const SizedBox(height: 10),
+                        if (selectedTallesDialog.isNotEmpty)
+                          Wrap(
+                            spacing: 8,
+                            children: selectedTallesDialog
+                                .map((talle) => Chip(label: Text(talle)))
+                                .toList(),
+                          ),
+                      ],
+                    ),
+                    actions: [
+                      ElevatedButton(
+                        onPressed: () {
+                          if (selectedTipoAvioDialog != null &&
+                              cantidadAvioDialog != null &&
+                              cantidadAvioDialog!.isNotEmpty) {
+                            // Crear avio y actualizar lista
+                            AvioModelo avioCreado = AvioModelo(
+                              avioId: aviosData.firstWhere((av) =>
+                                  av['avio']['nombre'] ==
+                                  selectedTipoAvioDialog)['avio']['id'],
+                              esPorTalle: selectedTallesDialog.isNotEmpty,
+                              esPorColor: selectedColorDialog != null,
+                              talles: selectedTallesDialog
+                                  .map((t) => talle(nombre: t))
+                                  .toList(),
+                              cantidadRequerida: int.parse(cantidadAvioDialog!),
+                            );
 
-                      Navigator.of(context); // manda el formulario pero no lo cierra  
-                    }
-                  },
-                  child: const Text('Agregar Avio'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    if (selectedTipoAvioDialog != null) {
-                      // Crear avio y actualizar lista
-                      Avios avioCreado = Avios(
-                        nombre: selectedTipoAvioDialog!,
-                        proveedores: "Proveedor1",
-                        talles: List.from(selectedTallesDialog),
-                        color: selectedColorDialog,
-                      );
+                            // Usar setState para actualizar la tabla en la pantalla principal
+                            setState(() {
+                              aviosSeleccionados.add(avioCreado);
+                            });
 
-                      // Usar setState de la pantalla principal para actualizar la tabla
-                      setState(() {
-                        aviosSeleccionados.add(avioCreado);
-                        // Limpiar las selecciones
-                        selectedTipoAvioDialog = null;
-                        selectedTallesDialog.clear();
-                        selectedColorDialog = null;
-                      });
+                            // Limpiar el formulario para un próximo avio
+                            setDialogState(() {
+                              selectedTipoAvioDialog = null;
+                              selectedTallesDialog.clear();
+                              selectedColorDialog = null;
+                              cantidadAvioDialog = null;
+                              _cantidadController.clear();
+                            });
 
-                      Navigator.of(context).pop(); // Cerrar el diálogo
-                    }
-                  },
-                  child: const Text('finalizar'),
-                ),
-              ],
-            );
+                            Navigator.of(context).pop(); // Cerrar el diálogo
+                          }
+                        },
+                        child: const Text('Agregar Avio'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(); // Cerrar el diálogo
+                        },
+                        child: const Text('Cancelar'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            }
           },
         );
       },
@@ -411,32 +488,52 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   }
 
   // Diálogo para seleccionar los talles
-  void _showTalleSelectionDialog(StateSetter setState) {
+  void _showTalleSelectionDialog(StateSetter setState) async {
+    List<String> talles = [];
+    bool isLoading = true;
+
+    // Llamada a la API para obtener los talles
+    const String apiUrl =
+        'https://maria-chucena-api-production.up.railway.app/talle';
+    try {
+      final response = await http.get(Uri.parse(apiUrl));
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        talles = data.map((talle) => talle["talle"].toString()).toList();
+        isLoading = false;
+      } else {
+        _showErrorDialog('Error al obtener los talles: ${response.statusCode}');
+      }
+    } catch (e) {
+      _showErrorDialog('Error de conexión: $e');
+    }
+
+    // Mostrar el diálogo con los talles cargados
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Seleccione los talles'),
-          content: Wrap(
-            spacing: 10,
-            children: ['T1', 'T2', 'T3', 'T4'].map((talle) {
-              return ChoiceChip(
-                label: Text(talle),
-                selected: selectedTallesDialog.contains(talle),
-                onSelected: (selected) {
-                  setState(() {
-                    if (selected) {
-                      print('Talle seleccionado: $selected');
-                      selectedTallesDialog.add(talle);
-                      print('Talles en total: $selectedTallesDialog');
-                    } else {
-                      selectedTallesDialog.remove(talle);
-                    }
-                  });
-                },
-              );
-            }).toList(),
-          ),
+          content: isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : Wrap(
+                  spacing: 10,
+                  children: talles.map((talle) {
+                    return ChoiceChip(
+                      label: Text(talle),
+                      selected: selectedTallesDialog.contains(talle),
+                      onSelected: (selected) {
+                        setState(() {
+                          if (selected) {
+                            selectedTallesDialog.add(talle);
+                          } else {
+                            selectedTallesDialog.remove(talle);
+                          }
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
           actions: [
             TextButton(
               onPressed: () {
@@ -447,6 +544,22 @@ class _NuevomodeloState extends State<Nuevomodelo> {
           ],
         );
       },
+    );
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Error'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Aceptar'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -524,30 +637,92 @@ class _NuevomodeloState extends State<Nuevomodelo> {
     );
   }
 
-  // Widget para mostrar los talles en el formulario
-  Widget _buildTallesRowForm() {
+  // Widget para mostrar los Tipo de tela en el formulario
+  Widget _buildTelaRowForm() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Seleccione los talles:',
+          'Seleccione el tipo de tela :',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 10),
         Wrap(
           spacing: 10,
-          children: ['T1', 'T2', 'T3', 'T4'].map((talle) {
+          children: ['Plano', 'Punto'].map((tipoDeRollo) {
             return ChoiceChip(
-              label: Text(talle),
-              selected: selectedTallesForm.contains(talle),
+              label: Text(tipoDeRollo),
+              selected: selectedTipoDeRolloForm.contains(tipoDeRollo),
               onSelected: (selected) {
                 //  print(selected);
 
                 setState(() {
                   if (selected) {
-                    selectedTallesForm.add(talle);
+                    selectedTipoDeRolloForm.add(tipoDeRollo);
                   } else {
-                    selectedTallesForm.remove(talle);
+                    selectedTipoDeRolloForm.remove(tipoDeRollo);
+                  }
+                });
+              },
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAuxSelection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Seleccione si es tela auxiliar:',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 10,
+          children: auxOptions.map((aux) {
+            return ChoiceChip(
+              label: Text(aux),
+              selected: selectedAuxForm = false,
+              onSelected: (selected) {
+                setState(() {
+                  if (selected) {
+                    selectedAuxForm = true; // Solo permitir una selección
+                  } else {
+                    selectedAuxForm = false;
+                  }
+                });
+              },
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPrimSelection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Seleccione si es tela primaria:',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 10,
+          children: primOptions.map((prim) {
+            return ChoiceChip(
+              label: Text(prim),
+              selected: selectedPrimForm = false,
+              onSelected: (selected) {
+                setState(() {
+                  if (selected) {
+                    selectedPrimForm = true; // Solo permitir una selección
+                  } else {
+                    selectedPrimForm = false;
                   }
                 });
               },
@@ -578,21 +753,6 @@ class _NuevomodeloState extends State<Nuevomodelo> {
           ),
         ),
         const SizedBox(width: 20),
-        Expanded(
-          flex: 3,
-          child: _buildDropdown(
-            'Tipo de tela',
-            ['Plano', 'Punto', 'Tejido', 'Otro'],
-            'Seleccione el tipo de tela',
-            selectedTipo,
-            (value) {
-              setState(() {
-                selectedTipo = value;
-                print('Tipo de tela: $selectedTipo');
-              });
-            },
-          ),
-        ),
       ],
     );
   }
@@ -608,14 +768,38 @@ class _NuevomodeloState extends State<Nuevomodelo> {
         DataColumn(label: Text('Tipo de Avio')),
         DataColumn(label: Text('Talles')),
         DataColumn(label: Text('Color')),
+        DataColumn(label: Text('cantidad')),
       ],
-      rows: aviosSeleccionados.map((avio) {
+      rows: aviosSeleccionados.map((AvioModelo) {
         return DataRow(cells: [
-          DataCell(Text(avio.nombre)),
-          DataCell(Text(avio.talles.toString())),
-          DataCell(Text(avio.color ?? 'Ninguno')),
+          DataCell(Text(AvioModelo.avioId.toString())),
+          DataCell(Text(AvioModelo.talles.toString())),
+          DataCell(Text(AvioModelo.esPorColor.toString())),
+          DataCell(Text(AvioModelo.cantidadRequerida.toString())),
         ]);
       }).toList(),
     );
+  }
+
+// Función para obtener los avíos desde la API
+  Future<List<Map<String, dynamic>>> fetchAviosFromApi() async {
+    const String apiUrl =
+        'https://maria-chucena-api-production.up.railway.app/avio'; // URL de la API
+
+    try {
+      final response = await http.get(Uri.parse(apiUrl));
+
+      if (response.statusCode == 200) {
+        // Decodificar la respuesta JSON
+        final List<dynamic> data = jsonDecode(response.body);
+
+        // Convertir la lista dinámica en una lista de mapas
+        return data.map((avio) => avio as Map<String, dynamic>).toList();
+      } else {
+        throw Exception('Error al cargar los avíos: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error de conexión: $e');
+    }
   }
 }
