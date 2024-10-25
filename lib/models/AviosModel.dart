@@ -1,5 +1,5 @@
 import 'package:gestion_indumentaria/models/Proveedor.dart';
-import 'package:gestion_indumentaria/models/talle.dart';
+import 'package:gestion_indumentaria/models/Talle.dart';
 
 // ignore: camel_case_types
 class Avio {

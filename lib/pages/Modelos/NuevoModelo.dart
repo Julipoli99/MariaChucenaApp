@@ -6,7 +6,7 @@ import 'package:gestion_indumentaria/models/AviosModelo.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
 import 'package:gestion_indumentaria/models/TipoTela.dart';
 import 'package:gestion_indumentaria/models/observacion.dart';
-import 'package:gestion_indumentaria/models/talle.dart';
+import 'package:gestion_indumentaria/models/Talle.dart';
 import 'package:gestion_indumentaria/models/tipoPrenda.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
@@ -74,8 +74,8 @@ class _NuevomodeloState extends State<Nuevomodelo> {
         genero: selectedGenero!,
         observaciones: [],
         // avios: aviosSeleccionados,
-        curva: [],
-        categoriaTipo: selectedPrenda!);
+        curva: [Talle(id: 1, nombre: "T")],
+        categoriaTipo: 4);
 
     print(modeloCreado.toJson());
 
@@ -446,7 +446,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                               esPorTalle: selectedTallesDialog.isNotEmpty,
                               esPorColor: selectedColorDialog != null,
                               talles: selectedTallesDialog
-                                  .map((t) => talle(nombre: t))
+                                  .map((t) => Talle(nombre: t))
                                   .toList(),
                               cantidadRequerida: int.parse(cantidadAvioDialog!),
                             );

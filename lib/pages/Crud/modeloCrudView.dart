@@ -4,7 +4,7 @@ import 'package:gestion_indumentaria/models/AviosModel.dart';
 import 'package:gestion_indumentaria/models/AviosModelo.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
 import 'package:gestion_indumentaria/models/observacion.dart';
-import 'package:gestion_indumentaria/models/talle.dart';
+import 'package:gestion_indumentaria/models/Talle.dart';
 import 'package:gestion_indumentaria/widgets/boxDialog/BoxDialogModelo.dart';
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
 import 'package:http/http.dart' as http;
@@ -60,7 +60,7 @@ class _ModelCrudViewState extends State<ModelCrudView> {
           (model) => Text(model.codigo.toString()),
           (model) => Text(model.nombre),
           (model) => Text(model.genero),
-          (model) => Text(model.categoriaTipo),
+          (model) => Text(model.categoriaTipo as String),
           (model) => Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -106,8 +106,8 @@ class _ModelCrudViewState extends State<ModelCrudView> {
               return AvioModelo.fromJson(av); // Convierte cada elemento a Avios
             }).toList();
 
-            List<talle> curva = (json['curva'] as List<dynamic>).map((t) {
-              return talle.fromJson(t);
+            List<Talle> curva = (json['curva'] as List<dynamic>).map((t) {
+              return Talle.fromJson(t);
             }).toList();
 
             List<ObservacionModel> observaciones =

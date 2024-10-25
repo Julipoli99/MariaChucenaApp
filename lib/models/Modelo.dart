@@ -1,7 +1,7 @@
 import 'package:gestion_indumentaria/models/AviosModelo.dart';
 
 import 'observacion.dart'; // Asegúrate de que este archivo exista
-import 'talle.dart'; // Asegúrate de que este archivo exista
+import 'Talle.dart'; // Asegúrate de que este archivo exista
 // Asegúrate de que este archivo exista
 
 class Modelo {
@@ -12,10 +12,10 @@ class Modelo {
   final bool tieneTelaAuxiliar;
   final List<ObservacionModel>? observaciones; // Lista opcional
   final List<AvioModelo>? avios; // Lista opcional
-  final List<talle>
+  final List<Talle>
       curva; // Representa los talles como una lista de objetos Talle
   final String genero;
-  final String categoriaTipo;
+  final int categoriaTipo;
 
   Modelo({
     required this.id,
@@ -36,8 +36,8 @@ class Modelo {
       return ObservacionModel.fromJson(obs);
     }).toList();
 
-    List<talle> talles = (json['curva'] as List).map((t) {
-      return talle
+    List<Talle> talles = (json['curva'] as List).map((t) {
+      return Talle
           .fromJson(t); // Asumiendo que la API devuelve talles en formato JSON
     }).toList();
 
@@ -54,7 +54,7 @@ class Modelo {
       }).toList(),
       curva: talles,
       genero: json['genero'],
-      categoriaTipo: json['categoria']['tipo'],
+      categoriaTipo: json['categoriaId'],
     );
   }
 
@@ -71,7 +71,7 @@ class Modelo {
           .toList(), // Asegúrate de que tu clase Avios tenga este método
       'curva': curva.map((t) => t.toJson()).toList(), // Convierte talles a JSON
       'genero': genero,
-      'categoria': {'tipo': categoriaTipo},
+      'categoriaId': categoriaTipo,
     };
   }
 }
