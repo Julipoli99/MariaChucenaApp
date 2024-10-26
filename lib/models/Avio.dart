@@ -9,7 +9,7 @@ class Avio {
   final int tipoProductoId;
   final String nombre;
   final int stock;
-  final Proveedor provedor;
+  final Proveedor proveedor;
 
   Avio({
     required this.id,
@@ -18,7 +18,7 @@ class Avio {
     required this.tipoProductoId,
     required this.nombre,
     required this.stock,
-    required this.provedor,
+    required this.proveedor,
   });
 
   factory Avio.fromJson(Map<String, dynamic> json) {
@@ -29,7 +29,7 @@ class Avio {
       tipoProductoId: json['tipoProductoId'] ?? 0,
       nombre: json['nombre'] ?? 'Sin nombre',
       stock: json['stock'] ?? 0,
-      provedor: json['proveedor'] ?? " ",
+      proveedor: Proveedor.fromJson(json['proveedor'] ?? {}),
     );
   }
 
@@ -41,7 +41,7 @@ class Avio {
       'proveedorId': proveedorId,
       'tipoProductoId': tipoProductoId,
       'stock': stock,
-      'provedor': Proveedor,
+      'proveedor': proveedor.toJson(),
     };
   }
 }

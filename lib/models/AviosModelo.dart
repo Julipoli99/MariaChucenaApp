@@ -2,17 +2,17 @@ import 'package:gestion_indumentaria/models/talle.dart';
 
 class AvioModelo {
   final int avioId;
-  final bool esPorTalle;
-  final bool esPorColor;
-  final List<talle> talles;
-  final int cantidadRequerida;
+  final bool? esPorTalle;
+  final bool? esPorColor;
+  final List<talle>? talles;
+  final int? cantidadRequerida;
 
   AvioModelo({
     required this.avioId,
-    required this.esPorTalle,
-    required this.esPorColor,
-    required this.talles,
-    required this.cantidadRequerida,
+    this.esPorTalle,
+    this.esPorColor,
+    this.talles,
+    this.cantidadRequerida,
   });
 
   factory AvioModelo.fromJson(Map<String, dynamic> json) {
@@ -30,7 +30,7 @@ class AvioModelo {
       'avioId': avioId,
       'esPorTalle': esPorTalle,
       'esPorColor': esPorColor,
-      'talles': talles.map((t) => t.toJson()).toList(),
+      'talles': talles?.map((t) => t.toJson()).toList(),
       'cantidadRequerida': cantidadRequerida,
     };
   }
