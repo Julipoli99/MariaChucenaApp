@@ -1,5 +1,5 @@
 class Proveedor {
-  int id;
+  String id;
   String nombre;
   String telefono;
 

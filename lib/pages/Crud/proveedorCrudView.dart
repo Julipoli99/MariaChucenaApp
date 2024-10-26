@@ -75,7 +75,7 @@ class _ProvedorCrudViewState extends State<Provedorcrudview> {
               items: provedores, // Lista de proveedores
               dataMapper: [
                 // Celdas/valores
-                (proveedor) => Text(proveedor.id.toString()),
+                (proveedor) => Text(proveedor.id),
                 (proveedor) => Text(proveedor.nombre),
                 (proveedor) => Text(proveedor.telefono),
                 //Parte de Opciones, se le pasa una funcion que retorna una List de Widgets en este caso Row.
