@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Avio.dart';
 import 'package:gestion_indumentaria/models/AviosModelo.dart';
+import 'package:gestion_indumentaria/models/Curva.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
 import 'package:gestion_indumentaria/models/observacion.dart';
 import 'package:gestion_indumentaria/models/Talle.dart';
@@ -99,15 +100,23 @@ class _ModelCrudViewState extends State<ModelCrudView> {
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = jsonDecode(response.body);
+        print(response.body);
+
+        print("###################");
 
         setState(() {
           models = jsonData.map((json) {
             List<AvioModelo> avio = (json['avios'] as List<dynamic>).map((av) {
+              print(av);
               return AvioModelo.fromJson(av); // Convierte cada elemento a Avios
             }).toList();
 
-            List<Talle> curva = (json['curva'] as List<dynamic>).map((t) {
-              return Talle.fromJson(t);
+
+            print('#################');
+
+            List<Curva> curva = (json['curva']['talle'] as List<dynamic>).map((t) {
+              print(t);
+              return Curva.fromJson(t);
             }).toList();
 
             List<ObservacionModel> observaciones =

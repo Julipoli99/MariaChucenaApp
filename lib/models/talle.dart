@@ -11,7 +11,7 @@ class Talle {
   factory Talle.fromJson(Map<String, dynamic> json) {
     return Talle(
       id: json['id'] ?? 0, // Valor por defecto si 'id' es nulo
-      nombre: json['talle'] ?? 'Sin talle',
+      nombre: json['nombre'] ?? 'Sin talle',
     );
   }
   Map<String, dynamic> toJson() {

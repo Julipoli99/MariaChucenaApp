@@ -12,7 +12,7 @@ class Modelo {
   final bool tieneTelaAuxiliar;
   final List<ObservacionModel>? observaciones; // Lista opcional
   final List<AvioModelo>? avios; // Lista opcional
-  final List<Talle>
+  final List<dynamic>
       curva; // Representa los talles como una lista de objetos Talle
   final String genero;
   final int categoriaTipo;
