@@ -51,7 +51,7 @@ class _PrendaCrudViewState extends State<Prendacrudview> {
                     onPressed: () {
                       _confirmDelete(
                           context, prenda.id); // Confirmación antes de eliminar
-                      print('Prenda borrada: ${prenda.id}');
+                      print('Prenda por borrar: ${prenda.id}');
                     },
                     icon: const Icon(Icons.delete),
                   ),

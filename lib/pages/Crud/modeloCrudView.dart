@@ -106,23 +106,26 @@ class _ModelCrudViewState extends State<ModelCrudView> {
 
         setState(() {
           models = jsonData.map((json) {
-            List<AvioModelo> avio = (json['avios'] as List<dynamic>).map((av) {
-              print(av);
-              return AvioModelo.fromJson(av); // Convierte cada elemento a Avios
-            }).toList();
+            // Verifica si 'avios' existe y es una lista antes de mapear
+            List<AvioModelo> avio = json['avios'] != null
+                ? (json['avios'] as List<dynamic>)
+                    .map((av) => AvioModelo.fromJson(av))
+                    .toList()
+                : [];
 
+            // Verifica si 'observaciones' existe y es una lista antes de mapear
+            List<ObservacionModel> observaciones = json['observaciones'] != null
+                ? (json['observaciones'] as List<dynamic>)
+                    .map((obs) => ObservacionModel.fromJson(obs))
+                    .toList()
+                : [];
 
-            print('#################');
-
-            List<Curva> curva = (json['curva']['talle'] as List<dynamic>).map((t) {
-              print(t);
-              return Curva.fromJson(t);
-            }).toList();
-
-            List<ObservacionModel> observaciones =
-                (json['observaciones'] as List<dynamic>).map((obs) {
-              return ObservacionModel.fromJson(obs);
-            }).toList();
+            // Verifica si 'talle' existe y es una lista antes de mapear
+            List<Talle> curva = json['talle'] != null
+                ? (json['talle'] as List<dynamic>)
+                    .map((t) => Talle.fromJson(t))
+                    .toList()
+                : [];
 
             return Modelo(
               id: json['id'],
