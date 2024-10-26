@@ -1,9 +1,93 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:gestion_indumentaria/models/Avio.dart';
+import 'package:gestion_indumentaria/pages/Avios/avios.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
+import 'package:http/http.dart' as http;
 
-class Modificadoravios extends StatelessWidget {
+class Modificadoravios extends StatefulWidget {
   const Modificadoravios({super.key});
+
+  @override
+  _ModificadoraviosState createState() => _ModificadoraviosState();
+}
+
+class _ModificadoraviosState extends State<Modificadoravios> {
+  List<Avio> aviosData = [];
+  String? selectedAvio;
+  String? selectedProveedor;
+  int cantidadInicial = 0; // Cantidad que se mostrará como inicial
+  int cantidadActual = 0; // Cantidad que se mostrará como actual
+
+  @override
+  void initState() {
+    super.initState();
+    fetchAviosFromApi();
+  }
+
+  Future<void> fetchAviosFromApi() async {
+    final response = await http.get(
+        Uri.parse('https://maria-chucena-api-production.up.railway.app/avio'));
+
+    if (response.statusCode == 200) {
+      List<dynamic> jsonData = json.decode(response.body);
+      aviosData = jsonData.map((item) => Avio.fromJson(item)).toList();
+      setState(() {});
+    } else {
+      throw Exception('Error al cargar los avios');
+    }
+  }
+
+  void updateCantidadActual() {
+    if (selectedAvio != null) {
+      final avio =
+          aviosData.firstWhere((element) => element.nombre == selectedAvio);
+      cantidadInicial = avio
+          .stock; // Asumiendo que `stock` es la propiedad que contiene la cantidad actual
+      setState(() {});
+    }
+  }
+
+  Future<void> updateStock() async {
+    if (selectedAvio != null) {
+      final avio =
+          aviosData.firstWhere((element) => element.nombre == selectedAvio);
+
+      // Asegúrate de que avio tenga un ID válido
+      if (avio.id == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('ID de avío no válido')),
+        );
+        return;
+      }
+
+      int nuevaCantidad = cantidadActual;
+
+      // Realiza la solicitud PUT a la API
+      final response = await http.put(
+        Uri.parse(
+            'https://maria-chucena-api-production.up.railway.app/avio/${avio.id}'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'stock': nuevaCantidad,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Stock actualizado correctamente')),
+        );
+        fetchAviosFromApi(); // Refresca la lista después de la actualización
+      } else {
+        print('Error: ${response.statusCode}');
+        print('Response body: ${response.body}');
+        throw Exception('Error al actualizar el stock: ${response.body}');
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,8 +97,7 @@ class Modificadoravios extends StatelessWidget {
         title: const Text('Maria Chucena ERP System'),
         toolbarHeight: 80,
         actions: [
-          buildLoggedInUser('assets/imagen/logo.png',
-              'Supervisor'), //el tipo de rango lo tendria que traer de la base de datos
+          buildLoggedInUser('assets/imagen/logo.png', 'Supervisor'),
         ],
       ),
       drawer: const DrawerMenuLateral(),
@@ -24,7 +107,6 @@ class Modificadoravios extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Título principal centrado con subtítulo
               Container(
                 color: Colors.grey[800],
                 width: double.infinity,
@@ -53,8 +135,6 @@ class Modificadoravios extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-
-              // Formulario de Registro de Avios
               Padding(
                 padding: const EdgeInsets.all(32.0),
                 child: Row(
@@ -67,7 +147,7 @@ class Modificadoravios extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            'modificar Stock de avios',
+                            'Modificar Stock de avios',
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -84,28 +164,27 @@ class Modificadoravios extends StatelessWidget {
                         children: [
                           DropdownButtonFormField<String>(
                             decoration: const InputDecoration(
-                              labelText: 'Tipo',
-                              hintText: 'Tipo de avios',
+                              labelText: 'Tipo de Avio',
+                              hintText: 'Seleccione un avío',
                             ),
-                            items: <String>['boton', 'piluso', 'manga']
-                                .map((String value) {
+                            items: aviosData.map((Avio avio) {
                               return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value),
+                                value: avio.nombre,
+                                child: Text(avio.nombre),
                               );
                             }).toList(),
                             onChanged: (newValue) {
-                              // Acción al seleccionar un proveedor de prueba
-                              // Aquí puedes agregar cualquier acción temporal
-                              print('tipo de avios : $newValue');
+                              setState(() {
+                                selectedAvio = newValue;
+                                updateCantidadActual();
+                              });
                             },
                           ),
                           const SizedBox(height: 20),
-                          // Dropdown para Proveedores con valores de prueba
                           DropdownButtonFormField<String>(
                             decoration: const InputDecoration(
                               labelText: 'Proveedor',
-                              hintText: 'proveedor',
+                              hintText: 'Seleccione un proveedor',
                             ),
                             items: <String>[
                               'Proveedor de prueba 1',
@@ -118,61 +197,56 @@ class Modificadoravios extends StatelessWidget {
                               );
                             }).toList(),
                             onChanged: (newValue) {
-                              // Acción al seleccionar un proveedor de prueba
-                              // Aquí puedes agregar cualquier acción temporal
-                              print('Proveedor seleccionado: $newValue');
+                              setState(() {
+                                selectedProveedor = newValue;
+                              });
                             },
                           ),
                           const SizedBox(height: 20),
-                          const Row(
+                          Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              // Campo de "Cantidad Inicial"
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
+                                    const Text(
                                       'Cantidad Inicial',
                                       style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    SizedBox(
-                                        height:
-                                            8), // Espacio entre título y campo
+                                    const SizedBox(height: 8),
                                     TextField(
                                       enabled: false,
                                       decoration: InputDecoration(
-                                        hintText: 'Cantidad inicial',
+                                        hintText: cantidadInicial.toString(),
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                              SizedBox(
-                                  width: 16), // Separación entre los campos
-
-                              // Campo de "Cantidad Actual"
+                              const SizedBox(width: 16),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
+                                    const Text(
                                       'Cantidad Actual',
                                       style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    SizedBox(
-                                        height:
-                                            8), // Espacio entre título y campo
+                                    const SizedBox(height: 8),
                                     TextField(
-                                      decoration: InputDecoration(
-                                        hintText: 'Cantidad actual',
-                                      ),
+                                      onChanged: (value) {
+                                        cantidadActual = int.tryParse(value) ??
+                                            0; // Actualiza la cantidad actual
+                                      },
+                                      decoration: const InputDecoration(
+                                          hintText: "Ingrese cantidad actual"),
                                     ),
                                   ],
                                 ),
@@ -182,9 +256,9 @@ class Modificadoravios extends StatelessWidget {
                           const SizedBox(height: 20),
                           ElevatedButton(
                             onPressed: () {
-                              // Acción al guardar el avío
-                              // Agrega cualquier acción temporal para probar
-                              print('Avíos guardados');
+                              updateStock();
+                              // Llama al método para actualizar el stock
+                              Avios;
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.black,
@@ -206,9 +280,7 @@ class Modificadoravios extends StatelessWidget {
                   ],
                 ),
               ),
-
               const Divider(),
-              // Pie de página con usuario logueado
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.0),
                 child: Column(
