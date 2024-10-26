@@ -1,11 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:gestion_indumentaria/models/Avio.dart';
 import 'package:gestion_indumentaria/models/AviosModelo.dart';
+import 'package:gestion_indumentaria/models/Avio.dart';
+
 import 'package:gestion_indumentaria/models/Modelo.dart';
-import 'package:gestion_indumentaria/models/Proveedor.dart';
-import 'package:gestion_indumentaria/models/TipoTela.dart';
 import 'package:gestion_indumentaria/models/observacion.dart';
 import 'package:gestion_indumentaria/models/Talle.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
@@ -66,18 +65,21 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   void _createPost() {
     //Avios(nombre: selectedTipoAvioDialog!, proveedores: "Proveedor1");
     Modelo modeloCreado = Modelo(
-        id: 15,
-        codigo: codigoModelo!,
+        id: 10000,
+        codigo: " codigo-prueba",
         nombre: nombreModelo!,
         tieneTelaSecundaria: selectedPrimForm!,
         tieneTelaAuxiliar: selectedAuxForm!,
         genero: selectedGenero!,
-        observaciones: [],
-        // avios: aviosSeleccionados,
-        curva: [Talle(id: 1, nombre: "T")],
+        observaciones: [
+          ObservacionModel(
+              id: 1, titulo: "Probando observacion", descripcion: "prueba")
+        ],
+        avios: aviosSeleccionados,
+        curva: [Talle(id: 1, nombre: "T1")],
         categoriaTipo: 4);
 
-    print(modeloCreado.toJson());
+    print('MODELO POST: ${modeloCreado.toJson()}');
 
     // metodo post
     _post(modeloCreado);
@@ -103,6 +105,10 @@ class _NuevomodeloState extends State<Nuevomodelo> {
       // Verificar el estado de la respuesta
       if (response.statusCode == 201) {
         print("Modelo creado con éxito: ${response.body}");
+
+        // Suponiendo que el servidor devuelve el modelo completo, lo puedes parsear
+        Modelo modeloCreado = Modelo.fromJson(jsonDecode(response.body));
+        print("Código del modelo creado: ${modeloCreado.codigo}");
       } else {
         print(
             "Error al crear el modelo: ${response.statusCode} - ${response.body}");
@@ -165,16 +171,6 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          TextField(
-                            onChanged: (value) {
-                              setState(() {
-                                codigoModelo = value;
-                                print('Codigo del modelo: $codigoModelo');
-                              });
-                            },
-                            decoration: const InputDecoration(
-                                labelText: 'Codigo de Modelo'),
-                          ),
                           const SizedBox(height: 15),
                           TextField(
                             onChanged: (value) {
@@ -416,38 +412,33 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                     actions: [
                       ElevatedButton(
                         onPressed: () {
-                          if (selectedTipoAvioDialog != null &&
-                              cantidadAvioDialog != null &&
-                              cantidadAvioDialog!.isNotEmpty) {
-                            // Crear avio y actualizar lista
-                            AvioModelo avioCreado = AvioModelo(
-                              avioId: aviosData.firstWhere((av) =>
-                                  av['avio']['nombre'] ==
-                                  selectedTipoAvioDialog)['avio']['id'],
-                              esPorTalle: selectedTallesDialog.isNotEmpty,
-                              esPorColor: selectedColorDialog != null,
-                              talles: selectedTallesDialog
-                                  .map((t) => Talle(nombre: t))
-                                  .toList(),
-                              cantidadRequerida: int.parse(cantidadAvioDialog!),
-                            );
-
-                            // Usar setState para actualizar la tabla en la pantalla principal
-                            setState(() {
-                              aviosSeleccionados.add(avioCreado);
-                            });
-
-                            // Limpiar el formulario para un próximo avio
-                            setDialogState(() {
-                              selectedTipoAvioDialog = null;
-                              selectedTallesDialog.clear();
-                              selectedColorDialog = null;
-                              cantidadAvioDialog = null;
-                              _cantidadController.clear();
-                            });
-
-                            Navigator.of(context).pop(); // Cerrar el diálogo
-                          }
+                          // Agregar avio a la lista con los datos ingresados
+                          setState(() {
+                            if (selectedTipoAvioDialog != null &&
+                                _cantidadController.text.isNotEmpty) {
+                              final avioSeleccionado = aviosData.firstWhere(
+                                  (avio) =>
+                                      avio.nombre == selectedTipoAvioDialog);
+                              aviosSeleccionados.add(
+                                AvioModelo(
+                                  avioId: avioSeleccionado.id,
+                                  esPorTalle: esPorTalle,
+                                  esPorColor: esPorColor,
+                                  talles: [Talle(id: 1, nombre: "T1")],
+                                  cantidadRequerida:
+                                      int.parse(_cantidadController.text),
+                                ),
+                              );
+                            }
+                          });
+                          // Limpiar campos
+                          setDialogState(() {
+                            selectedTipoAvioDialog = null;
+                            _cantidadController.clear();
+                            esPorTalle = false;
+                            esPorColor = false;
+                            selectedTallesDialog.clear();
+                          });
                         },
                         child: const Text('Agregar Avio'),
                       ),
@@ -467,6 +458,8 @@ class _NuevomodeloState extends State<Nuevomodelo> {
       },
     );
   }
+
+  // Agregar el avio seleccionado a la lista
 
   // Diálogo para seleccionar los talles
   void _showTalleSelectionDialog(StateSetter setState) async {
@@ -738,7 +731,6 @@ class _NuevomodeloState extends State<Nuevomodelo> {
     );
   }
 
-  // Widget para construir la tabla de avios seleccionados
   Widget _buildAviosTable() {
     if (aviosSeleccionados.isEmpty) {
       return const Text('No hay avios seleccionados.');
@@ -746,56 +738,38 @@ class _NuevomodeloState extends State<Nuevomodelo> {
 
     return DataTable(
       columns: const [
-        DataColumn(label: Text('Tipo de Avio')),
-        DataColumn(label: Text('Talles')),
-        DataColumn(label: Text('Color')),
+        DataColumn(label: Text('ID de Avio')),
+        DataColumn(label: Text('Es por Talle')),
+        DataColumn(label: Text('Es por Color')),
         DataColumn(label: Text('Cantidad')),
       ],
-      rows: aviosSeleccionados.map((avio) {
+      rows: aviosSeleccionados.map((AvioModelo avio) {
         return DataRow(cells: [
-          DataCell(
-              Text(avio.avioId.toString())), // Mostrar el ID o nombre del avio
+          DataCell(Text(avio.avioId.toString())),
           DataCell(Text(avio.esPorTalle == true ? 'Sí' : 'No')),
           DataCell(Text(avio.esPorColor == true ? 'Sí' : 'No')),
-          DataCell(Text(avio.cantidadRequerida?.toString() ?? 'N/A')),
+          DataCell(Text(avio.cantidadRequerida.toString())),
         ]);
       }).toList(),
     );
   }
 
   Future<List<Avio>> fetchAviosFromApi() async {
-    const String apiUrl =
-        'https://maria-chucena-api-production.up.railway.app/avio'; // URL de la API
+    // Simulando una llamada a la API
+    final response = await http.get(
+        Uri.parse('https://maria-chucena-api-production.up.railway.app/avio'));
 
-    try {
-      final response = await http.get(Uri.parse(apiUrl));
-      if (response.statusCode == 200) {
-        List<dynamic> data = json.decode(response.body);
-        return data
-            .map((item) => Avio(
-                  id: item['id'],
-                  codigoProveedor: item['codigoProveedor'],
-                  proveedorId: item['proveedorId'],
-                  tipoProductoId: item['tipoProductoId'],
-                  nombre: item['nombre'],
-                  stock: item['stock'],
-                  proveedor: Proveedor.fromJson(item[
-                      'proveedor']), // Asegúrate de que esto esté bien definido
-                ))
-            .toList();
-      } else {
-        // Manejo de errores si la respuesta no es 200
-        throw Exception('Error al cargar avíos: ${response.statusCode}');
-      }
-    } catch (e) {
-      print("ERROR: $e");
-      // Manejo de errores: puedes retornar una lista vacía o lanzar una excepción
-      return []; // Retorna una lista vacía si ocurre un error
+    if (response.statusCode == 200) {
+      // Decodificando el JSON y convirtiendo a objetos Avio
+      List<dynamic> jsonData = json.decode(response.body);
+      return jsonData.map((item) => Avio.fromJson(item)).toList();
+    } else {
+      throw Exception('Error al cargar los avios');
     }
   }
-}
+/*
 // Función para obtener los avíos desde la API
-  /* Future<List<Map<String, dynamic>>> fetchAviosFromApi() async {
+  Future<List<Map<String, dynamic>>> fetchAviosFromApi() async {
     const String apiUrl =
         'https://maria-chucena-api-production.up.railway.app/avio'; // URL de la API
 
@@ -814,6 +788,5 @@ class _NuevomodeloState extends State<Nuevomodelo> {
     } catch (e) {
       throw Exception('Error de conexión: $e');
     }
-  }
-  */
-
+  }*/
+}

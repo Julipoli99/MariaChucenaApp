@@ -6,7 +6,7 @@ import 'Talle.dart'; // Asegúrate de que este archivo exista
 
 class Modelo {
   final int id;
-  final String codigo;
+  final String? codigo;
   final String nombre;
   final bool tieneTelaSecundaria;
   final bool tieneTelaAuxiliar;
@@ -19,7 +19,7 @@ class Modelo {
 
   Modelo({
     required this.id,
-    required this.codigo,
+    this.codigo,
     required this.nombre,
     required this.tieneTelaSecundaria,
     required this.tieneTelaAuxiliar,
@@ -37,8 +37,8 @@ class Modelo {
     }).toList();
 
     List<Talle> talles = (json['curva'] as List).map((t) {
-      return Talle
-          .fromJson(t); // Asumiendo que la API devuelve talles en formato JSON
+      return Talle.fromJson(
+          t); // Asumiendo que la API devuelve talles en formato JSON
     }).toList();
 
     return Modelo(
