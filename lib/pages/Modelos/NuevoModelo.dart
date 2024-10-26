@@ -418,7 +418,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                                   avioId: avioSeleccionado.id,
                                   esPorTalle: esPorTalle,
                                   esPorColor: esPorColor,
-                                  talles: [Talle(id: 1, nombre: "T1")],
+                                  talle: [Talle(id: 1, nombre: "T1")],
                                   cantidadRequerida:
                                       int.parse(_cantidadController.text),
                                 ),
