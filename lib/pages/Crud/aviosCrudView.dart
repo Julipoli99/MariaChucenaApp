@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:gestion_indumentaria/models/AviosModel.dart';
+import 'package:gestion_indumentaria/models/Avio.dart';
 import 'package:gestion_indumentaria/pages/Avios/modificadorAvios.dart';
 import 'package:gestion_indumentaria/pages/Avios/nuevoAvios.dart';
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
