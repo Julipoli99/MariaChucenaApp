@@ -43,6 +43,9 @@ class _ModificadoraviosState extends State<Modificadoravios> {
     if (selectedAvio != null) {
       final avio =
           aviosData.firstWhere((element) => element.nombre == selectedAvio);
+      //codigo para comparar con provedor tambien
+      //&& element.proveedorId == selectedProveedor
+
       cantidadInicial = avio
           .stock; // Asumiendo que `stock` es la propiedad que contiene la cantidad actual
       setState(() {});
@@ -65,7 +68,7 @@ class _ModificadoraviosState extends State<Modificadoravios> {
       int nuevaCantidad = cantidadActual;
 
       // Realiza la solicitud PUT a la API
-      final response = await http.put(
+      final response = await http.patch(
         Uri.parse(
             'https://maria-chucena-api-production.up.railway.app/avio/${avio.id}'),
         headers: {
@@ -80,7 +83,12 @@ class _ModificadoraviosState extends State<Modificadoravios> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Stock actualizado correctamente')),
         );
-        fetchAviosFromApi(); // Refresca la lista después de la actualización
+
+        // Navega a la pantalla de CRUD de avíos
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+                builder: (context) =>
+                    const Avios()) // Cambia `Avios()` por tu pantalla de CRUD
+            );
       } else {
         print('Error: ${response.statusCode}');
         print('Response body: ${response.body}');
@@ -199,6 +207,7 @@ class _ModificadoraviosState extends State<Modificadoravios> {
                             onChanged: (newValue) {
                               setState(() {
                                 selectedProveedor = newValue;
+                                // updateCantidadActual();
                               });
                             },
                           ),
