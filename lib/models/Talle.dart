@@ -1,12 +1,23 @@
-import 'package:gestion_indumentaria/models/Avios.dart';
-
 class Talle {
-  final Avios avio;
-  final List<String> listaTalles;
+  int id;
+  String? nombre;
 
   Talle({
-    required this.avio,
-    required this.listaTalles
+    this.id = 0,
+    this.nombre,
   });
 
+  /// **Fábrica para crear un Avios desde JSON**
+  factory Talle.fromJson(Map<String, dynamic> json) {
+    return Talle(
+      id: json['id'] ?? 0, // Valor por defecto si 'id' es nulo
+      nombre: json['talle'] ?? 'Sin talle',
+    );
+  }
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'nombre': nombre,
+    };
+  }
 }
