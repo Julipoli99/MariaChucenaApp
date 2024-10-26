@@ -27,13 +27,11 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   String? selectedGenero;
   String? selectedEdad;
   String? selectedAvios;
-  String? selectedTela;
   String? selectedPrenda;
   String? selectedTallesForm; // Lista de talles en el formulario principal
-  List<String> selectedTipoDeRolloForm = [];
   String? codigoModelo;
   String? nombreModelo;
-  List<ObservacionModel>? observacion;
+  List<ObservacionModel>? observaciones;
   String? cantidad;
   String? tipoEdad;
   String? titulo;
@@ -224,10 +222,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                               _buildPrimSelection(),
                             ],
                           ),
-                          const SizedBox(height: 15),
-                          _buildTelaRow(),
-                          const SizedBox(height: 15),
-                          _buildTelaRowForm(),
+
                           const SizedBox(height: 15),
 
                           TextField(
@@ -250,7 +245,6 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                             decoration:
                                 const InputDecoration(labelText: 'Descripción'),
                           ),
-
                           const SizedBox(height: 15),
                           TalleSelector(
                             selectedTalle: selectedTallesForm,
@@ -611,40 +605,6 @@ class _NuevomodeloState extends State<Nuevomodelo> {
     );
   }
 
-  // Widget para mostrar los Tipo de tela en el formulario
-  Widget _buildTelaRowForm() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Seleccione el tipo de tela :',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 10),
-        Wrap(
-          spacing: 10,
-          children: ['Plano', 'Punto'].map((tipoDeRollo) {
-            return ChoiceChip(
-              label: Text(tipoDeRollo),
-              selected: selectedTipoDeRolloForm.contains(tipoDeRollo),
-              onSelected: (selected) {
-                //  print(selected);
-
-                setState(() {
-                  if (selected) {
-                    selectedTipoDeRolloForm.add(tipoDeRollo);
-                  } else {
-                    selectedTipoDeRolloForm.remove(tipoDeRollo);
-                  }
-                });
-              },
-            );
-          }).toList(),
-        ),
-      ],
-    );
-  }
-
   Widget _buildAuxSelection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -703,30 +663,6 @@ class _NuevomodeloState extends State<Nuevomodelo> {
             );
           }).toList(),
         ),
-      ],
-    );
-  }
-
-  // Widget para construir el menú desplegable de tela
-  Widget _buildTelaRow() {
-    return Row(
-      children: [
-        Expanded(
-          flex: 3,
-          child: _buildDropdown(
-            'Tela',
-            ['Algodón', 'Lino', 'Poliéster', 'Seda'],
-            'Seleccione la tela',
-            selectedTela,
-            (value) {
-              setState(() {
-                selectedTela = value;
-                print('Tela de modelo seleccionada: $selectedTela');
-              });
-            },
-          ),
-        ),
-        const SizedBox(width: 20),
       ],
     );
   }
