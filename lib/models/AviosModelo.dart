@@ -1,10 +1,10 @@
-import 'package:gestion_indumentaria/models/talle.dart';
+import 'package:gestion_indumentaria/models/Talle.dart';
 
 class AvioModelo {
   final int avioId;
   final bool? esPorTalle;
   final bool? esPorColor;
-  final List<talle>? talles;
+  final List<Talle>? talles;
   final int? cantidadRequerida;
 
   AvioModelo({
@@ -20,7 +20,7 @@ class AvioModelo {
       avioId: json['avioId'],
       esPorTalle: json['esPorTalle'] ?? false,
       esPorColor: json['esPorColor'] ?? false,
-      talles: (json['talles'] as List).map((t) => talle.fromJson(t)).toList(),
+      talles: (json['talles'] as List).map((t) => Talle.fromJson(t)).toList(),
       cantidadRequerida: json['cantidadRequerida'] ?? 0,
     );
   }

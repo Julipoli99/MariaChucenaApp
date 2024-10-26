@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Avio.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
 import 'package:gestion_indumentaria/models/tipoPrenda.dart';
-import 'package:gestion_indumentaria/widgets/boxDialog/BoxDialogModelo.dart';
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
 import 'package:http/http.dart' as http;
 

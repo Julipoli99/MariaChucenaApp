@@ -7,8 +7,7 @@ import 'package:gestion_indumentaria/models/Modelo.dart';
 import 'package:gestion_indumentaria/models/Proveedor.dart';
 import 'package:gestion_indumentaria/models/TipoTela.dart';
 import 'package:gestion_indumentaria/models/observacion.dart';
-import 'package:gestion_indumentaria/models/talle.dart';
-import 'package:gestion_indumentaria/models/tipoPrenda.dart';
+import 'package:gestion_indumentaria/models/Talle.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
 import 'package:gestion_indumentaria/widgets/TalleSelectorWidget.dart';
@@ -75,8 +74,8 @@ class _NuevomodeloState extends State<Nuevomodelo> {
         genero: selectedGenero!,
         observaciones: [],
         // avios: aviosSeleccionados,
-        curva: [],
-        categoriaTipo: selectedPrenda!);
+        curva: [Talle(id: 1, nombre: "T")],
+        categoriaTipo: 4);
 
     print(modeloCreado.toJson());
 
@@ -417,32 +416,38 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                     actions: [
                       ElevatedButton(
                         onPressed: () {
-                          // Agregar avio a la lista con los datos ingresados
-                          setState(() {
-                            if (selectedTipoAvioDialog != null &&
-                                _cantidadController.text.isNotEmpty) {
-                              final avioSeleccionado = aviosData.firstWhere(
-                                  (avio) =>
-                                      avio.nombre == selectedTipoAvioDialog);
-                              aviosSeleccionados.add(
-                                AvioModelo(
-                                  avioId: avioSeleccionado.id,
-                                  esPorTalle: esPorTalle,
-                                  esPorColor: esPorColor,
-                                  cantidadRequerida:
-                                      int.parse(_cantidadController.text),
-                                ),
-                              );
-                            }
-                          });
-                          // Limpiar campos
-                          setDialogState(() {
-                            selectedTipoAvioDialog = null;
-                            _cantidadController.clear();
-                            esPorTalle = false;
-                            esPorColor = false;
-                            selectedTallesDialog.clear();
-                          });
+                          if (selectedTipoAvioDialog != null &&
+                              cantidadAvioDialog != null &&
+                              cantidadAvioDialog!.isNotEmpty) {
+                            // Crear avio y actualizar lista
+                            AvioModelo avioCreado = AvioModelo(
+                              avioId: aviosData.firstWhere((av) =>
+                                  av['avio']['nombre'] ==
+                                  selectedTipoAvioDialog)['avio']['id'],
+                              esPorTalle: selectedTallesDialog.isNotEmpty,
+                              esPorColor: selectedColorDialog != null,
+                              talles: selectedTallesDialog
+                                  .map((t) => Talle(nombre: t))
+                                  .toList(),
+                              cantidadRequerida: int.parse(cantidadAvioDialog!),
+                            );
+
+                            // Usar setState para actualizar la tabla en la pantalla principal
+                            setState(() {
+                              aviosSeleccionados.add(avioCreado);
+                            });
+
+                            // Limpiar el formulario para un próximo avio
+                            setDialogState(() {
+                              selectedTipoAvioDialog = null;
+                              selectedTallesDialog.clear();
+                              selectedColorDialog = null;
+                              cantidadAvioDialog = null;
+                              _cantidadController.clear();
+                            });
+
+                            Navigator.of(context).pop(); // Cerrar el diálogo
+                          }
                         },
                         child: const Text('Agregar Avio'),
                       ),

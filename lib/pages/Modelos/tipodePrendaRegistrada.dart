@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:gestion_indumentaria/pages/Crud/modeloCrudView.dart';
 import 'package:gestion_indumentaria/pages/Crud/prendaCrudView.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
