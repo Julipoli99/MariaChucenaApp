@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http; // Importa el paquete http
+import 'dart:convert'; // Importa esto para convertir a JSON
 import 'package:gestion_indumentaria/pages/Provedores/NuevoProvedor.dart';
 import 'package:gestion_indumentaria/pages/TipoDeTelas/NuevoTipoDeTela.dart';
-// import 'package:http/http.dart' as http; // Se comentan temporalmente para el ejemplo.
-// import 'dart:convert'; // Para trabajar con JSON, se comentan por ahora.
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
-import 'package:gestion_indumentaria/widgets/HomePage.dart';
 
 class NuevasTelas extends StatefulWidget {
   const NuevasTelas({super.key});
@@ -14,39 +13,17 @@ class NuevasTelas extends StatefulWidget {
 }
 
 class _NuevasTelasState extends State<NuevasTelas> {
-  // Lista para manejar los tipos de tejidos seleccionados
   List<String> selectedTejidos = [];
 
-  // Listas simuladas para almacenar los datos en lugar de obtenerlos desde la API
-  List<String> tiposTela = ['Algodón', 'Lana', 'Poliéster', 'Seda'];
   List<String> proveedores = ['Proveedor A', 'Proveedor B', 'Proveedor C'];
 
-  @override
-  void initState() {
-    super.initState();
-    // Comentar las llamadas a la API ya que estamos simulando los datos
-    // fetchTiposTela();
-    // fetchProveedores();
-  }
-
-  // Función simulada para cargar los tipos de tela
-  Future<void> fetchTiposTela() async {
-    // Simular un tiempo de carga como si viniera de una API
-    await Future.delayed(Duration(seconds: 1));
-    // Se usan datos estáticos para simular la respuesta
-    setState(() {
-      tiposTela = ['Algodón', 'Lana', 'Poliéster', 'Seda'];
-    });
-  }
-
-  // Función simulada para cargar los proveedores
-  Future<void> fetchProveedores() async {
-    // Simular un tiempo de carga como si viniera de una API
-    await Future.delayed(Duration(seconds: 1));
-    setState(() {
-      proveedores = ['Proveedor A', 'Proveedor B', 'Proveedor C'];
-    });
-  }
+  double cantidad = 0.0;
+  String color = '';
+  bool estampado = false;
+  String descripcion = '';
+  String tipoRollo = 'PLANO'; // Valor por defecto
+  int? tipoProductoId; // Suponiendo que se cargará desde un API
+  int? proveedorId; // Suponiendo que se cargará desde un API
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +53,7 @@ class _NuevasTelasState extends State<NuevasTelas> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          SizedBox(height: 50), // Espacio inicial
+                          SizedBox(height: 50),
                           Text(
                             'Registro de Telas',
                             style: TextStyle(
@@ -98,22 +75,38 @@ class _NuevasTelasState extends State<NuevasTelas> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        buildDropdownField('Tipo de tela', tiposTela),
                         buildTipoTejidoSelector(),
                         const SizedBox(height: 10),
-                        buildDropdownField('Proveedor', proveedores),
+                        buildDropdownField('Proveedor', proveedores, (value) {
+                          // Maneja la selección del proveedor
+                        }),
                         buildTextField('Cantidad',
-                            'Cantidad de tela registrada, en metros o kilos'),
-                        buildTextField('Descripción',
-                            'Nombre del color o descripción del estampado'),
-                        buildTextField('Código',
-                            'Código de referencia proporcionado por el proveedor'),
+                            'Cantidad de tela registrada, en metros o kilos',
+                            (value) {
+                          cantidad = double.tryParse(value) ??
+                              0.0; // Convertir a double
+                        }),
+                        buildTextField('Color', 'Nombre del color', (value) {
+                          color = value; // Almacenar el color
+                        }),
+                        buildCheckboxField('Estampado', (value) {
+                          setState(() {
+                            estampado = value; // Almacenar si es estampado
+                          });
+                        }),
+                        buildTextField(
+                            'Descripción', 'Descripción del estampado',
+                            (value) {
+                          descripcion = value; // Almacenar descripción
+                        }),
                         const SizedBox(height: 20),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             ElevatedButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                _guardarTela(); // Llama al método para guardar la tela
+                              },
                               child: const Text('Guardar Tela'),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.black,
@@ -163,7 +156,41 @@ class _NuevasTelasState extends State<NuevasTelas> {
     );
   }
 
-  Widget buildDropdownField(String label, List<String> items) {
+  Future<void> _guardarTela() async {
+    final url =
+        'https://maria-chucena-api-production.up.railway.app/Rollo'; // Reemplaza con tu URL de API
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json', // Especifica el tipo de contenido
+      },
+      body: jsonEncode({
+        "cantidad": cantidad,
+        "color": color,
+        "estampado": estampado,
+        "descripcion": descripcion,
+        "tipoRollo": tipoRollo,
+        "tipoProductoId": 1,
+        "proveedorId": 1,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      // Si el servidor devuelve un OK response, procesamos los datos
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Tela registrada exitosamente')),
+      );
+    } else {
+      // Si el servidor no devuelve un OK response, lanza un error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al registrar la tela: ${response.body}')),
+      );
+    }
+  }
+
+  Widget buildDropdownField(
+      String label, List<String> items, ValueChanged<String?> onChanged) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20.0),
       child: Row(
@@ -177,7 +204,7 @@ class _NuevasTelasState extends State<NuevasTelas> {
                   child: Text(item),
                 );
               }).toList(),
-              onChanged: (value) {},
+              onChanged: onChanged,
               decoration: InputDecoration(
                 labelText: label,
                 labelStyle: const TextStyle(fontSize: 18),
@@ -218,7 +245,7 @@ class _NuevasTelasState extends State<NuevasTelas> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Tipo de Tejido',
+          'Tipo de Rollo',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 10),
@@ -245,10 +272,12 @@ class _NuevasTelasState extends State<NuevasTelas> {
     );
   }
 
-  Widget buildTextField(String label, String hint) {
+  Widget buildTextField(
+      String label, String hint, ValueChanged<String> onChanged) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20.0),
       child: TextField(
+        onChanged: onChanged,
         decoration: InputDecoration(
           labelText: label,
           labelStyle: const TextStyle(fontSize: 18),
@@ -258,6 +287,41 @@ class _NuevasTelasState extends State<NuevasTelas> {
             borderRadius: BorderRadius.circular(8),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget buildCheckboxField(String label, ValueChanged<bool> onChanged) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Checkbox(
+          value: estampado,
+          onChanged: (value) {
+            setState(() {
+              estampado = value!;
+              onChanged(value);
+            });
+          },
+        ),
+        Text(label, style: const TextStyle(fontSize: 18)),
+      ],
+    );
+  }
+
+  // Método para mostrar el usuario registrado (puedes adaptarlo)
+  Widget buildLoggedInUser(String logoUrl, String role) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Row(
+        children: [
+          CircleAvatar(
+            backgroundImage: AssetImage(logoUrl),
+            radius: 20,
+          ),
+          const SizedBox(width: 8),
+          Text(role, style: const TextStyle(color: Colors.white)),
+        ],
       ),
     );
   }

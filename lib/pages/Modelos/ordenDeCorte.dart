@@ -1,10 +1,14 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:gestion_indumentaria/models/Modelo.dart';
+import 'package:gestion_indumentaria/pages/principal.dart';
+import 'package:http/http.dart' as http;
 import 'package:gestion_indumentaria/pages/Avios/nuevoAvios.dart';
 import 'package:gestion_indumentaria/pages/Modelos/NuevoModelo.dart';
 import 'package:gestion_indumentaria/pages/TipoDeTelas/NuevoTipoDeTela.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
-import 'package:gestion_indumentaria/widgets/TalleSelectorWidget.dart'; // Import del widget
+import 'package:gestion_indumentaria/widgets/TalleSelectorWidget.dart';
 
 class OrdenDeCorteScreen extends StatefulWidget {
   @override
@@ -13,9 +17,42 @@ class OrdenDeCorteScreen extends StatefulWidget {
 
 class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
   final List<String> tiposDeTela = ['Algodón', 'Poliéster', 'Lino'];
-  final List<String> modelosACortar = ['Modelo A', 'Modelo B', 'Modelo C'];
-  final List<String> avios = ['Botones', 'Cremalleras', 'Hilos'];
-  String? selectedTalle; // Estado para el talle seleccionado
+  List<dynamic> modelosACortar = [];
+  List<String> avios = [];
+  String? selectedTalle;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchAvios();
+    fetchModelo();
+  }
+
+  Future<void> fetchAvios() async {
+    final response = await http.get(
+        Uri.parse('https://maria-chucena-api-production.up.railway.app/avio'));
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      setState(() {
+        avios = List<String>.from(data.map((avio) => avio['nombre']));
+      });
+    } else {
+      print('Error al cargar los avíos');
+    }
+  }
+
+  Future<void> fetchModelo() async {
+    final response = await http.get(Uri.parse(
+        'https://maria-chucena-api-production.up.railway.app/modelo'));
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      setState(() {
+        modelosACortar = data;
+      });
+    } else {
+      print('Error al cargar los modelos');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -92,7 +129,12 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
             children: [
               buildDropdownField('Tipo de Tela', tiposDeTela, context),
               const SizedBox(height: 10),
-              buildDropdownField('Modelo a Cortar', modelosACortar, context),
+              buildDropdownField(
+                  'Modelo a Cortar',
+                  modelosACortar
+                      .map((modelo) => modelo['nombre'].toString())
+                      .toList(),
+                  context),
               const SizedBox(height: 10),
               buildDropdownField('Avíos', avios, context),
               const SizedBox(height: 10),
@@ -124,7 +166,14 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
     return Row(
       children: [
         ElevatedButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const HomePage(),
+              ),
+            );
+          },
           child: const Text('Cancelar'),
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.grey,
@@ -160,15 +209,47 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 10),
-          buildListItem('Tela: ${tiposDeTela[0]}', context),
-          buildListItem('Modelo: ${modelosACortar[0]}', context),
-          buildListItem('Avíos: ${avios[0]}', context),
-          const SizedBox(height: 10),
+          Expanded(
+            child: ListView.builder(
+              itemCount: modelosACortar.length,
+              itemBuilder: (context, index) {
+                final modelo = modelosACortar[index];
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Modelo: ${modelo['nombre']}'),
+                    Text('Código: ${modelo['codigo']}'),
+                    Text('Fecha de Creación: ${modelo['fechaCreacion']}'),
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Observaciones:',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    ...modelo['observaciones']
+                        .map<Widget>((obs) => Text(
+                              '${obs['titulo']}: ${obs['descripcion']}',
+                            ))
+                        .toList(),
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Avíos:',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    ...modelo['avios']
+                        .map<Widget>((avioItem) => Text(
+                              '${avioItem['avio']['nombre']} - Cantidad: ${avioItem['cantidadRequerida']}',
+                            ))
+                        .toList(),
+                    const Divider(),
+                  ],
+                );
+              },
+            ),
+          ),
           const Text(
             'Detalles adicionales:',
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
-          const Text('• Fecha de creación: 10-10-2021'),
           const Text('• Estado: En progreso'),
         ],
       ),
@@ -247,25 +328,11 @@ Widget buildTextField(String label) {
       ),
       const SizedBox(height: 5),
       TextField(
-        maxLines: 3,
         decoration: InputDecoration(
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
           ),
         ),
-      ),
-    ],
-  );
-}
-
-Widget buildListItem(String text, BuildContext context) {
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-      Text(text),
-      IconButton(
-        icon: const Icon(Icons.close),
-        onPressed: () {},
       ),
     ],
   );
