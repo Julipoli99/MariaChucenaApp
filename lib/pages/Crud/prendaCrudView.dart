@@ -1,9 +1,10 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Avio.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
 import 'package:gestion_indumentaria/models/tipoPrenda.dart';
+import 'package:gestion_indumentaria/widgets/boxDialog/BoxDialogPrendaModificador.dart';
+import 'package:gestion_indumentaria/widgets/boxDialog/boxdialogoPrenda.dart';
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
 import 'package:http/http.dart' as http;
 
@@ -26,37 +27,85 @@ class _PrendaCrudViewState extends State<Prendacrudview> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: TablaCrud<Prenda>(
-        tituloAppBar: 'Prendas registradas', // Titulo del appBar
-        encabezados: const [
-          "ID",
-          "NOMBRE",
-          "ACCIONES" // Agregado para reflejar el número de columnas
-        ], // Encabezados
-        items: prendas, // Lista de modelos
-        dataMapper: [
-          // Celdas/valores
-          (prenda) => Text(prenda.id.toString()),
-          (prenda) => Text(prenda.nombre ?? 'Sin nombre'),
-          (prenda) => Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      print('Edicion para prenda con id: ${prenda.id}');
-                    },
-                    icon: const Icon(Icons.edit),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AddPrendaDialog(
+                        onPrendaAdded: (Prenda nuevaPrenda) {
+                          setState(() {
+                            prendas.add(nuevaPrenda); // Agrega el objeto Prenda
+                          });
+                        },
+                      ),
+                    );
+                  },
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.blue[300],
+                    foregroundColor: Colors.white,
                   ),
-                  IconButton(
-                    onPressed: () {
-                      _confirmDelete(
-                          context, prenda.id); // Confirmación antes de eliminar
-                      print('Prenda por borrar: ${prenda.id}');
-                    },
-                    icon: const Icon(Icons.delete),
-                  ),
-                ],
-              ),
+                  child: const Text('Nuevo registro'),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: TablaCrud<Prenda>(
+              tituloAppBar: 'Prendas registradas', // Titulo del appBar
+              encabezados: const [
+                "ID",
+                "NOMBRE",
+                "ACCIONES" // Agregado para reflejar el número de columnas
+              ], // Encabezados
+              items: prendas, // Lista de modelos
+              dataMapper: [
+                // Celdas/valores
+                (prenda) => Text(prenda.id.toString()),
+                (prenda) => Text(prenda.nombre ?? 'Sin nombre'),
+                (prenda) => Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) => ModificadorPrendaDialog(
+                                prenda: prenda,
+                                onPrendaModified: (Prenda updatedPrenda) {
+                                  setState(() {
+                                    // Actualizar la prenda en la lista
+                                    final index = prendas.indexWhere(
+                                        (p) => p.id == updatedPrenda.id);
+                                    if (index != -1) {
+                                      prendas[index] = updatedPrenda;
+                                    }
+                                  });
+                                },
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.edit),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            _confirmDelete(context,
+                                prenda.id); // Confirmación antes de eliminar
+                            print('Prenda por borrar: ${prenda.id}');
+                          },
+                          icon: const Icon(Icons.delete),
+                        ),
+                      ],
+                    ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -86,7 +135,7 @@ class _PrendaCrudViewState extends State<Prendacrudview> {
 
   Future<void> deletePrenda(int id) async {
     final url =
-        'https://maria-chucena-api-production.up.railway.app/categoria/$id'; // Endpoint para eliminar un avio
+        'https://maria-chucena-api-production.up.railway.app/categoria/$id';
     final uri = Uri.parse(url);
 
     try {
@@ -94,8 +143,7 @@ class _PrendaCrudViewState extends State<Prendacrudview> {
 
       if (response.statusCode == 200 || response.statusCode == 204) {
         setState(() {
-          prendas.removeWhere(
-              (prenda) => prenda.id == id); // Remover avio localmente
+          prendas.removeWhere((prenda) => prenda.id == id);
         });
         print('prenda eliminado correctamente.');
       } else {
