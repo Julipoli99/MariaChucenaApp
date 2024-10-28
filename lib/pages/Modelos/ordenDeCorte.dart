@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
+import 'package:gestion_indumentaria/models/Talle.dart';
 import 'package:gestion_indumentaria/pages/principal.dart';
 import 'package:http/http.dart' as http;
 import 'package:gestion_indumentaria/pages/Avios/nuevoAvios.dart';
@@ -11,6 +12,8 @@ import 'package:gestion_indumentaria/widgets/HomePage.dart';
 import 'package:gestion_indumentaria/widgets/TalleSelectorWidget.dart';
 
 class OrdenDeCorteScreen extends StatefulWidget {
+  const OrdenDeCorteScreen({super.key});
+
   @override
   _OrdenDeCorteScreenState createState() => _OrdenDeCorteScreenState();
 }
@@ -19,7 +22,7 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
   final List<String> tiposDeTela = ['Algodón', 'Poliéster', 'Lino'];
   List<dynamic> modelosACortar = [];
   List<String> avios = [];
-  String? selectedTalle;
+  List<Talle> selectedTalle = [];
 
   @override
   void initState() {
@@ -141,10 +144,10 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
               buildTextField('Observaciones'),
               const SizedBox(height: 10),
               TalleSelector(
-                selectedTalle: selectedTalle,
-                onTalleSelected: (talle) {
+                selectedTalles: selectedTalle,
+                onTalleSelected: (talles) {
                   setState(() {
-                    selectedTalle = talle;
+                    selectedTalle = talles;
                   });
                 },
               ),

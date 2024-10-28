@@ -1,16 +1,16 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:gestion_indumentaria/models/Avio.dart';
 import 'package:gestion_indumentaria/models/AviosModelo.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
 import 'package:gestion_indumentaria/models/observacion.dart';
 import 'package:gestion_indumentaria/models/Talle.dart';
+import 'package:gestion_indumentaria/pages/Modelos/NuevoModelo.dart';
 import 'package:gestion_indumentaria/widgets/boxDialog/BoxDialogModelo.dart';
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
 import 'package:http/http.dart' as http;
 
 class ModelCrudView extends StatefulWidget {
-  ModelCrudView({super.key});
+  const ModelCrudView({super.key});
 
   @override
   State<ModelCrudView> createState() => _ModelCrudViewState();
@@ -44,47 +44,92 @@ class _ModelCrudViewState extends State<ModelCrudView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: TablaCrud<Modelo>(
-        tituloAppBar: 'Modelos registrados',
-        encabezados: const [
-          "ID",
-          "CODIGO",
-          "NOMBRE",
-          "GENERO",
-          "TIPO",
-          "OPCIONES"
-        ],
-        items: models,
-        dataMapper: [
-          (model) => Text(model.id.toString()),
-          (model) => Text(model.codigo.toString()),
-          (model) => Text(model.nombre),
-          (model) => Text(model.genero),
-          (model) => Text(model.categoriaTipo as String),
-          (model) => Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      showBox(model);
-                    },
-                    icon: const Icon(Icons.remove_red_eye_outlined),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      print('Edición para modelo con id: ${model.id}');
-                      // Aquí podrías abrir un diálogo similar para editar el modelo
-                    },
-                    icon: const Icon(Icons.edit),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      deleteModel(model.id);
-                    },
-                    icon: const Icon(Icons.delete),
-                  ),
-                ],
-              ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const Nuevomodelo(), // Pantalla para crear nuevo modelo
+                          ),
+                        );
+                      },
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.blue[300],
+                        foregroundColor: Colors.white,
+                      ),
+                      child: const Text('Nuevo modelo'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        // Aquí podrías abrir un diálogo o una nueva pantalla para seleccionar el modelo a modificar
+                        print('Seleccionar modelo para modificar');
+                      },
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.blue[300],
+                        foregroundColor: Colors.white,
+                      ),
+                      child: const Text('Modificar modelo'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: TablaCrud<Modelo>(
+              tituloAppBar: 'Modelos registrados',
+              encabezados: const [
+                "ID",
+                "CODIGO",
+                "NOMBRE",
+                "GENERO",
+                "TIPO",
+                "OPCIONES"
+              ],
+              items: models,
+              dataMapper: [
+                (model) => Text(model.id.toString()),
+                (model) => Text(model.codigo),
+                (model) => Text(model.nombre),
+                (model) => Text(model.genero),
+                (model) => Text(model.categoriaTipo.toString()),
+                (model) => Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            showBox(model);
+                          },
+                          icon: const Icon(Icons.remove_red_eye_outlined),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            print('Edición para modelo con id: ${model.id}');
+                            // Aquí podrías abrir un diálogo o una pantalla para editar el modelo
+                          },
+                          icon: const Icon(Icons.edit),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            deleteModel(model.id);
+                          },
+                          icon: const Icon(Icons.delete),
+                        ),
+                      ],
+                    ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -96,32 +141,27 @@ class _ModelCrudViewState extends State<ModelCrudView> {
 
     try {
       final response = await http.get(uri);
+      print("Respuesta de la API: ${response.body}");
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = jsonDecode(response.body);
 
         setState(() {
           models = jsonData.map((json) {
-            // Verifica si 'avios' existe y es una lista antes de mapear
-            List<AvioModelo> avio = json['avios'] != null
-                ? (json['avios'] as List<dynamic>)
-                    .map((av) => AvioModelo.fromJson(av))
-                    .toList()
-                : [];
-
-            // Verifica si 'observaciones' existe y es una lista antes de mapear
-            List<ObservacionModel> observaciones = json['observaciones'] != null
-                ? (json['observaciones'] as List<dynamic>)
-                    .map((obs) => ObservacionModel.fromJson(obs))
-                    .toList()
-                : [];
-
-            // Verifica si 'talle' existe y es una lista antes de mapear
-            List<Talle> curva = json['talle'] != null
-                ? (json['talle'] as List<dynamic>)
-                    .map((t) => Talle.fromJson(t))
-                    .toList()
-                : [];
+            // Manejo seguro de nulos
+            List<AvioModelo> avio = (json['avios'] as List<dynamic>?)
+                    ?.map((av) => AvioModelo.fromJson(av))
+                    .toList() ??
+                [];
+            List<ObservacionModel> observaciones =
+                (json['observaciones'] as List<dynamic>?)
+                        ?.map((obs) => ObservacionModel.fromJson(obs))
+                        .toList() ??
+                    [];
+            List<Talle> curva = (json['talle'] as List<dynamic>?)
+                    ?.map((t) => Talle.fromJson(t))
+                    .toList() ??
+                [];
 
             return Modelo(
               id: json['id'],
@@ -132,13 +172,15 @@ class _ModelCrudViewState extends State<ModelCrudView> {
               tieneTelaAuxiliar: json['tieneTelaAuxiliar'],
               avios: avio,
               curva: curva,
-              categoriaTipo: json['categoria']['tipo'],
+              categoriaTipo: json['categoria'] != null
+                  ? json['categoria']['tipo']
+                  : null, // Asegúrate de manejar nulos
               observaciones: observaciones,
             );
           }).toList();
         });
 
-        print("Modelos cargados");
+        print("Modelos cargados: ${models.length}");
       } else {
         print("Error al cargar modelos: ${response.statusCode}");
       }

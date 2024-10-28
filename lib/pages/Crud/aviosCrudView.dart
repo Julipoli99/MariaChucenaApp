@@ -67,14 +67,6 @@ class _AvioCrudViewState extends State<Avioscrudview> {
                     ),
                   ],
                 ),
-                TextButton(
-                  onPressed: () {},
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    foregroundColor: Colors.white,
-                  ),
-                  child: const Text('Inicio'),
-                ),
               ],
             ),
           ),

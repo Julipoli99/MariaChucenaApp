@@ -27,15 +27,16 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   String? selectedGenero;
   String? selectedEdad;
   String? selectedAvios;
-  String? selectedPrenda;
-  String? selectedTallesForm; // Lista de talles en el formulario principal
+  int? selectedPrenda;
+  List<Talle> selectedTallesForm =
+      []; // Lista de talles en el formulario principal
   String? codigoModelo;
   String? nombreModelo;
   List<ObservacionModel>? observaciones;
   String? cantidad;
   String? tipoEdad;
-  String? titulo;
-  String? descripcion;
+  String tituloObservacion = "Sin titulo";
+  String descripcionObservacion = "Sin descripción";
   bool? selectedAuxForm;
   bool? selectedPrimForm;
   final List<String> auxOptions = ['auxiliar'];
@@ -63,7 +64,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   void _createPost() {
     //Avios(nombre: selectedTipoAvioDialog!, proveedores: "Proveedor1");
     Modelo modeloCreado = Modelo(
-        id: 10000,
+        id: 0,
         codigo: " codigo-prueba",
         nombre: nombreModelo!,
         tieneTelaSecundaria: selectedPrimForm!,
@@ -71,11 +72,14 @@ class _NuevomodeloState extends State<Nuevomodelo> {
         genero: selectedGenero!,
         observaciones: [
           ObservacionModel(
-              id: 1, titulo: "Probando observacion", descripcion: "prueba")
+            id: 1,
+            titulo: tituloObservacion,
+            descripcion: descripcionObservacion,
+          )
         ],
         avios: aviosSeleccionados,
-        curva: [Talle(id: 1, nombre: "T1")],
-        categoriaTipo: 4);
+        curva: selectedTallesForm,
+        categoriaTipo: selectedPrenda!);
 
     print('MODELO POST: ${modeloCreado.toJson()}');
 
@@ -174,21 +178,22 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                             onChanged: (value) {
                               setState(() {
                                 nombreModelo = value;
-                                print('Nombre del modelo: $nombreModelo');
                               });
                             },
                             decoration: const InputDecoration(
                                 labelText: 'Nombre de Modelo'),
                           ),
                           const SizedBox(height: 15),
-                          Prendaselectorwidget(
-                            selectedprenda: selectedPrenda,
-                            onPrendaSelected: (prenda) {
+                          PrendaSelectorWidget(
+                            selectedPrendaId: selectedPrenda,
+                            onPrendaSelected: (id) {
                               setState(() {
-                                selectedPrenda = prenda;
+                                selectedPrenda =
+                                    id; // Guarda el id seleccionado
                               });
                             },
                           ),
+
                           const SizedBox(height: 15),
                           _buildRadioGroup(
                             'Género',
@@ -197,7 +202,6 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                             (value) {
                               setState(() {
                                 selectedGenero = value;
-                                print('Genero del modelo: $selectedGenero');
                               });
                             },
                           ),
@@ -209,7 +213,6 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                             (value) {
                               setState(() {
                                 selectedEdad = value;
-                                print('Genero del modelo: $selectedEdad');
                               });
                             },
                           ),
@@ -228,8 +231,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                           TextField(
                             onChanged: (value) {
                               setState(() {
-                                titulo = value;
-                                print('Título: $titulo');
+                                tituloObservacion = value;
                               });
                             },
                             decoration:
@@ -238,8 +240,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                           TextField(
                             onChanged: (value) {
                               setState(() {
-                                descripcion = value;
-                                print('Subtítulo: $descripcion');
+                                descripcionObservacion = value;
                               });
                             },
                             decoration:
@@ -247,10 +248,10 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                           ),
                           const SizedBox(height: 15),
                           TalleSelector(
-                            selectedTalle: selectedTallesForm,
-                            onTalleSelected: (talle) {
+                            selectedTalles: selectedTallesForm,
+                            onTalleSelected: (talles) {
                               setState(() {
-                                selectedTallesForm = talle;
+                                selectedTallesForm = talles;
                               });
                             },
                           ),
