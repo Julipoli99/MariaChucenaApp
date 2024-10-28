@@ -34,8 +34,8 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   List<ObservacionModel>? observaciones;
   String? cantidad;
   String? tipoEdad;
-  String? titulo;
-  String? descripcion;
+  String tituloObservacion = "Sin titulo";
+  String descripcionObservacion = "Sin descripción";
   bool? selectedAuxForm;
   bool? selectedPrimForm;
   final List<String> auxOptions = ['auxiliar'];
@@ -64,14 +64,17 @@ class _NuevomodeloState extends State<Nuevomodelo> {
     //Avios(nombre: selectedTipoAvioDialog!, proveedores: "Proveedor1");
     Modelo modeloCreado = Modelo(
         id: 0,
-        codigo: " ",
+        codigo: " codigo-prueba",
         nombre: nombreModelo!,
         tieneTelaSecundaria: selectedPrimForm!,
         tieneTelaAuxiliar: selectedAuxForm!,
         genero: selectedGenero!,
         observaciones: [
           ObservacionModel(
-              id: 1, titulo: "Probando observacion", descripcion: "prueba")
+            id: 1,
+            titulo: tituloObservacion,
+            descripcion: descripcionObservacion,
+          )
         ],
         avios: aviosSeleccionados,
         curva: [Talle(id: 1, nombre: "T1")],
@@ -230,8 +233,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                           TextField(
                             onChanged: (value) {
                               setState(() {
-                                titulo = value;
-                                print('Título: $titulo');
+                                tituloObservacion = value;
                               });
                             },
                             decoration:
@@ -240,8 +242,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                           TextField(
                             onChanged: (value) {
                               setState(() {
-                                descripcion = value;
-                                print('Subtítulo: $descripcion');
+                                descripcionObservacion = value;
                               });
                             },
                             decoration:

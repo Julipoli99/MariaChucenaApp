@@ -6,7 +6,7 @@ import 'Talle.dart'; // Asegúrate de que este archivo exista
 
 class Modelo {
   final int id;
-  final String? codigo;
+  final String codigo;
   final String nombre;
   final bool tieneTelaSecundaria;
   final bool tieneTelaAuxiliar;
@@ -19,7 +19,7 @@ class Modelo {
 
   Modelo({
     required this.id,
-    this.codigo,
+    required this.codigo,
     required this.nombre,
     required this.tieneTelaSecundaria,
     required this.tieneTelaAuxiliar,

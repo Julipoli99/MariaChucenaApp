@@ -55,7 +55,7 @@ class Modelosregistradospage extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               // Aquí mostramos el AviosCrudView
-              SizedBox(
+              const SizedBox(
                 height: 600, // Ajusta el alto según lo necesario
                 child: ModelCrudView(),
               ),

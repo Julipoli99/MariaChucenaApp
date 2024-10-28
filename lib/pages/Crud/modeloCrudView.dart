@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:gestion_indumentaria/models/Avio.dart';
 import 'package:gestion_indumentaria/models/AviosModelo.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
 import 'package:gestion_indumentaria/models/observacion.dart';
@@ -10,7 +9,7 @@ import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
 import 'package:http/http.dart' as http;
 
 class ModelCrudView extends StatefulWidget {
-  ModelCrudView({super.key});
+  const ModelCrudView({super.key});
 
   @override
   State<ModelCrudView> createState() => _ModelCrudViewState();
@@ -57,10 +56,10 @@ class _ModelCrudViewState extends State<ModelCrudView> {
         items: models,
         dataMapper: [
           (model) => Text(model.id.toString()),
-          (model) => Text(model.codigo.toString()),
+          (model) => Text(model.codigo),
           (model) => Text(model.nombre),
           (model) => Text(model.genero),
-          (model) => Text(model.categoriaTipo as String),
+          (model) => Text(model.categoriaTipo.toString()),
           (model) => Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
