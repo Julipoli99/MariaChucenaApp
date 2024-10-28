@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:gestion_indumentaria/models/Talle.dart'; // Asegúrate de importar la clase Talle aquí
+import 'package:gestion_indumentaria/models/Talle.dart';
 import 'package:gestion_indumentaria/widgets/boxDialog/boxdialogoTalle.dart';
 
 class TalleSelector extends StatefulWidget {
