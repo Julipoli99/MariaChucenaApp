@@ -28,7 +28,8 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   String? selectedEdad;
   String? selectedAvios;
   int? selectedPrenda;
-  String? selectedTallesForm; // Lista de talles en el formulario principal
+  List<Talle> selectedTallesForm =
+      []; // Lista de talles en el formulario principal
   String? codigoModelo;
   String? nombreModelo;
   List<ObservacionModel>? observaciones;
@@ -77,7 +78,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
           )
         ],
         avios: aviosSeleccionados,
-        curva: [Talle(id: 1, nombre: "T1")],
+        curva: selectedTallesForm,
         categoriaTipo: selectedPrenda!);
 
     print('MODELO POST: ${modeloCreado.toJson()}');
@@ -177,7 +178,6 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                             onChanged: (value) {
                               setState(() {
                                 nombreModelo = value;
-                                print('Nombre del modelo: $nombreModelo');
                               });
                             },
                             decoration: const InputDecoration(
@@ -202,7 +202,6 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                             (value) {
                               setState(() {
                                 selectedGenero = value;
-                                print('Genero del modelo: $selectedGenero');
                               });
                             },
                           ),
@@ -214,7 +213,6 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                             (value) {
                               setState(() {
                                 selectedEdad = value;
-                                print('Genero del modelo: $selectedEdad');
                               });
                             },
                           ),
@@ -250,10 +248,10 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                           ),
                           const SizedBox(height: 15),
                           TalleSelector(
-                            selectedTalle: selectedTallesForm,
-                            onTalleSelected: (talle) {
+                            selectedTalles: selectedTallesForm,
+                            onTalleSelected: (talles) {
                               setState(() {
-                                selectedTallesForm = talle;
+                                selectedTallesForm = talles;
                               });
                             },
                           ),
