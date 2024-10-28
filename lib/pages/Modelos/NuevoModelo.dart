@@ -27,7 +27,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   String? selectedGenero;
   String? selectedEdad;
   String? selectedAvios;
-  String? selectedPrenda;
+  int? selectedPrenda;
   String? selectedTallesForm; // Lista de talles en el formulario principal
   String? codigoModelo;
   String? nombreModelo;
@@ -63,8 +63,8 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   void _createPost() {
     //Avios(nombre: selectedTipoAvioDialog!, proveedores: "Proveedor1");
     Modelo modeloCreado = Modelo(
-        id: 10000,
-        codigo: " codigo-prueba",
+        id: 0,
+        codigo: " ",
         nombre: nombreModelo!,
         tieneTelaSecundaria: selectedPrimForm!,
         tieneTelaAuxiliar: selectedAuxForm!,
@@ -75,7 +75,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
         ],
         avios: aviosSeleccionados,
         curva: [Talle(id: 1, nombre: "T1")],
-        categoriaTipo: 4);
+        categoriaTipo: selectedPrenda!);
 
     print('MODELO POST: ${modeloCreado.toJson()}');
 
@@ -181,14 +181,16 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                                 labelText: 'Nombre de Modelo'),
                           ),
                           const SizedBox(height: 15),
-                          Prendaselectorwidget(
-                            selectedprenda: selectedPrenda,
-                            onPrendaSelected: (prenda) {
+                          PrendaSelectorWidget(
+                            selectedPrendaId: selectedPrenda,
+                            onPrendaSelected: (id) {
                               setState(() {
-                                selectedPrenda = prenda;
+                                selectedPrenda =
+                                    id; // Guarda el id seleccionado
                               });
                             },
                           ),
+
                           const SizedBox(height: 15),
                           _buildRadioGroup(
                             'Género',

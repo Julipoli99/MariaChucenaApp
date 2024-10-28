@@ -15,7 +15,7 @@ class Prendacrudview extends StatefulWidget {
 }
 
 class _PrendaCrudViewState extends State<Prendacrudview> {
-  List<prenda> prendas = [];
+  List<Prenda> prendas = [];
 
   @override
   void initState() {
@@ -26,7 +26,7 @@ class _PrendaCrudViewState extends State<Prendacrudview> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: TablaCrud<prenda>(
+      body: TablaCrud<Prenda>(
         tituloAppBar: 'Prendas registradas', // Titulo del appBar
         encabezados: const [
           "ID",
@@ -74,7 +74,7 @@ class _PrendaCrudViewState extends State<Prendacrudview> {
 
     setState(() {
       prendas = jsonData.map((json) {
-        return prenda(
+        return Prenda(
           id: json['id'] ?? 0, // Asignar un valor por defecto si es null
           nombre: json['tipo'] ?? 'Sin nombre', // Asignar un valor por defecto
         );
