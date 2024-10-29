@@ -90,6 +90,7 @@ class _ProvedorCrudViewState extends State<Provedorcrudview> {
                         ),
                         IconButton(
                           onPressed: () {
+                            _confirmDelete(context, proveedor.id);
                             print('proveedor borrado: ${proveedor.nombre}');
                           },
                           icon: const Icon(Icons.delete),

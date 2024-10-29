@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/TipoProducto.dart';
+import 'package:gestion_indumentaria/pages/StockTelas/stock_Control_Page.dart';
+import 'package:gestion_indumentaria/widgets/HomePage.dart';
 import 'package:http/http.dart' as http; // Importa el paquete http
 import 'dart:convert'; // Importa esto para convertir a JSON
 import 'package:gestion_indumentaria/pages/Provedores/NuevoProvedor.dart';
@@ -16,7 +18,8 @@ class NuevasTelas extends StatefulWidget {
 class _NuevasTelasState extends State<NuevasTelas> {
   List<String> selectedTejidos = [];
   TipoEnum? selectedTipo;
-  List<String> proveedores = ['Proveedor A', 'Proveedor B', 'Proveedor C'];
+  List<String> proveedores = [];
+  int? selectedProveedorId;
 
   double cantidad = 0.0;
   String color = '';
@@ -24,7 +27,34 @@ class _NuevasTelasState extends State<NuevasTelas> {
   String descripcion = '';
   String tipoRollo = ''; // Valor por defecto
   int? tipoProductoId; // Suponiendo que se cargará desde un API
-  int? proveedorId; // Suponiendo que se cargará desde un API
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarProveedores(); // Cargar proveedores al iniciar
+  }
+
+  Future<void> _cargarProveedores() async {
+    final url =
+        'https://maria-chucena-api-production.up.railway.app/proveedor'; // URL de la API de proveedores
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      // Éxito, parsear los datos
+      final List<dynamic> data = jsonDecode(response.body);
+      setState(() {
+        proveedores = data
+            .map((proveedor) => proveedor['nombre'].toString())
+            .toList(); // Suponiendo que el JSON tiene un campo 'nombre'
+      });
+    } else {
+      // Manejar error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Error al cargar proveedores: ${response.body}')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,26 +111,28 @@ class _NuevasTelasState extends State<NuevasTelas> {
                         buildTipoProductoSelector(),
                         const SizedBox(height: 10),
                         buildDropdownField('Proveedor', proveedores, (value) {
-                          // Maneja la selección del proveedor
+                          setState(() {
+                            selectedProveedorId = proveedores.indexOf(
+                                value!); // Asignar el índice del proveedor seleccionado
+                          });
                         }),
                         buildTextField('Cantidad',
                             'Cantidad de tela registrada, en metros o kilos',
                             (value) {
-                          cantidad = double.tryParse(value) ??
-                              0.0; // Convertir a double
+                          cantidad = double.tryParse(value) ?? 0.0;
                         }),
                         buildTextField('Color', 'Nombre del color', (value) {
-                          color = value; // Almacenar el color
+                          color = value;
                         }),
                         buildCheckboxField('Estampado', (value) {
                           setState(() {
-                            estampado = value; // Almacenar si es estampado
+                            estampado = value!;
                           });
                         }),
                         buildTextField(
                             'Descripción', 'Descripción del estampado',
                             (value) {
-                          descripcion = value; // Almacenar descripción
+                          descripcion = value;
                         }),
                         const SizedBox(height: 20),
                         Row(
@@ -108,7 +140,7 @@ class _NuevasTelasState extends State<NuevasTelas> {
                           children: [
                             ElevatedButton(
                               onPressed: () {
-                                _guardarTela(); // Llama al método para guardar la tela
+                                _guardarTela();
                               },
                               child: const Text('Guardar Tela'),
                               style: ElevatedButton.styleFrom(
@@ -160,35 +192,33 @@ class _NuevasTelasState extends State<NuevasTelas> {
   }
 
   Future<void> _guardarTela() async {
-    // Recolectar datos
     final datosTela = {
       "cantidad": cantidad,
       "color": color,
       "estampado": estampado,
       "descripcion": descripcion,
       "tipoRollo": tipoRollo,
-      "tipoProductoId": tipoProductoId, // Cambiar esto para cargar del API
-      "proveedorId": 1, // Cambiar esto para cargar del API
+      "tipoProductoId": tipoProductoId,
+      "proveedorId":
+          selectedProveedorId != null ? selectedProveedorId! + 1 : null,
     };
-    print(datosTela);
-    // URL del endpoint
     final url = 'https://maria-chucena-api-production.up.railway.app/Rollo';
 
-    // Enviar solicitud POST
     final response = await http.post(
       Uri.parse(url),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(datosTela), // Convertir a JSON
+      body: jsonEncode(datosTela),
     );
 
-    // Manejar la respuesta
-    if (response.statusCode == 200) {
-      // Éxito
+    if (response.statusCode == 201) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Tela registrada exitosamente')),
       );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const Stockcontrolpage()),
+      );
     } else {
-      // Error
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error al registrar la tela: ${response.body}')),
       );
@@ -261,14 +291,11 @@ class _NuevasTelasState extends State<NuevasTelas> {
             return ChoiceChip(
               label: Text(tipoTejido),
               selected: tipoRollo == tipoTejido,
-              onSelected: (selected) {
+              onSelected: (isSelected) {
                 setState(() {
-                  tipoRollo = selected
-                      ? tipoTejido
-                      : ''; // Asigna el valor seleccionado
+                  tipoRollo = isSelected ? tipoTejido : '';
                 });
               },
-              labelStyle: const TextStyle(fontSize: 16),
             );
           }).toList(),
         ),
@@ -309,16 +336,15 @@ class _NuevasTelasState extends State<NuevasTelas> {
   }
 
   Widget buildTextField(
-      String label, String hint, ValueChanged<String> onChanged) {
+      String label, String hintText, ValueChanged<String> onChanged) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20.0),
-      child: TextField(
+      child: TextFormField(
         onChanged: onChanged,
         decoration: InputDecoration(
           labelText: label,
+          hintText: hintText,
           labelStyle: const TextStyle(fontSize: 18),
-          hintText: hint,
-          hintStyle: const TextStyle(color: Colors.grey),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
           ),
@@ -327,36 +353,19 @@ class _NuevasTelasState extends State<NuevasTelas> {
     );
   }
 
-  Widget buildCheckboxField(String label, ValueChanged<bool> onChanged) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        Checkbox(
-          value: estampado,
-          onChanged: (value) {
-            setState(() {
-              estampado = value!;
-              onChanged(value);
-            });
-          },
-        ),
-        Text(label, style: const TextStyle(fontSize: 18)),
-      ],
-    );
-  }
-
-  // Método para mostrar el usuario registrado (puedes adaptarlo)
-  Widget buildLoggedInUser(String logoUrl, String role) {
+  Widget buildCheckboxField(String label, ValueChanged<bool?> onChanged) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding: const EdgeInsets.only(bottom: 20.0),
       child: Row(
         children: [
-          CircleAvatar(
-            backgroundImage: AssetImage(logoUrl),
-            radius: 20,
+          Checkbox(
+            value: estampado,
+            onChanged: onChanged,
           ),
-          const SizedBox(width: 8),
-          Text(role, style: const TextStyle(color: Colors.white)),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 16),
+          ),
         ],
       ),
     );
