@@ -1,17 +1,16 @@
-// ignore: constant_identifier_names
 enum TipoEnum { AVIO, TELA }
 
 // ignore: constant_identifier_names
-enum UnidadMetricaEnum { UNIDAD, METRO, KILO }
+enum UnidadMetricaEnum { UNIDAD, METROS, KILOS }
 
 class TipoProducto {
-  int? id; // El ID se auto genera
+  int id; // El ID se auto genera
   String nombre;
   TipoEnum tipo;
   UnidadMetricaEnum unidadMetrica;
 
   TipoProducto({
-    this.id,
+    required this.id,
     required this.nombre,
     required this.tipo,
     required this.unidadMetrica,
@@ -20,7 +19,7 @@ class TipoProducto {
   // Método para convertir de JSON a TipoProducto
   factory TipoProducto.fromJson(Map<String, dynamic> json) {
     return TipoProducto(
-      id: json['id'] as int?,
+      id: json['id'] ?? 0,
       nombre: json['nombre'] as String,
       tipo: TipoEnum.values
           .firstWhere((e) => e.toString().split('.').last == json['tipo']),

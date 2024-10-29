@@ -7,6 +7,7 @@ import 'package:gestion_indumentaria/models/Avio.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
 import 'package:gestion_indumentaria/models/observacion.dart';
 import 'package:gestion_indumentaria/models/Talle.dart';
+import 'package:gestion_indumentaria/pages/Modelos/ModelosRegistradosPage.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
 import 'package:gestion_indumentaria/widgets/TalleSelectorWidget.dart';
@@ -107,7 +108,11 @@ class _NuevomodeloState extends State<Nuevomodelo> {
       // Verificar el estado de la respuesta
       if (response.statusCode == 201) {
         print("Modelo creado con éxito: ${response.body}");
-
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const Modelosregistradospage()),
+        );
         // Suponiendo que el servidor devuelve el modelo completo, lo puedes parsear
         Modelo modeloCreado = Modelo.fromJson(jsonDecode(response.body));
         print("Código del modelo creado: ${modeloCreado.codigo}");

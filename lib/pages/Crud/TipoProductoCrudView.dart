@@ -2,20 +2,22 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Tela.dart';
+import 'package:gestion_indumentaria/models/TipoProducto.dart';
 import 'package:gestion_indumentaria/pages/StockTelas/nuevaTela.dart';
+import 'package:gestion_indumentaria/pages/TipoProducto/nuevoRegistro.dart';
 import 'package:gestion_indumentaria/pages/principal.dart';
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
 import 'package:http/http.dart' as http;
 
-class Telacrudview extends StatefulWidget {
-  const Telacrudview({super.key});
+class TipoProductocrudview extends StatefulWidget {
+  const TipoProductocrudview({super.key});
 
   @override
-  State<Telacrudview> createState() => _telaCrudViewState();
+  State<TipoProductocrudview> createState() => _TipoCrudViewState();
 }
 
-class _telaCrudViewState extends State<Telacrudview> {
-  List<Tela> telas = [];
+class _TipoCrudViewState extends State<TipoProductocrudview> {
+  List<TipoProducto> productos = [];
 
   @override
   void initState() {
@@ -38,7 +40,7 @@ class _telaCrudViewState extends State<Telacrudview> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const NuevasTelas(),
+                        builder: (context) => const NuevoTipoDeProducto(),
                       ),
                     );
                   },
@@ -65,7 +67,7 @@ class _telaCrudViewState extends State<Telacrudview> {
             ),
           ),
           Expanded(
-            child: TablaCrud<Tela>(
+            child: TablaCrud<TipoProducto>(
               tituloAppBar: 'Telas registradas', // Titulo del appBar
               encabezados: const [
                 "ID",
@@ -74,26 +76,20 @@ class _telaCrudViewState extends State<Telacrudview> {
                 "TIPO DE ROLLO",
                 "OPCIONES"
               ], // Encabezados visibles en la tabla
-              items: telas, // Lista de telas
+              items: productos, // Lista de telas
               dataMapper: [
                 // Celdas/valores visibles en la tabla
-                (tela) => Text(tela.id.toString()),
-                (tela) => Text(tela.cantidad.toString()),
-                (tela) => Text(tela.color),
-                (tela) => Text(tela.tipoDeRollo.toString()),
+                (producto) => Text(producto.id.toString()),
+                (producto) => Text(producto.nombre.toString()),
+                (producto) => Text(producto.tipo.name),
+                (producto) => Text(producto.unidadMetrica.name),
                 // Botones de opciones
-                (tela) => Row(
+                (producto) => Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         IconButton(
                           onPressed: () {
-                            _showDetailDialog(context, tela);
-                          },
-                          icon: const Icon(Icons.remove_red_eye_outlined),
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            _confirmDelete(context, tela.id);
+                            _confirmDelete(context, producto.id);
                           },
                           icon: const Icon(Icons.delete),
                         ),
@@ -107,60 +103,31 @@ class _telaCrudViewState extends State<Telacrudview> {
     );
   }
 
-  // Función para mostrar el diálogo con detalles adicionales de una tela
-  void _showDetailDialog(BuildContext context, Tela tela) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Detalles de la Tela ID: ${tela.id}'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("Estampado: ${tela.estampado}"),
-              Text("Descripción: ${tela.descripcion}"),
-              Text("Tipo Producto ID: ${tela.tipoProductoId}"),
-              Text("Proveedor ID: ${tela.proveedorId}"),
-            ],
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cerrar'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   void fetchModels() async {
-    const url = "https://maria-chucena-api-production.up.railway.app/rollo";
+    const url =
+        "https://maria-chucena-api-production.up.railway.app/tipo-producto";
     final uri = Uri.parse(url);
     final response = await http.get(uri);
 
     final List<dynamic> jsonData = jsonDecode(response.body);
 
     setState(() {
-      telas = jsonData.map((json) {
-        return Tela(
+      productos = jsonData.map((json) {
+        return TipoProducto(
           id: json['id'] ?? 0,
-          tipoDeRollo: json['tipoRollo'] ?? 'Sin tipo de rollo',
-          proveedorId: json['proveedorId'] ?? 0,
-          color: json['color'] ?? 'Sin color',
-          cantidad: json['cantidad'] ?? 'Sin cantidad',
-          estampado: json['estampado'] ?? 'Sin estampado',
-          descripcion: json['descripcion'] ?? 'Sin descripcion',
-          tipoProductoId: json['tipoProductoId'] ?? 0,
+          nombre: json['nombre'] ?? 'Sin nombre',
+          tipo: TipoEnum.values
+              .firstWhere((e) => e.toString().split('.').last == json['tipo']),
+          unidadMetrica: UnidadMetricaEnum.values.firstWhere(
+              (e) => e.toString().split('.').last == json['unidadMetrica']),
         );
       }).toList();
     });
   }
 
-  Future<void> deleteTela(int id) async {
-    final url = 'https://maria-chucena-api-production.up.railway.app/rollo/$id';
+  Future<void> deleteprenda(int id) async {
+    final url =
+        'https://maria-chucena-api-production.up.railway.app/tipo-producto/$id';
     final uri = Uri.parse(url);
 
     try {
@@ -168,14 +135,14 @@ class _telaCrudViewState extends State<Telacrudview> {
 
       if (response.statusCode == 200 || response.statusCode == 204) {
         setState(() {
-          telas.removeWhere((tela) => tela.id == id);
+          productos.removeWhere((tela) => tela.id == id);
         });
       } else {
         print(
-            'Error: No se pudo eliminar el rollo. Código de estado ${response.statusCode}');
+            'Error: No se pudo eliminar el producto. Código de estado ${response.statusCode}');
       }
     } catch (e) {
-      print('Error al eliminar el rollo: $e');
+      print('Error al eliminar el producto: $e');
     }
   }
 
@@ -186,7 +153,7 @@ class _telaCrudViewState extends State<Telacrudview> {
         return AlertDialog(
           title: const Text('Confirmar eliminación'),
           content:
-              const Text('¿Estás seguro de que deseas eliminar este rollo?'),
+              const Text('¿Estás seguro de que deseas eliminar este producto?'),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -194,7 +161,7 @@ class _telaCrudViewState extends State<Telacrudview> {
             ),
             ElevatedButton(
               onPressed: () {
-                deleteTela(id);
+                deleteprenda(id);
                 Navigator.of(context).pop();
               },
               child: const Text('Eliminar'),

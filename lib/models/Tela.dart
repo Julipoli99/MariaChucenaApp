@@ -1,8 +1,8 @@
 class Tela {
-  String id;
+  int id;
   String tipoDeRollo; //tubular o plano
   int proveedorId;
-  int cantidad;
+  double cantidad;
   String color;
   bool estampado;
   String descripcion;
@@ -24,7 +24,7 @@ class Tela {
     return Tela(
       id: json['id'] ?? 0, // Valor por defecto si 'id' es nulo
       tipoDeRollo: json['tipoDeRollo'] ?? 'Sin tipo de rollo',
-      proveedorId: json['provedorId'] ?? 'Sin provedor',
+      proveedorId: json['provedorId'] ?? 0,
       color: json['color'] ?? 'Sin color',
       cantidad: json['cantidad'] ?? 'Sin cantidad',
       estampado: json['estampado'] ?? 'Sin estampado',

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:gestion_indumentaria/models/TipoProducto.dart';
 import 'package:gestion_indumentaria/pages/Login/usuariosRegistrados.dart';
+import 'package:gestion_indumentaria/pages/TipoProducto/registroTipoProducto.dart';
 import 'package:gestion_indumentaria/pages/principal.dart';
 
 class DrawerMenuLateral extends StatelessWidget {
@@ -104,10 +106,16 @@ class DrawerMenuLateral extends StatelessWidget {
                       color: Colors.white,
                       Icons.production_quantity_limits_sharp),
                   title: const Text(
-                    'Productos',
+                    'Tipo de Productos',
                     style: TextStyle(color: Colors.white),
                   ),
                   onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              const TipoProductoregistradospage()),
+                    );
                     print('Presionado boton Productos');
                   },
                 ),

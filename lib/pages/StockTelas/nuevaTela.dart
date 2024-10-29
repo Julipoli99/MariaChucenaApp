@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gestion_indumentaria/models/TipoProducto.dart';
 import 'package:http/http.dart' as http; // Importa el paquete http
 import 'dart:convert'; // Importa esto para convertir a JSON
 import 'package:gestion_indumentaria/pages/Provedores/NuevoProvedor.dart';
@@ -14,14 +15,14 @@ class NuevasTelas extends StatefulWidget {
 
 class _NuevasTelasState extends State<NuevasTelas> {
   List<String> selectedTejidos = [];
-
+  TipoEnum? selectedTipo;
   List<String> proveedores = ['Proveedor A', 'Proveedor B', 'Proveedor C'];
 
   double cantidad = 0.0;
   String color = '';
   bool estampado = false;
   String descripcion = '';
-  String tipoRollo = 'PLANO'; // Valor por defecto
+  String tipoRollo = ''; // Valor por defecto
   int? tipoProductoId; // Suponiendo que se cargará desde un API
   int? proveedorId; // Suponiendo que se cargará desde un API
 
@@ -76,6 +77,8 @@ class _NuevasTelasState extends State<NuevasTelas> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         buildTipoTejidoSelector(),
+                        const SizedBox(height: 10),
+                        buildTipoProductoSelector(),
                         const SizedBox(height: 10),
                         buildDropdownField('Proveedor', proveedores, (value) {
                           // Maneja la selección del proveedor
@@ -157,32 +160,35 @@ class _NuevasTelasState extends State<NuevasTelas> {
   }
 
   Future<void> _guardarTela() async {
-    final url =
-        'https://maria-chucena-api-production.up.railway.app/Rollo'; // Reemplaza con tu URL de API
+    // Recolectar datos
+    final datosTela = {
+      "cantidad": cantidad,
+      "color": color,
+      "estampado": estampado,
+      "descripcion": descripcion,
+      "tipoRollo": tipoRollo,
+      "tipoProductoId": tipoProductoId, // Cambiar esto para cargar del API
+      "proveedorId": 1, // Cambiar esto para cargar del API
+    };
+    print(datosTela);
+    // URL del endpoint
+    final url = 'https://maria-chucena-api-production.up.railway.app/Rollo';
 
+    // Enviar solicitud POST
     final response = await http.post(
       Uri.parse(url),
-      headers: {
-        'Content-Type': 'application/json', // Especifica el tipo de contenido
-      },
-      body: jsonEncode({
-        "cantidad": cantidad,
-        "color": color,
-        "estampado": estampado,
-        "descripcion": descripcion,
-        "tipoRollo": tipoRollo,
-        "tipoProductoId": 1,
-        "proveedorId": 1,
-      }),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(datosTela), // Convertir a JSON
     );
 
+    // Manejar la respuesta
     if (response.statusCode == 200) {
-      // Si el servidor devuelve un OK response, procesamos los datos
+      // Éxito
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Tela registrada exitosamente')),
+        const SnackBar(content: Text('Tela registrada exitosamente')),
       );
     } else {
-      // Si el servidor no devuelve un OK response, lanza un error
+      // Error
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error al registrar la tela: ${response.body}')),
       );
@@ -251,16 +257,46 @@ class _NuevasTelasState extends State<NuevasTelas> {
         const SizedBox(height: 10),
         Wrap(
           spacing: 10,
-          children: ['Plano', 'Tubular'].map((tipoTejido) {
+          children: ['PLANO', 'TUBULAR'].map((tipoTejido) {
             return ChoiceChip(
               label: Text(tipoTejido),
-              selected: selectedTejidos.contains(tipoTejido),
+              selected: tipoRollo == tipoTejido,
+              onSelected: (selected) {
+                setState(() {
+                  tipoRollo = selected
+                      ? tipoTejido
+                      : ''; // Asigna el valor seleccionado
+                });
+              },
+              labelStyle: const TextStyle(fontSize: 16),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget buildTipoProductoSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Tipo de Producto',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 10,
+          children: TipoEnum.values.map((tipo) {
+            return ChoiceChip(
+              label: Text(tipo.toString().split('.').last),
+              selected: selectedTipo == tipo,
               onSelected: (selected) {
                 setState(() {
                   if (selected) {
-                    selectedTejidos.add(tipoTejido);
-                  } else {
-                    selectedTejidos.remove(tipoTejido);
+                    selectedTipo = tipo;
+                    tipoProductoId =
+                        selectedTipo == TipoEnum.AVIO ? 1 : 2; // Ajusta el id
                   }
                 });
               },

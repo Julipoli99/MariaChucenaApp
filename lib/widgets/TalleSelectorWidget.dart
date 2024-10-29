@@ -76,7 +76,7 @@ class _TalleSelectorState extends State<TalleSelector> {
       } else {
         widget.selectedTalles.add(talle);
       }
-      widget.onTalleSelected(widget.selectedTalles);
+      widget.onTalleSelected(List.from(widget.selectedTalles));
     });
   }
 
