@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/TipoProducto.dart';
+import 'package:gestion_indumentaria/pages/Crud/TallesCrudView.dart';
 import 'package:gestion_indumentaria/pages/Login/usuariosRegistrados.dart';
+import 'package:gestion_indumentaria/pages/Talles/tallesVista.dart';
 import 'package:gestion_indumentaria/pages/TipoProducto/registroTipoProducto.dart';
 import 'package:gestion_indumentaria/pages/principal.dart';
 
@@ -89,11 +91,16 @@ class DrawerMenuLateral extends StatelessWidget {
                   leading:
                       const Icon(color: Colors.white, Icons.list_alt_rounded),
                   title: const Text(
-                    'Ordenes',
+                    'Talles',
                     style: TextStyle(color: Colors.white),
                   ),
                   onTap: () {
-                    print('Presionado boton Ordenes');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const tallesregistradospage()),
+                    );
+                    print('Presionado boton de talles');
                   },
                 ),
               ),
