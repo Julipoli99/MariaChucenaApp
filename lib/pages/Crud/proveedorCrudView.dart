@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Proveedor.dart';
 import 'package:gestion_indumentaria/pages/Provedores/NuevoProvedor.dart';
 import 'package:gestion_indumentaria/pages/principal.dart';
+import 'package:gestion_indumentaria/widgets/boxDialog/BoxDialogoProvedorModificador.dart';
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
 import 'package:http/http.dart' as http;
 
@@ -84,9 +85,26 @@ class _ProvedorCrudViewState extends State<Provedorcrudview> {
                       children: [
                         IconButton(
                           onPressed: () {
-                            print('Vista para proveedor: ${proveedor.nombre}');
+                            showDialog(
+                              context: context,
+                              builder: (context) => ModificadorProvedorDialog(
+                                proveedor: proveedor,
+                                onProvedorModified:
+                                    (Proveedor updatedProveedor) {
+                                  setState(() {
+                                    // Actualizar la prenda en la lista
+                                    final index = provedores.indexWhere(
+                                        (p) => p.id == updatedProveedor.id);
+                                    if (index != -1) {
+                                      provedores[index] = updatedProveedor;
+                                    }
+                                  });
+                                },
+                              ),
+                            );
+                            print('editar  proveedor: ${proveedor.nombre}');
                           },
-                          icon: const Icon(Icons.remove_red_eye_outlined),
+                          icon: const Icon(Icons.create_sharp),
                         ),
                         IconButton(
                           onPressed: () {
