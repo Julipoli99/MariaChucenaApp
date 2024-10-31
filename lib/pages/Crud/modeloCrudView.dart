@@ -121,7 +121,7 @@ class _ModelCrudViewState extends State<ModelCrudView> {
                         ),
                         IconButton(
                           onPressed: () {
-                            deleteModel(model.id);
+                            _confirmDelete(context, model.id);
                           },
                           icon: const Icon(Icons.delete),
                         ),
@@ -141,52 +141,74 @@ class _ModelCrudViewState extends State<ModelCrudView> {
 
     try {
       final response = await http.get(uri);
-      print("Respuesta de la API: ${response.body}");
-
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = jsonDecode(response.body);
 
         setState(() {
           models = jsonData.map((json) {
-            // Manejo seguro de nulos
-            List<AvioModelo> avio = (json['avios'] as List<dynamic>?)
-                    ?.map((av) => AvioModelo.fromJson(av))
-                    .toList() ??
-                [];
-            List<ObservacionModel> observaciones =
-                (json['observaciones'] as List<dynamic>?)
-                        ?.map((obs) => ObservacionModel.fromJson(obs))
-                        .toList() ??
-                    [];
-            List<Talle> curva = (json['talle'] as List<dynamic>?)
-                    ?.map((t) => Talle.fromJson(t))
-                    .toList() ??
-                [];
-
             return Modelo(
-              id: json['id'],
+              id: json[
+                  'id'], // Asegúrate de que este campo exista en la respuesta
               codigo: json['codigo'],
               genero: json['genero'],
               nombre: json['nombre'],
-              tieneTelaSecundaria: json['tieneTelaSecundaria'],
-              tieneTelaAuxiliar: json['tieneTelaAuxiliar'],
-              avios: avio,
-              curva: curva,
-              categoriaTipo: json['categoria'] != null
-                  ? json['categoria']['tipo']
-                  : null, // Asegúrate de manejar nulos
-              observaciones: observaciones,
+              tieneTelaSecundaria: json['tieneTelaSecundaria'] ?? false,
+              tieneTelaAuxiliar: json['tieneTelaAuxiliar'] ?? false,
+              avios: (json['avios'] as List<dynamic>?)?.map((av) {
+                    List<Talle> talles = (av['talles'] as List<dynamic>?)
+                            ?.map((t) => Talle.fromJson(t))
+                            .toList() ??
+                        [];
+                    return AvioModelo(
+                      avioId: av['avioId'],
+                      esPorTalle: av['esPorTalle'] ?? false,
+                      esPorColor: av['esPorColor'] ?? false,
+                      talle: talles,
+                      cantidadRequerida: av['cantidadRequerida'] ?? 0,
+                    );
+                  }).toList() ??
+                  [],
+              curva: [], // Ajusta según la estructura de tu modelo
+              categoriaTipo: json['categoriaId'], // Ajusta según sea necesario
+              observaciones: (json['observaciones'] as List<dynamic>?)
+                      ?.map((obs) => ObservacionModel.fromJson(obs))
+                      .toList() ??
+                  [],
             );
           }).toList();
         });
-
-        print("Modelos cargados: ${models.length}");
       } else {
         print("Error al cargar modelos: ${response.statusCode}");
       }
     } catch (e) {
       print("Error al hacer la petición: $e");
     }
+  }
+
+  void _confirmDelete(BuildContext context, int id) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirmar eliminación'),
+          content:
+              const Text('¿Estás seguro de que deseas eliminar esta prenda?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                deleteModel(id); // Llama a la función para eliminar el avio
+                Navigator.of(context).pop(); // Cierra el diálogo
+              },
+              child: const Text('Eliminar'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void deleteModel(int id) async {

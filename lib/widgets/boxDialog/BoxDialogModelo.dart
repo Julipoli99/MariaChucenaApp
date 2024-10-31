@@ -48,21 +48,24 @@ class BoxDialogModelo extends StatelessWidget {
               'Avios (${modelo.avios?.length}):', // Muestra la cantidad de avios
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            /*Flexible(
+            Flexible(
               child: Scrollbar(
                 thumbVisibility: true, // Hace visible la scrollbar
                 child: ListView.builder(
-                  itemCount: modelo.avios?.length,
+                  itemCount: modelo.avios?.length ?? 0, // Cambiado a '?? 0'
                   itemBuilder: (context, index) {
-                    final avio = modelo.avios?[index];
+                    final avioModelo = modelo.avios?[index];
+                    print(avioModelo?.toJson());
                     return ListTile(
-                      title: Text('Avio: ${avio?.nombre}'),
-                      subtitle: Text('Proveedores: ${avio?.proveedores}'),
+                      title: Text(
+                          'Avio: ${avioModelo?.avio?.nombre ?? 'Sin nombre'}'), // Accede a avio.nombre
+                      subtitle: Text(
+                          'Cantidad requerida: ${avioModelo?.cantidadRequerida ?? 0}'), // Cantidad requerida
                     );
                   },
                 ),
               ),
-            ),*/
+            ),
             const SizedBox(height: 10), // Espaciado entre secciones
 
             // Curva

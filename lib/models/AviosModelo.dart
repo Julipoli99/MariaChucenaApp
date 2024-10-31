@@ -35,7 +35,7 @@ class AvioModelo {
       esPorTalle: json['esPorTalle'],
       esPorColor: json['esPorColor'],
       cantidadRequerida: json['cantidadRequerida'],
-      avio: Avio.fromJson(json['avio']),
+      avio: json['avio'] != null ? Avio.fromJson(json['avio']) : null,
       talle: talles,
     );
   }
