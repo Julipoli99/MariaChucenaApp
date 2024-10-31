@@ -46,8 +46,8 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   // data para la parte de Avio
   String? nombreAvio;
   String? tipoTalleAvio;
-  List<String> selectedTallesDialog = [];
-  bool esPorTalle = true;
+  List<Talle>? selectedTallesDialog = [];
+  bool esPorTalle = false;
   bool esPorColor = false;
   final int cantRequerida = 2;
 
@@ -386,6 +386,9 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                             onChanged: (bool? value) {
                               setDialogState(() {
                                 esPorTalle = value ?? false;
+                                if (esPorTalle) {
+                                  _showTalleSelectionDialog(setDialogState);
+                                }
                               });
                             },
                           ),
@@ -405,6 +408,26 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                             ),
                             keyboardType: TextInputType.number,
                           ),
+                          const SizedBox(height: 10),
+                          // Mostrar los talles seleccionados
+                          if (selectedTallesDialog != null &&
+                              selectedTallesDialog!.isNotEmpty)
+                            Column(
+                              children: [
+                                const Text('Talles Seleccionados:',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold)),
+                                Wrap(
+                                  spacing: 8.0,
+                                  children: selectedTallesDialog!.map((talle) {
+                                    return Chip(
+                                      label: Text(talle
+                                          .nombre), // Asegúrate de que Talle tiene la propiedad nombre
+                                    );
+                                  }).toList(),
+                                ),
+                              ],
+                            ),
                           const SizedBox(height: 15),
                         ],
                       ),
@@ -424,7 +447,8 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                                   avioId: avioSeleccionado.id,
                                   esPorTalle: esPorTalle,
                                   esPorColor: esPorColor,
-                                  talle: [Talle(id: 1, nombre: "T1")],
+                                  talles: List<Talle>.from(
+                                      selectedTallesDialog!), // Asigna talles seleccionados
                                   cantidadRequerida:
                                       int.parse(_cantidadController.text),
                                 ),
@@ -437,7 +461,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                             _cantidadController.clear();
                             esPorTalle = false;
                             esPorColor = false;
-                            selectedTallesDialog.clear();
+                            selectedTallesDialog?.clear();
                           });
                         },
                         child: const Text('Agregar Avio'),
@@ -459,11 +483,9 @@ class _NuevomodeloState extends State<Nuevomodelo> {
     );
   }
 
-  // Agregar el avio seleccionado a la lista
-
-  // Diálogo para seleccionar los talles
+// Diálogo para seleccionar los talles
   void _showTalleSelectionDialog(StateSetter setState) async {
-    List<String> talles = [];
+    List<Talle> talles = [];
     bool isLoading = true;
 
     // Llamada a la API para obtener los talles
@@ -473,7 +495,9 @@ class _NuevomodeloState extends State<Nuevomodelo> {
       final response = await http.get(Uri.parse(apiUrl));
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
-        talles = data.map((talle) => talle["talle"].toString()).toList();
+        talles = data
+            .map((talle) => Talle.fromJson(talle))
+            .toList(); // Asumiendo que tienes un método fromJson en Talle
         isLoading = false;
       } else {
         _showErrorDialog('Error al obtener los talles: ${response.statusCode}');
@@ -492,16 +516,17 @@ class _NuevomodeloState extends State<Nuevomodelo> {
               ? const Center(child: CircularProgressIndicator())
               : Wrap(
                   spacing: 10,
-                  children: talles.map((talle) {
+                  children: talles.map((Talle talle) {
                     return ChoiceChip(
-                      label: Text(talle),
-                      selected: selectedTallesDialog.contains(talle),
+                      label: Text(talle
+                          .nombre), // Asegúrate de que Talle tiene la propiedad nombre
+                      selected: selectedTallesDialog!.contains(talle),
                       onSelected: (selected) {
                         setState(() {
                           if (selected) {
-                            selectedTallesDialog.add(talle);
+                            selectedTallesDialog?.add(talle);
                           } else {
-                            selectedTallesDialog.remove(talle);
+                            selectedTallesDialog?.remove(talle);
                           }
                         });
                       },
@@ -684,6 +709,8 @@ class _NuevomodeloState extends State<Nuevomodelo> {
         DataColumn(label: Text('Es por Talle')),
         DataColumn(label: Text('Es por Color')),
         DataColumn(label: Text('Cantidad')),
+        DataColumn(
+            label: Text('Talles Seleccionados')), // Nueva columna para talles
       ],
       rows: aviosSeleccionados.map((AvioModelo avio) {
         return DataRow(cells: [
@@ -691,6 +718,8 @@ class _NuevomodeloState extends State<Nuevomodelo> {
           DataCell(Text(avio.esPorTalle == true ? 'Sí' : 'No')),
           DataCell(Text(avio.esPorColor == true ? 'Sí' : 'No')),
           DataCell(Text(avio.cantidadRequerida.toString())),
+          DataCell(Text(avio.talles?.map((t) => t.nombre).join(', ') ??
+              '')), // Mostrar talles seleccionados
         ]);
       }).toList(),
     );

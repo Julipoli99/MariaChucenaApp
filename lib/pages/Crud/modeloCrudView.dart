@@ -69,17 +69,6 @@ class _ModelCrudViewState extends State<ModelCrudView> {
                       ),
                       child: const Text('Nuevo modelo'),
                     ),
-                    TextButton(
-                      onPressed: () {
-                        // Aquí podrías abrir un diálogo o una nueva pantalla para seleccionar el modelo a modificar
-                        print('Seleccionar modelo para modificar');
-                      },
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.blue[300],
-                        foregroundColor: Colors.white,
-                      ),
-                      child: const Text('Modificar modelo'),
-                    ),
                   ],
                 ),
               ],
@@ -141,6 +130,7 @@ class _ModelCrudViewState extends State<ModelCrudView> {
 
     try {
       final response = await http.get(uri);
+      print("Respuesta de la API: ${response.body}");
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = jsonDecode(response.body);
 
@@ -155,20 +145,15 @@ class _ModelCrudViewState extends State<ModelCrudView> {
               tieneTelaSecundaria: json['tieneTelaSecundaria'] ?? false,
               tieneTelaAuxiliar: json['tieneTelaAuxiliar'] ?? false,
               avios: (json['avios'] as List<dynamic>?)?.map((av) {
-                    List<Talle> talles = (av['talles'] as List<dynamic>?)
-                            ?.map((t) => Talle.fromJson(t))
-                            .toList() ??
-                        [];
-                    return AvioModelo(
-                      avioId: av['avioId'],
-                      esPorTalle: av['esPorTalle'] ?? false,
-                      esPorColor: av['esPorColor'] ?? false,
-                      talle: talles,
-                      cantidadRequerida: av['cantidadRequerida'] ?? 0,
-                    );
+                    return AvioModelo.fromJson(
+                        av); // Mapea correctamente el avio
                   }).toList() ??
                   [],
-              curva: [], // Ajusta según la estructura de tu modelo
+              curva: (json['curva'] as List<
+                          dynamic>?) // Asegúrate de que este campo exista
+                      ?.map((item) => Talle.fromJson(item))
+                      .toList() ??
+                  [], // Ajusta según la estructura de tu modelo
               categoriaTipo: json['categoriaId'], // Ajusta según sea necesario
               observaciones: (json['observaciones'] as List<dynamic>?)
                       ?.map((obs) => ObservacionModel.fromJson(obs))
@@ -177,6 +162,7 @@ class _ModelCrudViewState extends State<ModelCrudView> {
             );
           }).toList();
         });
+        print("Modelos cargados: ${models.length}");
       } else {
         print("Error al cargar modelos: ${response.statusCode}");
       }

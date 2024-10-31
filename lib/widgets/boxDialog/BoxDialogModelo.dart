@@ -13,20 +13,21 @@ class BoxDialogModelo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('Contenido completo del modelo: ${modelo.toJson()}');
+
     return AlertDialog(
       backgroundColor: Colors.grey[200],
       title: Text('Detalles del Modelo: ${modelo.nombre}'),
       content: SizedBox(
-        height: 400, // Altura total del contenido del diálogo
-        width: 500, // Ajusta el ancho si es necesario
+        height: 400,
+        width: 500,
         child: Column(
           children: [
-            // Observaciones
             const Text('Observaciones:',
                 style: TextStyle(fontWeight: FontWeight.bold)),
             Flexible(
               child: Scrollbar(
-                thumbVisibility: true, // Hace visible la scrollbar
+                thumbVisibility: true,
                 child: ListView.builder(
                   itemCount: modelo.observaciones?.length ?? 0,
                   itemBuilder: (context, index) {
@@ -41,53 +42,76 @@ class BoxDialogModelo extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 10), // Espaciado entre secciones
-
-            // Avios
+            const SizedBox(height: 10),
             Text(
-              'Avios (${modelo.avios?.length}):', // Muestra la cantidad de avios
+              'Avios (${modelo.avios?.length ?? 0}):',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             Flexible(
               child: Scrollbar(
-                thumbVisibility: true, // Hace visible la scrollbar
+                thumbVisibility: true,
                 child: ListView.builder(
-                  itemCount: modelo.avios?.length ?? 0, // Cambiado a '?? 0'
+                  itemCount: modelo.avios?.length ?? 0,
                   itemBuilder: (context, index) {
                     final avioModelo = modelo.avios?[index];
-                    print(avioModelo?.toJson());
+
                     return ListTile(
                       title: Text(
-                          'Avio: ${avioModelo?.avio?.nombre ?? 'Sin nombre'}'), // Accede a avio.nombre
-                      subtitle: Text(
-                          'Cantidad requerida: ${avioModelo?.cantidadRequerida ?? 0}'), // Cantidad requerida
+                          'Avio: ${avioModelo?.avio?.nombre ?? 'Sin nombre'}'),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                              'Cantidad requerida: ${avioModelo?.cantidadRequerida ?? 0}'),
+                          Text(
+                              'Por Talle: ${avioModelo?.esPorTalle ?? false ? "Sí" : "No"}'),
+                          Text(
+                              'Por Color: ${avioModelo?.esPorColor ?? false ? "Sí" : "No"}'),
+                          // Mostrar talles si es por talle
+                          if (avioModelo?.esPorTalle == true &&
+                              avioModelo?.talles != null &&
+                              avioModelo!.talles!.isNotEmpty)
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Talles:',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold)),
+                                ...avioModelo.talles!.map((talle) {
+                                  return Text(
+                                      ' - ${talle.nombre}'); // Asegúrate de que `talle` tiene la propiedad `nombre`
+                                }).toList(),
+                              ],
+                            ),
+                        ],
+                      ),
                     );
                   },
                 ),
               ),
             ),
-            const SizedBox(height: 10), // Espaciado entre secciones
-
-            // Curva
+            const SizedBox(height: 10),
             Text(
-              'Curva (${modelo.curva.length}):', // Muestra la cantidad de ítems en la curva
+              'Curva (${modelo.curva.length}):',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            Flexible(
-              child: Scrollbar(
-                thumbVisibility: true, // Hace visible la scrollbar
-                child: ListView.builder(
-                  itemCount: modelo.curva.length,
-                  itemBuilder: (context, index) {
-                    final talle = modelo.curva[index];
-                    return ListTile(
-                      title: Text(
-                          'Talle: ${talle.nombre}'), // Asumiendo que talle es de tipo Talle
-                    );
-                  },
+            if (modelo.curva.isNotEmpty)
+              Flexible(
+                child: Scrollbar(
+                  thumbVisibility: true,
+                  child: ListView.builder(
+                    itemCount: modelo.curva.length,
+                    itemBuilder: (context, index) {
+                      final talle = modelo.curva[index];
+                      return ListTile(
+                        title: Text('Talle: ${talle.nombre}'),
+                      );
+                    },
+                  ),
                 ),
-              ),
-            ),
+              )
+            else
+              const Text('No hay talles disponibles'),
           ],
         ),
       ),
