@@ -19,11 +19,36 @@ class _ModificadoraviosState extends State<Modificadoravios> {
   String? selectedProveedor;
   int cantidadInicial = 0; // Cantidad que se mostrará como inicial
   int cantidadActual = 0; // Cantidad que se mostrará como actual
+  List<String> proveedores = [];
+  int? selectedProveedorId;
 
   @override
   void initState() {
     super.initState();
     fetchAviosFromApi();
+    _cargarProveedores(); // Cargar proveedores al iniciar
+  }
+
+  Future<void> _cargarProveedores() async {
+    final url =
+        'https://maria-chucena-api-production.up.railway.app/proveedor'; // URL de la API de proveedores
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      // Éxito, parsear los datos
+      final List<dynamic> data = jsonDecode(response.body);
+      setState(() {
+        proveedores = data
+            .map((proveedor) => proveedor['nombre'].toString())
+            .toList(); // Suponiendo que el JSON tiene un campo 'nombre'
+      });
+    } else {
+      // Manejar error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Error al cargar proveedores: ${response.body}')),
+      );
+    }
   }
 
   Future<void> fetchAviosFromApi() async {
@@ -189,29 +214,12 @@ class _ModificadoraviosState extends State<Modificadoravios> {
                             },
                           ),
                           const SizedBox(height: 20),
-                          DropdownButtonFormField<String>(
-                            decoration: const InputDecoration(
-                              labelText: 'Proveedor',
-                              hintText: 'Seleccione un proveedor',
-                            ),
-                            items: <String>[
-                              'Proveedor de prueba 1',
-                              'Proveedor de prueba 2',
-                              'Proveedor de prueba 3'
-                            ].map((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value),
-                              );
-                            }).toList(),
-                            onChanged: (newValue) {
-                              setState(() {
-                                selectedProveedor = newValue;
-                                // updateCantidadActual();
-                              });
-                            },
-                          ),
-                          const SizedBox(height: 20),
+                          buildDropdownField('Proveedor', proveedores, (value) {
+                            setState(() {
+                              selectedProveedorId = proveedores.indexOf(
+                                  value!); // Asignar el índice del proveedor seleccionado
+                            });
+                          }),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -308,6 +316,36 @@ class _ModificadoraviosState extends State<Modificadoravios> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget buildDropdownField(
+      String label, List<String> items, ValueChanged<String?> onChanged) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20.0),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 5,
+            child: DropdownButtonFormField<String>(
+              items: items.map((String item) {
+                return DropdownMenuItem<String>(
+                  value: item,
+                  child: Text(item),
+                );
+              }).toList(),
+              onChanged: onChanged,
+              decoration: InputDecoration(
+                labelText: label,
+                labelStyle: const TextStyle(fontSize: 18),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

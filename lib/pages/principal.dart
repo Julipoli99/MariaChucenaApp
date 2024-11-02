@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/pages/Avios/avios.dart';
+import 'package:gestion_indumentaria/pages/Modelos/orden%20de%20corte/controlDeCorte.dart';
 import 'package:gestion_indumentaria/pages/Modelos/tipodePrendaRegistrada.dart';
 import 'package:gestion_indumentaria/pages/Tizadas/CreacionTizadasPage.dart';
 import 'package:gestion_indumentaria/pages/Modelos/ModelosRegistradosPage.dart';
-import 'package:gestion_indumentaria/pages/Modelos/ordenDeCorte.dart';
+import 'package:gestion_indumentaria/pages/Modelos/orden%20de%20corte/ordenDeCorte.dart';
 import 'package:gestion_indumentaria/pages/Provedores/provedoresPage.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
@@ -202,17 +203,17 @@ class HomePage extends StatelessWidget {
                                 height: 250, // Alto ajustado
                                 child: GestureDetector(
                                   onTap: () {
-                                    // Navegar a la página de CreacionTizadasPage
+                                    // Navegar a la página de crud de corte
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                            const CreacionTizadasPage(),
+                                            const ordenDeCorteregistradospage(),
                                       ),
                                     );
                                   },
                                   child: buildResourceCard(
-                                    'Creación de tizadas',
+                                    'control de ordenes de corte ',
                                     'Administración',
                                     250,
                                     140,
