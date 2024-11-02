@@ -15,6 +15,8 @@ class Nuevoavios extends StatefulWidget {
 class _NuevoaviosState extends State<Nuevoavios> {
   final TextEditingController _tipoController = TextEditingController();
   final TextEditingController _cantidadController = TextEditingController();
+  final TextEditingController _provedorCodigoController =
+      TextEditingController();
   String? _selectedProveedor;
   List<String> proveedores = [];
   int? selectedProveedorId;
@@ -116,7 +118,14 @@ class _NuevoaviosState extends State<Nuevoavios> {
                                   .toString(); // Asignar el índice del proveedor seleccionado
                             });
                           }),
-
+                          TextField(
+                            controller: _provedorCodigoController,
+                            decoration: const InputDecoration(
+                              labelText: 'codigo de provedor',
+                              hintText: 'provedor',
+                            ),
+                          ),
+                          const SizedBox(height: 20),
                           TextField(
                             controller: _cantidadController,
                             decoration: const InputDecoration(
