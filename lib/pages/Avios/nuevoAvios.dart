@@ -18,9 +18,10 @@ class _NuevoaviosState extends State<Nuevoavios> {
   final TextEditingController _provedorCodigoController =
       TextEditingController();
   String? _selectedProveedor;
-  List<String> proveedores = [];
+  List<Map<String, dynamic>> proveedores = [];
   int? selectedProveedorId;
 
+  @override
   void initState() {
     super.initState();
     _cargarProveedores(); // Cargar proveedores al iniciar
@@ -110,19 +111,24 @@ class _NuevoaviosState extends State<Nuevoavios> {
                             ),
                           ),
                           const SizedBox(height: 20),
-                          // Dropdown para Proveedores con valores de prueba
-                          buildDropdownField('Proveedor', proveedores, (value) {
+                          // Dropdown para Proveedores
+                          buildDropdownField(
+                              'Proveedor',
+                              proveedores
+                                  .map((p) => p['nombre'].toString())
+                                  .toList(), (value) {
                             setState(() {
-                              _selectedProveedor = proveedores
-                                  .indexOf(value!)
-                                  .toString(); // Asignar el índice del proveedor seleccionado
+                              _selectedProveedor = value;
+                              selectedProveedorId = proveedores.firstWhere(
+                                (p) => p['nombre'] == value,
+                              )['id']; // Asignar el ID del proveedor seleccionado
                             });
                           }),
                           TextField(
                             controller: _provedorCodigoController,
                             decoration: const InputDecoration(
-                              labelText: 'codigo de provedor',
-                              hintText: 'provedor',
+                              labelText: 'Código de proveedor',
+                              hintText: 'Proveedor',
                             ),
                           ),
                           const SizedBox(height: 20),
@@ -130,7 +136,7 @@ class _NuevoaviosState extends State<Nuevoavios> {
                             controller: _cantidadController,
                             decoration: const InputDecoration(
                               labelText: 'Cantidad',
-                              hintText: 'Cantidad inicial ',
+                              hintText: 'Cantidad inicial',
                             ),
                             keyboardType: TextInputType.number,
                           ),
@@ -187,7 +193,9 @@ class _NuevoaviosState extends State<Nuevoavios> {
         'https://maria-chucena-api-production.up.railway.app/avio';
 
     final Map<String, dynamic> avioData = {
-      "codigoProveedor": _selectedProveedor ?? '',
+      "codigoProveedor": _provedorCodigoController.text,
+      "proveedorId": selectedProveedorId,
+      "tipoProductoId": 1, // Asegúrate de cambiar esto si el tipo es dinámico
       "nombre": _tipoController.text,
       "stock": int.tryParse(_cantidadController.text) ?? 0,
     };
@@ -223,8 +231,11 @@ class _NuevoaviosState extends State<Nuevoavios> {
       final List<dynamic> data = jsonDecode(response.body);
       setState(() {
         proveedores = data
-            .map((proveedor) => proveedor['nombre'].toString())
-            .toList(); // Suponiendo que el JSON tiene un campo 'nombre'
+            .map((proveedor) => {
+                  'id': proveedor['id'],
+                  'nombre': proveedor['nombre'],
+                })
+            .toList(); // Suponiendo que el JSON tiene campos 'id' y 'nombre'
       });
     } else {
       // Manejar error

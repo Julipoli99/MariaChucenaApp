@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Avio.dart';
 import 'package:gestion_indumentaria/pages/Avios/modificadorAvios.dart';
 import 'package:gestion_indumentaria/pages/Avios/nuevoAvios.dart';
+import 'package:gestion_indumentaria/widgets/boxDialog/BoxDialogoAviosDetalles.dart';
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
 import 'package:http/http.dart' as http;
 
@@ -21,6 +22,22 @@ class _AvioCrudViewState extends State<Avioscrudview> {
   void initState() {
     super.initState();
     fetchModels();
+  }
+
+  void showBox(Avio avio) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return BoxDialogAvio(
+          avio: avio,
+          onCancel: onCancel,
+        );
+      },
+    );
+  }
+
+  void onCancel() {
+    Navigator.of(context).pop();
   }
 
   @override
@@ -84,13 +101,14 @@ class _AvioCrudViewState extends State<Avioscrudview> {
               dataMapper: [
                 (avio) => Text(avio.id.toString()),
                 (avio) => Text(avio.nombre),
-                (avio) => Text(avio.codigoProveedor),
+                (avio) => Text(avio.proveedor.nombre.toString()),
                 (avio) => Text(avio.stock.toString()),
                 (avio) => Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         IconButton(
                           onPressed: () {
+                            showBox(avio);
                             print('Vista para avio: ${avio.nombre}');
                           },
                           icon: const Icon(Icons.remove_red_eye_outlined),
@@ -155,11 +173,13 @@ class _AvioCrudViewState extends State<Avioscrudview> {
     try {
       final response = await http.delete(uri);
 
-      if (response.statusCode == 204) {
+      if (response.statusCode == 204 || response.statusCode == 200) {
         setState(() {
           avios.removeWhere((avio) => avio.id == id); // Remover avio localmente
         });
         print('avio eliminado correctamente.');
+        await fetchModels(); // Recargar los datos para actualizar la pantalla
+        print('Avio eliminado correctamente y lista actualizada.');
       } else {
         print(
             'Error: No se pudo eliminar el avio. Código de estado ${response.statusCode}');
