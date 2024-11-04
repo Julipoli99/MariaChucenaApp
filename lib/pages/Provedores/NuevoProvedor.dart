@@ -2,6 +2,7 @@ import 'dart:convert'; // Importar para manejar JSON
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/pages/Crud/proveedorCrudView.dart';
 import 'package:gestion_indumentaria/pages/Provedores/provedoresPage.dart';
+import 'package:gestion_indumentaria/pages/principal.dart';
 import 'package:http/http.dart'
     as http; // Importar para realizar solicitudes HTTP
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
@@ -130,6 +131,12 @@ class _NuevoprovedorFormState extends State<NuevoprovedorForm> {
                         children: [
                           ElevatedButton(
                             onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const HomePage(),
+                                ),
+                              );
                               // Acción para CANCELAR
                             },
                             style: ElevatedButton.styleFrom(

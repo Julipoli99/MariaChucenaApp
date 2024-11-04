@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:gestion_indumentaria/models/Proveedor.dart';
 import 'package:gestion_indumentaria/models/Tela.dart';
 import 'package:gestion_indumentaria/pages/StockTelas/nuevaTela.dart';
 import 'package:gestion_indumentaria/pages/principal.dart';
@@ -16,11 +17,44 @@ class Telacrudview extends StatefulWidget {
 
 class _telaCrudViewState extends State<Telacrudview> {
   List<Tela> telas = [];
+  List<Proveedor> proveedores = [];
 
   @override
   void initState() {
     super.initState();
-    fetchModels(); // Llamamos al fetch cuando la página se carga
+    fetchModels();
+    fetchProveedores(); // Llamamos al fetch cuando la página se carga
+  }
+
+  Future<void> fetchProveedores() async {
+    const url = 'https://maria-chucena-api-production.up.railway.app/proveedor';
+    final uri = Uri.parse(url);
+
+    try {
+      final response = await http.get(uri);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonData = jsonDecode(response.body);
+
+        setState(() {
+          proveedores =
+              jsonData.map((json) => Proveedor.fromJson(json)).toList();
+        });
+
+        print("Proveedores cargados correctamente.");
+      } else {
+        print("Error: Código de estado ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error al cargar los proveedores: $e");
+    }
+  }
+
+  String? getNombreProveedor(int proveedorId) {
+    final proveedor = proveedores.firstWhere(
+      (proveedor) => proveedor.id == proveedorId,
+    );
+    return proveedor.nombre;
   }
 
   @override
@@ -57,6 +91,8 @@ class _telaCrudViewState extends State<Telacrudview> {
                 "ID",
                 "CANTIDAD",
                 "COLOR",
+                "DESCRIPCION",
+                "ESTAMPADO",
                 "TIPO DE ROLLO",
                 "OPCIONES"
               ], // Encabezados visibles en la tabla
@@ -66,6 +102,8 @@ class _telaCrudViewState extends State<Telacrudview> {
                 (tela) => Text(tela.id.toString()),
                 (tela) => Text(tela.cantidad.toString()),
                 (tela) => Text(tela.color),
+                (tela) => Text(tela.descripcion.toString()),
+                (tela) => Text(tela.estampado.toString()),
                 (tela) => Text(tela.tipoDeRollo.toString()),
                 // Botones de opciones
                 (tela) => Row(
@@ -76,6 +114,10 @@ class _telaCrudViewState extends State<Telacrudview> {
                             _showDetailDialog(context, tela);
                           },
                           icon: const Icon(Icons.remove_red_eye_outlined),
+                        ),
+                        IconButton(
+                          onPressed: () {},
+                          icon: const Icon(Icons.create_sharp),
                         ),
                         IconButton(
                           onPressed: () {
@@ -103,10 +145,8 @@ class _telaCrudViewState extends State<Telacrudview> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("Estampado: ${tela.estampado}"),
-              Text("Descripción: ${tela.descripcion}"),
-              Text("Tipo Producto ID: ${tela.tipoProductoId}"),
-              Text("Proveedor ID: ${tela.proveedorId}"),
+              const Text("Tipo Producto : TELA "),
+              Text("Proveedor: ${getNombreProveedor(tela.proveedorId)}"),
             ],
           ),
           actions: <Widget>[
