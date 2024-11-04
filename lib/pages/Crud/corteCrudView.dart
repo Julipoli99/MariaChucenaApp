@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Corte.dart';
+import 'package:gestion_indumentaria/pages/Modelos/orden%20de%20corte/editarOrdenDeCorte.dart';
 import 'package:gestion_indumentaria/pages/Modelos/orden%20de%20corte/ordenDeCorte.dart';
 import 'package:gestion_indumentaria/widgets/boxDialog/BoxDialogoCorte.dart';
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
@@ -84,6 +85,13 @@ class _CorteCrudViewState extends State<Cortecrudview> {
                         ),
                         IconButton(
                           onPressed: () {
+                            _editCorte(context, corte);
+                            print('Editando corte: ${corte.id}');
+                          },
+                          icon: const Icon(Icons.edit),
+                        ),
+                        IconButton(
+                          onPressed: () {
                             _confirmDelete(context, corte.id);
                             print('Corte borrado: ${corte.id}');
                           },
@@ -117,7 +125,6 @@ class _CorteCrudViewState extends State<Cortecrudview> {
           return;
         }
 
-        // Intenta decodificar como lista
         final List<dynamic>? jsonData = jsonDecode(body) as List<dynamic>?;
 
         if (jsonData == null) {
@@ -125,7 +132,6 @@ class _CorteCrudViewState extends State<Cortecrudview> {
           return;
         }
 
-        // Muestra la longitud de jsonData para ver cuántos elementos hay
         print("Número de elementos en jsonData: ${jsonData.length}");
 
         setState(() {
@@ -135,7 +141,7 @@ class _CorteCrudViewState extends State<Cortecrudview> {
                   return Corte.fromJson(json);
                 } catch (e) {
                   print("Error al deserializar corte: $e");
-                  return null; // Devuelve null si hay un error
+                  return null;
                 }
               })
               .where((corte) => corte != null)
@@ -208,6 +214,20 @@ class _CorteCrudViewState extends State<Cortecrudview> {
           onCancel: () => Navigator.of(context).pop(),
         );
       },
+    );
+  }
+
+  void _editCorte(BuildContext context, Corte corte) {
+    // Navega a una pantalla de edición o muestra un cuadro de diálogo para editar el corte
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ModificarOrdenDeCorteScreen(
+          corteExistente: corte,
+          ordenId:
+              corte.id, // Asegúrate de manejar esto en la pantalla de edición
+        ),
+      ),
     );
   }
 }

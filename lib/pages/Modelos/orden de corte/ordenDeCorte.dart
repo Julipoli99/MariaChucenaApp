@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Talle.dart';
+import 'package:gestion_indumentaria/models/Tela.dart';
 import 'package:gestion_indumentaria/pages/principal.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
-import 'package:http/http.dart' as http;
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/TalleSelectorWidget.dart';
+import 'package:http/http.dart' as http;
 
 class OrdenDeCorteScreen extends StatefulWidget {
   const OrdenDeCorteScreen({super.key});
@@ -15,11 +16,11 @@ class OrdenDeCorteScreen extends StatefulWidget {
 }
 
 class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
-  List<String> tiposDeTela = [];
+  List<Tela> tiposDeTela = [];
   List<dynamic> modelosACortar = [];
   List<String> avios = [];
   List<Talle> selectedTalle = [];
-  String? selectedTipoDeTela;
+  Tela? selectedTipoDeTela;
   String? selectedModelo;
   String? selectedAvio;
   String? observaciones;
@@ -59,17 +60,19 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
   }
 
   Future<void> fetchTiposDeTela() async {
-    final response = await http.get(Uri.parse(
-        'https://maria-chucena-api-production.up.railway.app/tipo-Producto'));
+    final response = await http.get(
+        Uri.parse('https://maria-chucena-api-production.up.railway.app/rollo'));
+
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       setState(() {
-        tiposDeTela.addAll(data
-            .where((tipo) => tipo['tipo'] == 'TELA')
-            .map<String>((tipo) => tipo['nombre'].toString()));
+        // Crea objetos de tipo Tela en lugar de solo Strings
+        tiposDeTela = List<Tela>.from(
+          data.map((tipo) => Tela.fromJson(tipo)),
+        );
       });
     } else {
-      print('Error al cargar los tipos de producto');
+      print('Error al cargar los tipos de tela');
     }
   }
 
@@ -77,27 +80,24 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
     if (selectedTipoDeTela == null ||
         selectedModelo == null ||
         selectedAvio == null ||
-        selectedTalle.isEmpty || // Verifica que selectedTalle no esté vacío
+        selectedTalle.isEmpty ||
         observaciones == null) {
-      // Mostrar un mensaje de error si falta algún campo
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Por favor, complete todos los campos.')),
       );
       return;
     }
 
-    // Aquí construimos la lista de modelos
     final modeloSeleccionado = modelosACortar
         .firstWhere((modelo) => modelo['nombre'] == selectedModelo);
 
     final orderData = {
       'modelos': [
         {
-          'modeloId': modeloSeleccionado[
-              'id'], // Asumiendo que tu modelo tiene un campo 'id'
-          'esParaEstampar': true, // Ajusta según tus necesidades
-          'usaTelaSecundaria': false, // Ajusta según tus necesidades
-          'usaTelaAuxiliar': false, // Ajusta según tus necesidades
+          'modeloId': modeloSeleccionado['id'],
+          'esParaEstampar': true,
+          'usaTelaSecundaria': false,
+          'usaTelaAuxiliar': false,
           'observaciones': [
             {
               'titulo': 'Collareta',
@@ -106,18 +106,17 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
           ],
           'curva': selectedTalle.map((talle) {
             return {
-              'talleId':
-                  talle.id, // Asegúrate de que tu objeto Talle tenga un 'id'
-              'repeticion': 1, // Ajusta según tus necesidades
+              'talleId': talle.id,
+              'repeticion': 1,
             };
           }).toList(),
         },
       ],
       'rollos': [
         {
-          'rolloId': 1, // Ajusta según tu lógica para obtener el rollo
-          'categoria': 'PRIMARIA', // Ajusta según tus necesidades
-          'cantidadUtilizada': 25.6, // Ajusta según tus necesidades
+          'rolloId': selectedTipoDeTela?.id,
+          'categoria': 'PRIMARIA',
+          'cantidadUtilizada': 25.6,
         },
       ],
     };
@@ -130,7 +129,6 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
       );
 
       if (response.statusCode == 201) {
-        // La orden de corte fue creada exitosamente
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Orden de corte creada exitosamente.')),
         );
@@ -139,7 +137,6 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
           MaterialPageRoute(builder: (context) => const HomePage()),
         );
       } else {
-        // Manejar error, muestra el cuerpo de la respuesta
         final responseBody = json.decode(response.body);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -148,7 +145,6 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
         );
       }
     } catch (e) {
-      // Manejar excepciones de la red o del cliente
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error de conexión: $e')),
       );
@@ -228,22 +224,36 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              buildDropdownField('Tipo de Tela', tiposDeTela, context, (value) {
-                setState(() {
-                  selectedTipoDeTela = value;
-                });
-              }),
-              const SizedBox(height: 10),
+              // Para Tipo de Tela
               buildDropdownField(
-                  'Modelo a Cortar',
-                  modelosACortar
-                      .map((modelo) => modelo['nombre'].toString())
-                      .toList(),
-                  context, (value) {
-                setState(() {
-                  selectedModelo = value;
-                });
-              }),
+                'Tipo de Tela',
+                tiposDeTela.map((tipo) => tipo.descripcion).toList(),
+                context,
+                (value) {
+                  setState(() {
+                    // Encuentra el rollo completo según el nombre seleccionado
+                    selectedTipoDeTela = tiposDeTela
+                        .firstWhere((tipo) => tipo.descripcion == value);
+                  });
+                },
+              ),
+              const SizedBox(height: 10),
+
+              // Para Modelo a Cortar
+              buildDropdownField(
+                'Modelo a Cortar',
+                modelosACortar
+                    .map((modelo) => modelo['nombre'].toString())
+                    .toList(),
+                context,
+                (value) {
+                  setState(() {
+                    // Encuentra el modelo completo según el nombre seleccionado
+                    selectedModelo = value;
+                  });
+                },
+              ),
+
               const SizedBox(height: 10),
               buildDropdownField('Avíos', avios, context, (value) {
                 setState(() {
@@ -305,71 +315,55 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
         ElevatedButton(
           onPressed: () {}, // Lógica para crear tizadas
           child: const Text('Crear Tizadas'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue,
-          ),
         ),
       ],
     );
   }
 
   Widget _buildSummaryCard() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      color: Colors.grey[300],
-      height: 400,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Lista de cosas cargadas:',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 10),
-          Expanded(
-            child: ListView.builder(
-              itemCount: modelosACortar.length,
-              itemBuilder: (context, index) {
-                final modelo = modelosACortar[index];
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(modelo['nombre'].toString()),
-                    // Aquí puedes mostrar más detalles del modelo si lo deseas
-                    const Divider(),
-                  ],
-                );
-              },
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Resumen',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
-          ),
-        ],
+            const Divider(),
+            const Text('Aquí aparecerá el resumen de la orden de corte.'),
+            // Agrega más detalles del resumen aquí según sea necesario
+          ],
+        ),
       ),
     );
   }
 
   Widget buildDropdownField(String label, List<String> items,
-      BuildContext context, Function(String?) onChanged) {
+      BuildContext context, ValueChanged<String?> onChanged) {
     return DropdownButtonFormField<String>(
       decoration: InputDecoration(
         labelText: label,
-        border: OutlineInputBorder(),
+        border: const OutlineInputBorder(),
       ),
-      items: items.map((item) {
-        return DropdownMenuItem<String>(
-          value: item,
-          child: Text(item),
-        );
-      }).toList(),
+      items: items
+          .map((item) => DropdownMenuItem<String>(
+                value: item,
+                child: Text(item),
+              ))
+          .toList(),
       onChanged: onChanged,
-      isExpanded: true,
+      hint: const Text('Selecciona una opción'),
     );
   }
 
-  Widget buildTextField(String label, Function(String) onChanged) {
+  Widget buildTextField(String label, ValueChanged<String?> onChanged) {
     return TextField(
       decoration: InputDecoration(
         labelText: label,
-        border: OutlineInputBorder(),
+        border: const OutlineInputBorder(),
       ),
       onChanged: onChanged,
     );
