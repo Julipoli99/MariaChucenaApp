@@ -42,7 +42,22 @@ class BoxDialogModelo extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '¿Tiene tela primaria? ${modelo.tieneTelaAuxiliar ? 'Sí' : 'No'}',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 5), // Espacio entre los textos
+                Text(
+                  '¿Tiene tela secundaria? ${modelo.tieneTelaSecundaria ? 'Sí' : 'No'}',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 5), // Espacio entre los textos
+              ],
+            ),
+            const SizedBox(height: 5),
             Text(
               'Avios (${modelo.avios?.length ?? 0}):',
               style: const TextStyle(fontWeight: FontWeight.bold),

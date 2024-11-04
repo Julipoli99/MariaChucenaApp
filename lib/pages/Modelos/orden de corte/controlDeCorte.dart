@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gestion_indumentaria/pages/Crud/corteCrudView.dart';
 import 'package:gestion_indumentaria/pages/Crud/modeloCrudView.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
@@ -55,10 +56,10 @@ class ordenDeCorteregistradospage extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               // Aquí mostramos el AviosCrudView
-              /*const SizedBox(
+              SizedBox(
                 height: 600, // Ajusta el alto según lo necesario
                 child: Cortecrudview(),
-              ),*/
+              ),
 
               const Divider(),
               // Pie de página con usuario logueado

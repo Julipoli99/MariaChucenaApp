@@ -1,12 +1,10 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:gestion_indumentaria/models/Avio.dart';
 import 'package:gestion_indumentaria/models/Corte.dart';
 import 'package:gestion_indumentaria/pages/Modelos/orden%20de%20corte/ordenDeCorte.dart';
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
 import 'package:http/http.dart' as http;
-/*
+
 class Cortecrudview extends StatefulWidget {
   Cortecrudview({super.key});
 
@@ -57,38 +55,40 @@ class _CorteCrudViewState extends State<Cortecrudview> {
           ),
           Expanded(
             child: TablaCrud<Corte>(
-              tituloAppBar: 'ordenes de corte',
+              tituloAppBar: 'Órdenes de Corte',
               encabezados: const [
                 "ID",
-                "NOMBRE",
-                "PROVEEDORES",
-                "Stock",
+                "Modelo",
+                "Rollo",
                 "OPCIONES",
               ],
               items: cortes,
               dataMapper: [
-                //  (cortes) => Text(),
-                //  (cortes) => Text(),
-                // (cortes) => Text(),
-                //  (cortes) => Text(),
-                /*   (cortes) => Row(
+                (corte) => Text(corte.id.toString()),
+                (corte) => Text(corte.modelos
+                    .map((modelo) => modelo.modelo.nombre.toString())
+                    .join(', ')),
+                (corte) => Text(corte.rollos
+                    .map((rollo) => rollo.rollo?.descripcion ?? 'Sin nombre')
+                    .join(', ')),
+                (corte) => Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         IconButton(
                           onPressed: () {
-                            print('Vista para corte: ${cortes.nombre}');
+                            print('Vista para corte: ${corte.id}');
                           },
                           icon: const Icon(Icons.remove_red_eye_outlined),
                         ),
                         IconButton(
                           onPressed: () {
-                            _confirmDelete(context, cortes.id);
-                            print('corte borrado: ${cortes.nombre}');
+                            _confirmDelete(context, corte.id);
+                            print('Corte borrado: ${corte.id}');
                           },
                           icon: const Icon(Icons.delete),
                         ),
                       ],
-                    ),*/
+                    ),
               ],
             ),
           ),
@@ -98,11 +98,14 @@ class _CorteCrudViewState extends State<Cortecrudview> {
   }
 
   Future<void> fetchModels() async {
-    const url = "https://maria-chucena-api-production.up.railway.app/cortes";
+    const url = "https://maria-chucena-api-production.up.railway.app/corte";
     final uri = Uri.parse(url);
 
     try {
+      print("Intentando cargar datos desde la API...");
       final response = await http.get(uri);
+
+      print("Respuesta de la API: ${response.body}");
 
       if (response.statusCode == 200) {
         final body = response.body;
@@ -112,18 +115,33 @@ class _CorteCrudViewState extends State<Cortecrudview> {
           return;
         }
 
-        final List<dynamic> jsonData = jsonDecode(body);
+        // Intenta decodificar como lista
+        final List<dynamic>? jsonData = jsonDecode(body) as List<dynamic>?;
 
-        if (jsonData is! List) {
-          print("Error: La respuesta no es una lista válida.");
+        if (jsonData == null) {
+          print("Error: La respuesta es nula. Verifica el formato de la API.");
           return;
         }
 
+        // Muestra la longitud de jsonData para ver cuántos elementos hay
+        print("Número de elementos en jsonData: ${jsonData.length}");
+
         setState(() {
-          cortes = jsonData.map((json) => Corte.fromJson(json)).toList();
+          cortes = jsonData
+              .map((json) {
+                try {
+                  return Corte.fromJson(json);
+                } catch (e) {
+                  print("Error al deserializar corte: $e");
+                  return null; // Devuelve null si hay un error
+                }
+              })
+              .where((corte) => corte != null)
+              .cast<Corte>()
+              .toList();
         });
 
-        print("cortes cargados correctamente.");
+        print("Cortes cargados correctamente.");
       } else {
         print("Error: Código de estado ${response.statusCode}");
       }
@@ -133,8 +151,7 @@ class _CorteCrudViewState extends State<Cortecrudview> {
   }
 
   Future<void> deleteCorte(int id) async {
-    final url =
-        'https://maria-chucena-api-production.up.railway.app/corte/$id'; // Endpoint para eliminar un avio
+    final url = 'https://maria-chucena-api-production.up.railway.app/corte/$id';
     final uri = Uri.parse(url);
 
     try {
@@ -142,15 +159,15 @@ class _CorteCrudViewState extends State<Cortecrudview> {
 
       if (response.statusCode == 204) {
         setState(() {
-          cortes.removeWhere((corte) => corte.id == id); // Remover avio localmente
+          cortes.removeWhere((corte) => corte.id == id);
         });
-        print('corte eliminado correctamente.');
+        print('Corte eliminado correctamente.');
       } else {
         print(
-            'Error: No se pudo eliminar el avio. Código de estado ${response.statusCode}');
+            'Error: No se pudo eliminar el corte. Código de estado ${response.statusCode}');
       }
     } catch (e) {
-      print('Error al eliminar la avio: $e');
+      print('Error al eliminar el corte: $e');
     }
   }
 
@@ -169,9 +186,8 @@ class _CorteCrudViewState extends State<Cortecrudview> {
             ),
             ElevatedButton(
               onPressed: () async {
-                await deleteCorte(id); // Esperar a que se elimine el avio
-                Navigator.of(context)
-                    .pop(); // Cierra el diálogo después de la eliminación
+                await deleteCorte(id);
+                Navigator.of(context).pop();
               },
               child: const Text('Eliminar'),
             ),
@@ -180,4 +196,4 @@ class _CorteCrudViewState extends State<Cortecrudview> {
       },
     );
   }
-}*/
+}

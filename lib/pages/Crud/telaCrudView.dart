@@ -47,20 +47,6 @@ class _telaCrudViewState extends State<Telacrudview> {
                       foregroundColor: Colors.white),
                   child: const Text('Nuevo registro'),
                 ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const HomePage(),
-                      ),
-                    );
-                  },
-                  style: TextButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      foregroundColor: Colors.white),
-                  child: const Text('Inicio'),
-                ),
               ],
             ),
           ),

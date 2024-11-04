@@ -5,6 +5,7 @@ import 'package:gestion_indumentaria/models/Modelo.dart';
 import 'package:gestion_indumentaria/models/observacion.dart';
 import 'package:gestion_indumentaria/models/Talle.dart';
 import 'package:gestion_indumentaria/pages/Modelos/NuevoModelo.dart';
+import 'package:gestion_indumentaria/pages/Modelos/editarModelos.dart';
 import 'package:gestion_indumentaria/widgets/boxDialog/BoxDialogModelo.dart';
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
 import 'package:http/http.dart' as http;
@@ -103,8 +104,13 @@ class _ModelCrudViewState extends State<ModelCrudView> {
                         ),
                         IconButton(
                           onPressed: () {
-                            print('Edición para modelo con id: ${model.id}');
-                            // Aquí podrías abrir un diálogo o una pantalla para editar el modelo
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EditModelScreen(
+                                    modelId: model.id), // Aquí pasas el modelId
+                              ),
+                            );
                           },
                           icon: const Icon(Icons.edit),
                         ),

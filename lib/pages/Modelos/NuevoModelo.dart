@@ -66,7 +66,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
     //Avios(nombre: selectedTipoAvioDialog!, proveedores: "Proveedor1");
     Modelo modeloCreado = Modelo(
         id: 0,
-        codigo: " codigo-prueba",
+        codigo: "",
         nombre: nombreModelo!,
         tieneTelaSecundaria: selectedPrimForm!,
         tieneTelaAuxiliar: selectedAuxForm!,
@@ -636,6 +636,12 @@ class _NuevomodeloState extends State<Nuevomodelo> {
     );
   }
 
+// Define variables para almacenar las opciones seleccionadas
+
+// Añade variables para rastrear qué opción está seleccionada
+  String? selectedAux; // Opción auxiliar seleccionada
+  String? selectedPrim; // Opción primaria seleccionada
+
   Widget _buildAuxSelection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -650,13 +656,15 @@ class _NuevomodeloState extends State<Nuevomodelo> {
           children: auxOptions.map((aux) {
             return ChoiceChip(
               label: Text(aux),
-              selected: selectedAuxForm = false,
+              selected: selectedAux == aux, // Compara con la opción actual
               onSelected: (selected) {
                 setState(() {
                   if (selected) {
-                    selectedAuxForm = true; // Solo permitir una selección
+                    selectedAux = aux; // Asigna la opción seleccionada
+                    selectedAuxForm = true; // Marca como seleccionada
                   } else {
-                    selectedAuxForm = false;
+                    selectedAux = null; // Deselect all
+                    selectedAuxForm = false; // Desmarca
                   }
                 });
               },
@@ -681,13 +689,15 @@ class _NuevomodeloState extends State<Nuevomodelo> {
           children: primOptions.map((prim) {
             return ChoiceChip(
               label: Text(prim),
-              selected: selectedPrimForm = false,
+              selected: selectedPrim == prim, // Compara con la opción actual
               onSelected: (selected) {
                 setState(() {
                   if (selected) {
-                    selectedPrimForm = true; // Solo permitir una selección
+                    selectedPrim = prim; // Asigna la opción seleccionada
+                    selectedPrimForm = true; // Marca como seleccionada
                   } else {
-                    selectedPrimForm = false;
+                    selectedPrim = null; // Deselect all
+                    selectedPrimForm = false; // Desmarca
                   }
                 });
               },

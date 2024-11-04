@@ -5,7 +5,7 @@ import 'package:gestion_indumentaria/widgets/HomePage.dart';
 import 'package:http/http.dart' as http; // Importa el paquete http
 import 'dart:convert'; // Importa esto para convertir a JSON
 import 'package:gestion_indumentaria/pages/Provedores/NuevoProvedor.dart';
-import 'package:gestion_indumentaria/pages/TipoDeTelas/NuevoTipoDeTela.dart';
+
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 
 class NuevasTelas extends StatefulWidget {
@@ -107,9 +107,7 @@ class _NuevasTelasState extends State<NuevasTelas> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         buildTipoTejidoSelector(),
-                        const SizedBox(height: 10),
-                        buildTipoProductoSelector(),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 15),
                         buildDropdownField('Proveedor', proveedores, (value) {
                           setState(() {
                             selectedProveedorId = proveedores.indexOf(
@@ -198,7 +196,7 @@ class _NuevasTelasState extends State<NuevasTelas> {
       "estampado": estampado,
       "descripcion": descripcion,
       "tipoRollo": tipoRollo,
-      "tipoProductoId": tipoProductoId,
+      "tipoProductoId": 2,
       "proveedorId":
           selectedProveedorId != null ? selectedProveedorId! + 1 : null,
     };
@@ -254,14 +252,7 @@ class _NuevasTelasState extends State<NuevasTelas> {
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () {
-              if (label == 'Tipo de tela') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const Nuevotipodetela(),
-                  ),
-                );
-              } else if (label == 'Proveedor') {
+              if (label == 'Proveedor') {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -296,38 +287,6 @@ class _NuevasTelasState extends State<NuevasTelas> {
                   tipoRollo = isSelected ? tipoTejido : '';
                 });
               },
-            );
-          }).toList(),
-        ),
-      ],
-    );
-  }
-
-  Widget buildTipoProductoSelector() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Tipo de Producto',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 10),
-        Wrap(
-          spacing: 10,
-          children: TipoEnum.values.map((tipo) {
-            return ChoiceChip(
-              label: Text(tipo.toString().split('.').last),
-              selected: selectedTipo == tipo,
-              onSelected: (selected) {
-                setState(() {
-                  if (selected) {
-                    selectedTipo = tipo;
-                    tipoProductoId =
-                        selectedTipo == TipoEnum.AVIO ? 1 : 2; // Ajusta el id
-                  }
-                });
-              },
-              labelStyle: const TextStyle(fontSize: 16),
             );
           }).toList(),
         ),

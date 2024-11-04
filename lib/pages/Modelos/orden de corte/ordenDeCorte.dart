@@ -6,7 +6,6 @@ import 'package:gestion_indumentaria/pages/principal.dart';
 import 'package:http/http.dart' as http;
 import 'package:gestion_indumentaria/pages/Avios/nuevoAvios.dart';
 import 'package:gestion_indumentaria/pages/Modelos/NuevoModelo.dart';
-import 'package:gestion_indumentaria/pages/TipoDeTelas/NuevoTipoDeTela.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
 import 'package:gestion_indumentaria/widgets/TalleSelectorWidget.dart';
@@ -19,7 +18,7 @@ class OrdenDeCorteScreen extends StatefulWidget {
 }
 
 class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
-  final List<String> tiposDeTela = ['Algodón', 'Poliéster', 'Lino'];
+  List<String> tiposDeTela = [];
   List<dynamic> modelosACortar = [];
   List<String> avios = [];
   List<Talle> selectedTalle = [];
@@ -29,6 +28,7 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
     super.initState();
     fetchAvios();
     fetchModelo();
+    fetchTiposDeTela();
   }
 
   Future<void> fetchAvios() async {
@@ -54,6 +54,21 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
       });
     } else {
       print('Error al cargar los modelos');
+    }
+  }
+
+  Future<void> fetchTiposDeTela() async {
+    final response = await http.get(Uri.parse(
+        'https://maria-chucena-api-production.up.railway.app/tipo-Producto'));
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      setState(() {
+        tiposDeTela.addAll(data
+            .where((tipo) => tipo['tipo'] == 'TELA')
+            .map<String>((tipo) => tipo['nombre'].toString()));
+      });
+    } else {
+      print('Error al cargar los tipos de producto');
     }
   }
 
@@ -291,28 +306,7 @@ Widget buildDropdownField(
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () {
-              if (label == 'Tipo de Tela') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const Nuevotipodetela(),
-                  ),
-                );
-              } else if (label == 'Modelo a Cortar') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const Nuevomodelo(),
-                  ),
-                );
-              } else if (label == 'Avíos') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const Nuevoavios(),
-                  ),
-                );
-              }
+              // Acciones para añadir nuevos elementos
             },
           ),
         ],
