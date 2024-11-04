@@ -7,6 +7,7 @@ import 'package:gestion_indumentaria/models/Talle.dart';
 import 'package:gestion_indumentaria/pages/Modelos/NuevoModelo.dart';
 import 'package:gestion_indumentaria/pages/Modelos/editarModelos.dart';
 import 'package:gestion_indumentaria/widgets/boxDialog/BoxDialogModelo.dart';
+
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
 import 'package:http/http.dart' as http;
 
@@ -108,10 +109,31 @@ class _ModelCrudViewState extends State<ModelCrudView> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => EditModelScreen(
-                                    modelId: model.id), // Aquí pasas el modelId
+                                  modelo: model,
+                                  onModeloModified: (Modelo value) {},
+                                ), // Aquí pasas el modelId
                               ),
                             );
                           },
+
+                          /*     onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) => ModificadorModeloDialog(
+                                modelo: model,
+                                onModeloModified: (Modelo updatedModelo) {
+                                  setState(() {
+                                    // Actualizar la prenda en la lista
+                                    final index = models.indexWhere(
+                                        (m) => m.id == updatedModelo.id);
+                                    if (index != -1) {
+                                      models[index] = updatedModelo;
+                                    }
+                                  });
+                                },
+                              ),
+                            );
+                          },*/
                           icon: const Icon(Icons.edit),
                         ),
                         IconButton(

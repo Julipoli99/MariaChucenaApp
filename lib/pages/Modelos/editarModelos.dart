@@ -1,52 +1,168 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Avio.dart';
+import 'package:gestion_indumentaria/models/Modelo.dart';
 import 'package:gestion_indumentaria/models/AviosModelo.dart';
-import 'package:gestion_indumentaria/models/talle.dart';
+import 'package:gestion_indumentaria/models/Talle.dart';
+import 'package:gestion_indumentaria/widgets/TalleSelectorWidget.dart';
 import 'package:http/http.dart' as http;
 
-// Define las clases Avio, AvioModelo, Talle, etc. según tu estructura de datos.
-
 class EditModelScreen extends StatefulWidget {
-  final int modelId; // ID del modelo a editar
+  final Modelo modelo;
+  final ValueChanged<Modelo> onModeloModified;
 
-  const EditModelScreen({Key? key, required this.modelId}) : super(key: key);
+  const EditModelScreen({
+    Key? key,
+    required this.modelo,
+    required this.onModeloModified,
+  }) : super(key: key);
 
   @override
   _EditModelScreenState createState() => _EditModelScreenState();
 }
 
 class _EditModelScreenState extends State<EditModelScreen> {
+  final TextEditingController _codigoController = TextEditingController();
   final TextEditingController _nombreController = TextEditingController();
-  final TextEditingController _cantidadController = TextEditingController();
-  String? selectedTipoAvioDialog;
-  bool esPorTalle = false;
-  bool esPorColor = false;
-  List<AvioModelo> aviosSeleccionados = [];
-  List<Talle>? selectedTallesDialog = [];
-  List<String> auxOptions = ['Sí', 'No'];
-  bool selectedAuxForm = false;
-  bool selectedPrimForm = false;
+  final TextEditingController _cantidadController =
+      TextEditingController(); // Agregar controlador para cantidad
+  bool _tieneTelaSecundaria = false;
+  bool _tieneTelaAuxiliar = false;
+  bool _isSaving = false;
+  List<AvioModelo> _aviosSeleccionados = [];
+  List<Avio>? aviosData;
+  List<Talle> selectedTallesForm = [];
+  String? selectedTipoAvioDialog; // Variable para el tipo de avio seleccionado
+  bool esPorTalle = false; // Variable para indicar si es por talle
+  bool esPorColor = false; // Variable para indicar si es por color
+  List<Talle>? selectedTallesDialog; // Almacena los talles seleccionados
 
   @override
   void initState() {
     super.initState();
-    _loadModelData(); // Cargar datos del modelo
+    _codigoController.text = widget.modelo.codigo;
+    _nombreController.text = widget.modelo.nombre;
+    _tieneTelaSecundaria = widget.modelo.tieneTelaSecundaria;
+    _tieneTelaAuxiliar = widget.modelo.tieneTelaAuxiliar;
+    _aviosSeleccionados =
+        widget.modelo.avios ?? []; // Inicializar con avíos existentes
   }
 
-  Future<void> _loadModelData() async {
-    // Aquí debes agregar la lógica para cargar los datos del modelo desde la API
-    final response = await http.get(Uri.parse(
-        'https://maria-chucena-api-production.up.railway.app/modelo/${widget.modelId}'));
+  Future<void> _updateModeloInApi() async {
+    final String apiUrl =
+        'https://maria-chucena-api-production.up.railway.app/modelo/${widget.modelo.id}';
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      _nombreController.text = data['nombre'];
-      // Carga otros campos según la estructura de datos
-    } else {
-      _showErrorDialog(
-          'Error al cargar los datos del modelo: ${response.statusCode}');
+    try {
+      setState(() => _isSaving = true);
+      final response = await http.patch(
+        Uri.parse(apiUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'codigo': _codigoController.text.trim(),
+          'nombre': _nombreController.text.trim(),
+          'tieneTelaSecundaria': _tieneTelaSecundaria,
+          'tieneTelaAuxiliar': _tieneTelaAuxiliar,
+          'avios': _aviosSeleccionados
+              .map((avio) => avio.toJson())
+              .toList(), // Incluir avíos en la actualización
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        final updatedModelo =
+            Modelo.fromJson(responseData); // Usar el método fromJson
+        widget.onModeloModified(updatedModelo);
+        Navigator.of(context).pop();
+      } else {
+        _showError('Error al actualizar el modelo en la API. ${response.body}');
+      }
+    } catch (e) {
+      _showError('Ocurrió un error: $e');
+    } finally {
+      setState(() => _isSaving = false);
     }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Modificar Modelo'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.save),
+            onPressed: _isSaving ? null : _updateModeloInApi,
+          ),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Código actual: ${widget.modelo.codigo ?? "Sin código"}'),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _codigoController,
+              decoration: const InputDecoration(
+                labelText: 'Nuevo código del modelo',
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text('Nombre actual: ${widget.modelo.nombre ?? "Sin nombre"}'),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _nombreController,
+              decoration: const InputDecoration(
+                labelText: 'Nuevo nombre del modelo',
+              ),
+            ),
+            const SizedBox(height: 20),
+            CheckboxListTile(
+              title: const Text('¿Tiene tela secundaria?'),
+              value: _tieneTelaSecundaria,
+              onChanged: (value) {
+                setState(() => _tieneTelaSecundaria = value ?? false);
+              },
+            ),
+            CheckboxListTile(
+              title: const Text('¿Tiene tela auxiliar?'),
+              value: _tieneTelaAuxiliar,
+              onChanged: (value) {
+                setState(() => _tieneTelaAuxiliar = value ?? false);
+              },
+            ),
+            const SizedBox(height: 15),
+            TalleSelector(
+              selectedTalles: selectedTallesForm,
+              onTalleSelected: (talles) {
+                setState(() {
+                  selectedTallesForm = talles;
+                });
+              },
+            ),
+            const SizedBox(height: 20),
+            const Text('Avíos:'),
+            const SizedBox(height: 10),
+
+            ElevatedButton(
+              onPressed: _showAviosDialog,
+              child: const Text('Modificar Avios'),
+            ),
+            const SizedBox(height: 20),
+            // Tabla para mostrar avios seleccionados
+            Expanded(child: _buildAviosTable()),
+          ],
+        ),
+      ),
+    );
   }
 
   void _showAviosDialog() {
@@ -73,11 +189,10 @@ class _EditModelScreenState extends State<EditModelScreen> {
               );
             } else {
               List<Avio> aviosData = snapshot.data!;
-
               return StatefulBuilder(
                 builder: (BuildContext context, StateSetter setDialogState) {
                   return AlertDialog(
-                    title: const Text('Seleccione los detalles del Avio'),
+                    title: const Text('Modificar Avios'),
                     content: SingleChildScrollView(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -95,6 +210,7 @@ class _EditModelScreenState extends State<EditModelScreen> {
                               setDialogState(() {
                                 selectedTipoAvioDialog = value;
                               });
+                              print('Tipo de avio seleccionado: $value');
                             },
                           ),
                           const SizedBox(height: 10),
@@ -104,9 +220,7 @@ class _EditModelScreenState extends State<EditModelScreen> {
                             onChanged: (bool? value) {
                               setDialogState(() {
                                 esPorTalle = value ?? false;
-                                if (esPorTalle) {
-                                  _showTalleSelectionDialog(setDialogState);
-                                }
+                                print('Es por Talle: $esPorTalle');
                               });
                             },
                           ),
@@ -116,6 +230,7 @@ class _EditModelScreenState extends State<EditModelScreen> {
                             onChanged: (bool? value) {
                               setDialogState(() {
                                 esPorColor = value ?? false;
+                                print('Es por Color: $esPorColor');
                               });
                             },
                           ),
@@ -126,68 +241,68 @@ class _EditModelScreenState extends State<EditModelScreen> {
                             ),
                             keyboardType: TextInputType.number,
                           ),
-                          const SizedBox(height: 10),
-                          // Mostrar los talles seleccionados
-                          if (selectedTallesDialog != null &&
-                              selectedTallesDialog!.isNotEmpty)
-                            Column(
-                              children: [
-                                const Text('Talles Seleccionados:',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold)),
-                                Wrap(
-                                  spacing: 8.0,
-                                  children: selectedTallesDialog!.map((talle) {
-                                    return Chip(
-                                      label: Text(talle
-                                          .nombre), // Asegúrate de que Talle tiene la propiedad nombre
-                                    );
-                                  }).toList(),
-                                ),
-                              ],
-                            ),
-                          const SizedBox(height: 15),
                         ],
                       ),
                     ),
                     actions: [
                       ElevatedButton(
                         onPressed: () {
-                          // Agregar avio a la lista con los datos ingresados
-                          setState(() {
-                            if (selectedTipoAvioDialog != null &&
-                                _cantidadController.text.isNotEmpty) {
-                              final avioSeleccionado = aviosData.firstWhere(
-                                  (avio) =>
-                                      avio.nombre == selectedTipoAvioDialog);
-                              aviosSeleccionados.add(
-                                AvioModelo(
-                                  avioId: avioSeleccionado.id,
-                                  esPorTalle: esPorTalle,
-                                  esPorColor: esPorColor,
-                                  // Asigna talles seleccionados
-                                  cantidadRequerida:
-                                      int.parse(_cantidadController.text),
-                                ),
+                          if (selectedTipoAvioDialog != null &&
+                              _cantidadController.text.isNotEmpty) {
+                            final avioSeleccionado = aviosData.firstWhere(
+                                (avio) =>
+                                    avio.nombre == selectedTipoAvioDialog);
+
+                            // Mostrar datos que se van a agregar
+                            print('Agregando avio: ${avioSeleccionado.nombre}');
+                            print('Cantidad: ${_cantidadController.text}');
+                            print('Es por Talle: $esPorTalle');
+                            print('Es por Color: $esPorColor');
+                            print(
+                                'Talles seleccionados: $selectedTallesDialog');
+
+                            // Modificar el avio en lugar de agregar uno nuevo
+                            setState(() {
+                              final cantidadRequerida = int.parse(
+                                  _cantidadController
+                                      .text); // Asegúrate de que esto sea un número
+                              final avioAGuardar = AvioModelo(
+                                avioId: avioSeleccionado.id,
+                                cantidadRequerida: cantidadRequerida,
+                                esPorTalle: esPorTalle,
+                                esPorColor: esPorColor,
                               );
-                            }
-                          });
-                          // Limpiar campos
-                          setDialogState(() {
-                            selectedTipoAvioDialog = null;
-                            _cantidadController.clear();
-                            esPorTalle = false;
-                            esPorColor = false;
-                            selectedTallesDialog?.clear();
-                          });
+
+                              // Aquí se puede agregar lógica para evitar duplicados
+                              if (!_aviosSeleccionados
+                                  .any((avio) => avio.id == avioAGuardar.id)) {
+                                _aviosSeleccionados.add(avioAGuardar);
+                                print('Avio agregado: $avioAGuardar');
+                              } else {
+                                print('El avio ya está agregado.');
+                              }
+
+                              // Reiniciar el estado del diálogo
+                              setDialogState(() {
+                                selectedTipoAvioDialog = null;
+                                _cantidadController.clear();
+                                esPorTalle = false;
+                                esPorColor = false;
+                              });
+                            });
+
+                            Navigator.of(context).pop(); // Cerrar el diálogo
+                          } else {
+                            _showError('Por favor, complete todos los campos.');
+                          }
                         },
-                        child: const Text('Agregar Avio'),
+                        child: const Text('Agregar'),
                       ),
                       ElevatedButton(
                         onPressed: () {
                           Navigator.of(context).pop(); // Cerrar el diálogo
                         },
-                        child: const Text('Cerrar'),
+                        child: const Text('Cancelar'),
                       ),
                     ],
                   );
@@ -200,67 +315,155 @@ class _EditModelScreenState extends State<EditModelScreen> {
     );
   }
 
-  // Diálogo para seleccionar los talles
-  void _showTalleSelectionDialog(StateSetter setState) async {
-    List<Talle> talles = [];
-    bool isLoading = true;
+  Widget _buildAviosTable() {
+    return ListView.builder(
+      itemCount: _aviosSeleccionados.length,
+      itemBuilder: (context, index) {
+        final avio = _aviosSeleccionados[index];
+        return DataTable(
+          columns: const [
+            DataColumn(label: Text('ID de Avio')),
+            DataColumn(label: Text('Es por Talle')),
+            DataColumn(label: Text('Es por Color')),
+            DataColumn(label: Text('Cantidad')),
+            DataColumn(label: Text('Acciones')), // Nueva columna para acciones
+          ],
+          rows: _aviosSeleccionados.map((AvioModelo avio) {
+            return DataRow(cells: [
+              DataCell(Text(avio.avioId.toString())),
+              DataCell(Text(avio.esPorTalle ? 'Sí' : 'No')),
+              DataCell(Text(avio.esPorColor ? 'Sí' : 'No')),
+              DataCell(Text(avio.cantidadRequerida.toString())),
+              DataCell(Row(
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.edit),
+                    onPressed: () {
+                      _editAvio(avio);
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.delete),
+                    onPressed: () {
+                      _deleteAvio(widget.modelo.id, avio.id!);
+                    },
+                  ),
+                ],
+              )),
+            ]);
+          }).toList(),
+        );
+      },
+    );
+  }
 
-    // Llamada a la API para obtener los talles
-    const String apiUrl =
-        'https://maria-chucena-api-production.up.railway.app/talle';
-    try {
-      final response = await http.get(Uri.parse(apiUrl));
-      if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
-        talles = data
-            .map((talle) => Talle.fromJson(talle))
-            .toList(); // Asumiendo que tienes un método fromJson en Talle
-        isLoading = false;
-      } else {
-        _showErrorDialog('Error al obtener los talles: ${response.statusCode}');
-      }
-    } catch (e) {
-      _showErrorDialog('Error de conexión: $e');
-    }
+  void _editAvio(AvioModelo avio) {
+    // Configurar el dialogo para editar el avio
+    _cantidadController.text = avio.cantidadRequerida.toString();
+    selectedTipoAvioDialog = avio.avioId.toString();
 
-    // Mostrar el diálogo con los talles cargados
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (context) {
         return AlertDialog(
-          title: const Text('Seleccione los talles'),
-          content: isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : Wrap(
-                  spacing: 10,
-                  children: talles.map((Talle talle) {
-                    return ChoiceChip(
-                      label: Text(talle
-                          .nombre), // Asegúrate de que Talle tiene la propiedad nombre
-                      selected: selectedTallesDialog!.contains(talle),
-                      onSelected: (selected) {
-                        setState(() {
-                          if (selected) {
-                            selectedTallesDialog?.add(talle);
-                          } else {
-                            selectedTallesDialog?.remove(talle);
-                          }
-                        });
-                      },
+          title: const Text('Editar Avio'),
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                DropdownButton<String>(
+                  hint: const Text('Seleccione el avio'),
+                  value: selectedTipoAvioDialog,
+                  items: aviosData?.map((Avio avio) {
+                    return DropdownMenuItem<String>(
+                      value: avio.nombre,
+                      child: Text(avio.nombre),
                     );
                   }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedTipoAvioDialog = value;
+                    });
+                  },
                 ),
+                TextField(
+                  controller: _cantidadController,
+                  decoration:
+                      const InputDecoration(labelText: 'Cantidad Requerida'),
+                  keyboardType: TextInputType.number,
+                ),
+              ],
+            ),
+          ),
           actions: [
-            TextButton(
+            ElevatedButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Cerrar el diálogo
+                if (selectedTipoAvioDialog != null &&
+                    _cantidadController.text.isNotEmpty) {
+                  final cantidadRequerida = int.parse(_cantidadController.text);
+                  final updatedAvio = AvioModelo(
+                    avioId: avio.avioId,
+                    cantidadRequerida: cantidadRequerida,
+                    esPorTalle: avio.esPorTalle,
+                    esPorColor: avio.esPorColor,
+                  );
+
+                  setState(() {
+                    final index = _aviosSeleccionados
+                        .indexWhere((a) => a.avioId == avio.avioId);
+                    if (index != -1) {
+                      _aviosSeleccionados[index] = updatedAvio;
+                    }
+                  });
+                  Navigator.of(context).pop();
+                } else {
+                  _showError('Por favor, complete todos los campos.');
+                }
               },
-              child: const Text('Aceptar'),
+              child: const Text('Actualizar'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancelar'),
             ),
           ],
         );
       },
     );
+  }
+
+  _deleteAvio(int idModelo, int idAvioModelo) async {
+    final url =
+        'https://maria-chucena-api-production.up.railway.app//modelo/avio-modelo/$idModelo-modelo/$idAvioModelo-avio-modelo';
+
+    try {
+      final response = await http.delete(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        print('Recurso eliminado con éxito.');
+        // Aquí puedes agregar lógica adicional después de la eliminación
+      } else {
+        final errorResponse = json.decode(response.body);
+        throw Exception(
+            'Error al eliminar el recurso: ${errorResponse['message']}');
+      }
+    } catch (error) {
+      print('Se produjo un error: $error');
+    }
+  }
+
+  Future<List<Avio>> fetchAviosFromApi() async {
+    final response = await http.get(
+      Uri.parse('https://maria-chucena-api-production.up.railway.app/avio'),
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonData = jsonDecode(response.body);
+      return jsonData.map((json) => Avio.fromJson(json)).toList();
+    } else {
+      throw Exception('Error al cargar avíos');
+    }
   }
 
   void _showErrorDialog(String message) {
@@ -276,97 +479,6 @@ class _EditModelScreenState extends State<EditModelScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  Future<List<Avio>> fetchAviosFromApi() async {
-    // Simulando una llamada a la API
-    final response = await http.get(
-        Uri.parse('https://maria-chucena-api-production.up.railway.app/avio'));
-
-    if (response.statusCode == 200) {
-      // Decodificando el JSON y convirtiendo a objetos Avio
-      List<dynamic> jsonData = json.decode(response.body);
-      return jsonData.map((item) => Avio.fromJson(item)).toList();
-    } else {
-      throw Exception('Error al cargar avíos');
-    }
-  }
-
-  void _updateModel() async {
-    // Aquí puedes implementar la lógica para enviar la información actualizada a la API
-    final updatedModel = {
-      'nombre': _nombreController.text,
-      // Agrega otros campos del modelo que se deseen actualizar
-      'avios': aviosSeleccionados.map((e) => e.toJson()).toList(),
-    };
-
-    final response = await http.put(
-      Uri.parse('https://api-url-to-update-model/${widget.modelId}'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode(updatedModel),
-    );
-
-    if (response.statusCode == 200) {
-      Navigator.of(context).pop(); // Regresar a la pantalla anterior
-    } else {
-      _showErrorDialog('Error al actualizar el modelo: ${response.statusCode}');
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Editar Modelo'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.save),
-            onPressed: _updateModel, // Llamar al método de actualización
-          ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: _nombreController,
-              decoration: const InputDecoration(labelText: 'Nombre'),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _showAviosDialog,
-              child: const Text('Seleccionar Avios'),
-            ),
-            const SizedBox(height: 16),
-            // Mostrar la tabla de avíos seleccionados
-            _buildAviosTable(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAviosTable() {
-    return DataTable(
-      columns: const [
-        DataColumn(label: Text('ID')),
-        DataColumn(label: Text('Por Talle')),
-        DataColumn(label: Text('Por Color')),
-        DataColumn(label: Text('Cantidad')),
-      ],
-      rows: aviosSeleccionados.map((AvioModelo avio) {
-        return DataRow(
-          cells: [
-            DataCell(Text(avio.avioId.toString())),
-            DataCell(Text(avio.esPorTalle ? 'Sí' : 'No')),
-            DataCell(Text(avio.esPorColor ? 'Sí' : 'No')),
-            DataCell(Text(avio.cantidadRequerida.toString())),
-          ],
-        );
-      }).toList(),
     );
   }
 }
