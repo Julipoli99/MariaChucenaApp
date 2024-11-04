@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Corte.dart';
 import 'package:gestion_indumentaria/pages/Modelos/orden%20de%20corte/ordenDeCorte.dart';
+import 'package:gestion_indumentaria/widgets/boxDialog/BoxDialogoCorte.dart';
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
 import 'package:http/http.dart' as http;
 
@@ -38,7 +39,7 @@ class _CorteCrudViewState extends State<Cortecrudview> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const OrdenDeCorteScreen(),
+                            builder: (context) => OrdenDeCorteScreen(),
                           ),
                         );
                       },
@@ -76,6 +77,7 @@ class _CorteCrudViewState extends State<Cortecrudview> {
                       children: [
                         IconButton(
                           onPressed: () {
+                            _showCorteDetailsDialog(context, corte);
                             print('Vista para corte: ${corte.id}');
                           },
                           icon: const Icon(Icons.remove_red_eye_outlined),
@@ -192,6 +194,18 @@ class _CorteCrudViewState extends State<Cortecrudview> {
               child: const Text('Eliminar'),
             ),
           ],
+        );
+      },
+    );
+  }
+
+  void _showCorteDetailsDialog(BuildContext context, Corte corte) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return BoxDialogCorte(
+          corte: corte,
+          onCancel: () => Navigator.of(context).pop(),
         );
       },
     );
