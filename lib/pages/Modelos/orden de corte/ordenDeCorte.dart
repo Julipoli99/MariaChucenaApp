@@ -86,15 +86,40 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
       return;
     }
 
+    // Aquí construimos la lista de modelos
+    final modeloSeleccionado = modelosACortar
+        .firstWhere((modelo) => modelo['nombre'] == selectedModelo);
+
     final orderData = {
-      'tipoDeTela': selectedTipoDeTela,
-      'modelo': selectedModelo,
-      'avio': selectedAvio,
-      'observaciones': observaciones,
-      'talles': selectedTalle
-          .map((talle) => talle.toJson())
-          .toList(), // Envía los talles como un arreglo
-      // Aquí deberías agregar la lista de rollos si es necesario
+      'modelos': [
+        {
+          'modeloId': modeloSeleccionado[
+              'id'], // Asumiendo que tu modelo tiene un campo 'id'
+          'esParaEstampar': true, // Ajusta según tus necesidades
+          'usaTelaSecundaria': false, // Ajusta según tus necesidades
+          'usaTelaAuxiliar': false, // Ajusta según tus necesidades
+          'observaciones': [
+            {
+              'titulo': 'Collareta',
+              'descripcion': observaciones ?? '',
+            },
+          ],
+          'curva': selectedTalle.map((talle) {
+            return {
+              'talleId':
+                  talle.id, // Asegúrate de que tu objeto Talle tenga un 'id'
+              'repeticion': 1, // Ajusta según tus necesidades
+            };
+          }).toList(),
+        },
+      ],
+      'rollos': [
+        {
+          'rolloId': 1, // Ajusta según tu lógica para obtener el rollo
+          'categoria': 'PRIMARIA', // Ajusta según tus necesidades
+          'cantidadUtilizada': 25.6, // Ajusta según tus necesidades
+        },
+      ],
     };
 
     try {
