@@ -1,13 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:gestion_indumentaria/models/Modelo.dart';
 import 'package:gestion_indumentaria/models/Talle.dart';
 import 'package:gestion_indumentaria/pages/principal.dart';
-import 'package:http/http.dart' as http;
-import 'package:gestion_indumentaria/pages/Avios/nuevoAvios.dart';
-import 'package:gestion_indumentaria/pages/Modelos/NuevoModelo.dart';
-import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
+import 'package:http/http.dart' as http;
+import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/TalleSelectorWidget.dart';
 
 class OrdenDeCorteScreen extends StatefulWidget {
@@ -22,6 +19,10 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
   List<dynamic> modelosACortar = [];
   List<String> avios = [];
   List<Talle> selectedTalle = [];
+  String? selectedTipoDeTela;
+  String? selectedModelo;
+  String? selectedAvio;
+  String? observaciones;
 
   @override
   void initState() {
@@ -69,6 +70,63 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
       });
     } else {
       print('Error al cargar los tipos de producto');
+    }
+  }
+
+  Future<void> createOrdenDeCorte() async {
+    if (selectedTipoDeTela == null ||
+        selectedModelo == null ||
+        selectedAvio == null ||
+        selectedTalle.isEmpty || // Verifica que selectedTalle no esté vacío
+        observaciones == null) {
+      // Mostrar un mensaje de error si falta algún campo
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor, complete todos los campos.')),
+      );
+      return;
+    }
+
+    final orderData = {
+      'tipoDeTela': selectedTipoDeTela,
+      'modelo': selectedModelo,
+      'avio': selectedAvio,
+      'observaciones': observaciones,
+      'talles': selectedTalle
+          .map((talle) => talle.toJson())
+          .toList(), // Envía los talles como un arreglo
+      // Aquí deberías agregar la lista de rollos si es necesario
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse('https://maria-chucena-api-production.up.railway.app/corte'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(orderData),
+      );
+
+      if (response.statusCode == 201) {
+        // La orden de corte fue creada exitosamente
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Orden de corte creada exitosamente.')),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        );
+      } else {
+        // Manejar error, muestra el cuerpo de la respuesta
+        final responseBody = json.decode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(
+                  'Error al crear la orden de corte: ${responseBody['message'] ?? 'Error desconocido'}')),
+        );
+      }
+    } catch (e) {
+      // Manejar excepciones de la red o del cliente
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error de conexión: $e')),
+      );
     }
   }
 
@@ -145,18 +203,34 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              buildDropdownField('Tipo de Tela', tiposDeTela, context),
+              buildDropdownField('Tipo de Tela', tiposDeTela, context, (value) {
+                setState(() {
+                  selectedTipoDeTela = value;
+                });
+              }),
               const SizedBox(height: 10),
               buildDropdownField(
                   'Modelo a Cortar',
                   modelosACortar
                       .map((modelo) => modelo['nombre'].toString())
                       .toList(),
-                  context),
+                  context, (value) {
+                setState(() {
+                  selectedModelo = value;
+                });
+              }),
               const SizedBox(height: 10),
-              buildDropdownField('Avíos', avios, context),
+              buildDropdownField('Avíos', avios, context, (value) {
+                setState(() {
+                  selectedAvio = value;
+                });
+              }),
               const SizedBox(height: 10),
-              buildTextField('Observaciones'),
+              buildTextField('Observaciones', (value) {
+                setState(() {
+                  observaciones = value;
+                });
+              }),
               const SizedBox(height: 10),
               TalleSelector(
                 selectedTalles: selectedTalle,
@@ -199,12 +273,12 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
         ),
         const SizedBox(width: 10),
         ElevatedButton(
-          onPressed: () {},
+          onPressed: createOrdenDeCorte,
           child: const Text('Crear Orden'),
         ),
         const SizedBox(width: 10),
         ElevatedButton(
-          onPressed: () {},
+          onPressed: () {}, // Lógica para crear tizadas
           child: const Text('Crear Tizadas'),
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.blue,
@@ -235,102 +309,44 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Modelo: ${modelo['nombre']}'),
-                    Text('Código: ${modelo['codigo']}'),
-                    Text('Fecha de Creación: ${modelo['fechaCreacion']}'),
-                    const SizedBox(height: 10),
-                    const Text(
-                      'Observaciones:',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    ...modelo['observaciones']
-                        .map<Widget>((obs) => Text(
-                              '${obs['titulo']}: ${obs['descripcion']}',
-                            ))
-                        .toList(),
-                    const SizedBox(height: 10),
-                    const Text(
-                      'Avíos:',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    ...modelo['avios']
-                        .map<Widget>((avioItem) => Text(
-                              '${avioItem['avio']['nombre']} - Cantidad: ${avioItem['cantidadRequerida']}',
-                            ))
-                        .toList(),
+                    Text(modelo['nombre'].toString()),
+                    // Aquí puedes mostrar más detalles del modelo si lo deseas
                     const Divider(),
                   ],
                 );
               },
             ),
           ),
-          const Text(
-            'Detalles adicionales:',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          const Text('• Estado: En progreso'),
         ],
       ),
     );
   }
-}
 
-Widget buildDropdownField(
-    String label, List<String> items, BuildContext context) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        label,
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+  Widget buildDropdownField(String label, List<String> items,
+      BuildContext context, Function(String?) onChanged) {
+    return DropdownButtonFormField<String>(
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(),
       ),
-      const SizedBox(height: 5),
-      Row(
-        children: [
-          Expanded(
-            child: DropdownButtonFormField<String>(
-              items: items.map((String item) {
-                return DropdownMenuItem<String>(
-                  value: item,
-                  child: Text(item),
-                );
-              }).toList(),
-              onChanged: (value) {},
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              // Acciones para añadir nuevos elementos
-            },
-          ),
-        ],
-      ),
-    ],
-  );
-}
+      items: items.map((item) {
+        return DropdownMenuItem<String>(
+          value: item,
+          child: Text(item),
+        );
+      }).toList(),
+      onChanged: onChanged,
+      isExpanded: true,
+    );
+  }
 
-Widget buildTextField(String label) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        label,
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+  Widget buildTextField(String label, Function(String) onChanged) {
+    return TextField(
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(),
       ),
-      const SizedBox(height: 5),
-      TextField(
-        decoration: InputDecoration(
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
-      ),
-    ],
-  );
+      onChanged: onChanged,
+    );
+  }
 }
