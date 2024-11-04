@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:gestion_indumentaria/models/RolloCorte.dart';
 import 'package:gestion_indumentaria/models/Talle.dart';
 import 'package:gestion_indumentaria/models/Tela.dart';
+import 'package:gestion_indumentaria/models/observacion.dart';
 import 'package:gestion_indumentaria/pages/principal.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
@@ -23,17 +25,23 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
   Tela? selectedTipoDeTela;
   String? selectedModelo;
   String? selectedAvio;
-  String? observaciones;
+  CategoriaTela? selectedCategoriaTela;
+
+  double? cantidadUtilizada;
+  List<ObservacionModel>? observaciones;
+
+  String tituloObservacion = "Sin titulo";
+  String descripcionObservacion = "Sin descripción";
 
   @override
   void initState() {
     super.initState();
-    fetchAvios();
+    // fetchAvios();
     fetchModelo();
     fetchTiposDeTela();
   }
 
-  Future<void> fetchAvios() async {
+  /*Future<void> fetchAvios() async {
     final response = await http.get(
         Uri.parse('https://maria-chucena-api-production.up.railway.app/avio'));
     if (response.statusCode == 200) {
@@ -44,7 +52,7 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
     } else {
       print('Error al cargar los avíos');
     }
-  }
+  }*/
 
   Future<void> fetchModelo() async {
     final response = await http.get(Uri.parse(
@@ -79,9 +87,7 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
   Future<void> createOrdenDeCorte() async {
     if (selectedTipoDeTela == null ||
         selectedModelo == null ||
-        selectedAvio == null ||
-        selectedTalle.isEmpty ||
-        observaciones == null) {
+        selectedTalle.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Por favor, complete todos los campos.')),
       );
@@ -99,10 +105,11 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
           'usaTelaSecundaria': false,
           'usaTelaAuxiliar': false,
           'observaciones': [
-            {
-              'titulo': 'Collareta',
-              'descripcion': observaciones ?? '',
-            },
+            ObservacionModel(
+              id: 1,
+              titulo: tituloObservacion,
+              descripcion: descripcionObservacion,
+            )
           ],
           'curva': selectedTalle.map((talle) {
             return {
@@ -115,8 +122,8 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
       'rollos': [
         {
           'rolloId': selectedTipoDeTela?.id,
-          'categoria': 'PRIMARIA',
-          'cantidadUtilizada': 25.6,
+          'categoria': selectedCategoriaTela.toString().split('.').last,
+          'cantidadUtilizada': cantidadUtilizada,
         },
       ],
     };
@@ -255,15 +262,59 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
               ),
 
               const SizedBox(height: 10),
-              buildDropdownField('Avíos', avios, context, (value) {
-                setState(() {
-                  selectedAvio = value;
-                });
-              }),
+              buildDropdownField(
+                'Categoría',
+                CategoriaTela.values
+                    .map((e) => e.toString().split('.').last)
+                    .toList(),
+                context,
+                (value) {
+                  setState(() {
+                    selectedCategoriaTela = CategoriaTela.values.firstWhere(
+                        (e) => e.toString().split('.').last == value);
+                  });
+                },
+              ),
               const SizedBox(height: 10),
-              buildTextField('Observaciones', (value) {
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Observación',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  TextField(
+                    onChanged: (value) {
+                      setState(() {
+                        tituloObservacion = value;
+                      });
+                    },
+                    decoration: const InputDecoration(labelText: 'Título'),
+                  ),
+                  TextField(
+                    onChanged: (value) {
+                      setState(() {
+                        descripcionObservacion = value;
+                      });
+                    },
+                    decoration: const InputDecoration(labelText: 'Descripción'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              buildTextField('Cantidad Utilizada', (value) {
                 setState(() {
-                  observaciones = value;
+                  // Convert the input string to a double
+                  if (value != null && value.isNotEmpty) {
+                    cantidadUtilizada = double.tryParse(
+                        value); // Safely parse the string to a double
+                  } else {
+                    cantidadUtilizada =
+                        null; // Set to null if the input is empty
+                  }
                 });
               }),
               const SizedBox(height: 10),
@@ -321,19 +372,19 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
   }
 
   Widget _buildSummaryCard() {
-    return Card(
+    return const Card(
       elevation: 2,
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: EdgeInsets.all(8.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Resumen',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
-            const Divider(),
-            const Text('Aquí aparecerá el resumen de la orden de corte.'),
+            Divider(),
+            Text('Aquí aparecerá el resumen de la orden de corte.'),
             // Agrega más detalles del resumen aquí según sea necesario
           ],
         ),

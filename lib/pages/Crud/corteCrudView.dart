@@ -195,6 +195,8 @@ class _CorteCrudViewState extends State<Cortecrudview> {
             ElevatedButton(
               onPressed: () async {
                 await deleteCorte(id);
+                // Llama a fetchModels después de la eliminación para actualizar la lista
+                await fetchModels();
                 Navigator.of(context).pop();
               },
               child: const Text('Eliminar'),
