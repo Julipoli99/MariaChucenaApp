@@ -129,17 +129,26 @@ class _NuevoprovedorFormState extends State<NuevoprovedorForm> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           ElevatedButton(
+                            onPressed: () {
+                              // Acción para CANCELAR
+                            },
+                            style: ElevatedButton.styleFrom(
+                              minimumSize:
+                                  const Size(140, 50), // Ajusta el tamaño
+                            ),
+                            child: const Text('Cancelar'),
+                          ),
+                          FilledButton(
                             onPressed: _isSaving ? null : _guardarProveedor,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.black,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 40, vertical: 20),
+                              minimumSize:
+                                  const Size(140, 50), // Ajusta el tamaño
                             ),
                             child: _isSaving
                                 ? const CircularProgressIndicator(
                                     color: Colors.white,
                                   )
-                                : const Text('Guardar proveedor'),
+                                : const Text('Guardar Proveedor'),
                           ),
                         ],
                       ),

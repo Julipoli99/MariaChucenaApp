@@ -138,16 +138,25 @@ class _NuevasTelasState extends State<NuevasTelas> {
                           children: [
                             ElevatedButton(
                               onPressed: () {
+                                // Acción para CANCELAR
+                              },
+                              style: ElevatedButton.styleFrom(
+                                minimumSize:
+                                    const Size(140, 50), // Ajusta el tamaño
+                              ),
+                              child: const Text('Cancelar'),
+                            ),
+                            FilledButton(
+                              onPressed: () {
                                 _guardarTela();
                               },
                               child: const Text('Guardar Tela'),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.black,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 40, vertical: 20),
+                                minimumSize:
+                                    const Size(140, 50), // Ajusta el tamaño
                               ),
                             ),
-                            ElevatedButton(
+                            /* ElevatedButton(
                               onPressed: () {
                                 // Lógica para cargar la foto
                               },
@@ -157,7 +166,7 @@ class _NuevasTelasState extends State<NuevasTelas> {
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 40, vertical: 20),
                               ),
-                            ),
+                            ),*/
                           ],
                         ),
                       ],

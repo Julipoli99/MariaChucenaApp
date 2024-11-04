@@ -57,9 +57,9 @@ class _TipoCrudViewState extends State<TipoProductocrudview> {
               tituloAppBar: 'Telas registradas', // Titulo del appBar
               encabezados: const [
                 "ID",
-                "CANTIDAD",
-                "COLOR",
-                "TIPO DE ROLLO",
+                "PRODUCTO",
+                "TIPO",
+                "MEDIDA",
                 "OPCIONES"
               ], // Encabezados visibles en la tabla
               items: productos, // Lista de telas

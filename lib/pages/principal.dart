@@ -100,7 +100,7 @@ class HomePage extends StatelessWidget {
                                 },
                                 child: buildOptionCard(
                                   'Orden de Corte',
-                                  'Descripción de las órdenes de corte.',
+                                  'Crear nueva órden de corte.',
                                   250,
                                   80,
                                   'assets/imagen/orden.png',
@@ -116,8 +116,8 @@ class HomePage extends StatelessWidget {
                                   );
                                 },
                                 child: buildOptionCard(
-                                  'Informe de Avíos',
-                                  'Detalles de avíos necesarios.',
+                                  'Gestión de Avíos', //   'Informe de Avíos'
+                                  'Detalles de avíos registrados.',
                                   250,
                                   80,
                                   'assets/imagen/avios.png',
@@ -134,7 +134,7 @@ class HomePage extends StatelessWidget {
                                   );
                                 },
                                 child: buildOptionCard(
-                                  'Informe de prendas',
+                                  'Informe de Prendas',
                                   'Detalles de prendas registradas.',
                                   250,
                                   80,
@@ -186,8 +186,8 @@ class HomePage extends StatelessWidget {
                                     );
                                   },
                                   child: buildResourceCard(
-                                    'Stock control',
-                                    'Área textil',
+                                    'Gestión de Rollos',
+                                    'Textil',
                                     250,
                                     140,
                                     'assets/imagen/stock.png',
@@ -213,8 +213,8 @@ class HomePage extends StatelessWidget {
                                     );
                                   },
                                   child: buildResourceCard(
-                                    'control de ordenes de corte ',
-                                    'Administración',
+                                    'Registro de órdenes de corte',
+                                    'Historial',
                                     250,
                                     140,
                                     'assets/imagen/tizada.jpg',
@@ -246,8 +246,8 @@ class HomePage extends StatelessWidget {
                                     );
                                   },
                                   child: buildResourceCard(
-                                    'Registrados',
-                                    'Modelos',
+                                    'Gestión de Modelos',
+                                    'Recurso',
                                     250,
                                     140,
                                     'assets/imagen/modelos.jpeg',
@@ -273,8 +273,8 @@ class HomePage extends StatelessWidget {
                                     );
                                   },
                                   child: buildResourceCard(
-                                    'Lista de proveedores',
-                                    'Proveedores',
+                                    'Gestión de Proveedores',
+                                    'Recurso',
                                     250,
                                     140,
                                     'assets/imagen/provedores.jpeg',

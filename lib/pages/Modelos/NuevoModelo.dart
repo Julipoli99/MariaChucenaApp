@@ -212,8 +212,8 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                           ),
                           const SizedBox(height: 15),
                           _buildRadioGroup(
-                            'edad de la tela',
-                            ['BEBE', 'chico', 'adulto'],
+                            'Tamaño',
+                            ['BEBÉ', 'NIÑO', 'ADULTO'],
                             selectedEdad,
                             (value) {
                               setState(() {
@@ -233,24 +233,37 @@ class _NuevomodeloState extends State<Nuevomodelo> {
 
                           const SizedBox(height: 15),
 
-                          TextField(
-                            onChanged: (value) {
-                              setState(() {
-                                tituloObservacion = value;
-                              });
-                            },
-                            decoration:
-                                const InputDecoration(labelText: 'Título'),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Observación',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              TextField(
+                                onChanged: (value) {
+                                  setState(() {
+                                    tituloObservacion = value;
+                                  });
+                                },
+                                decoration:
+                                    const InputDecoration(labelText: 'Título'),
+                              ),
+                              TextField(
+                                onChanged: (value) {
+                                  setState(() {
+                                    descripcionObservacion = value;
+                                  });
+                                },
+                                decoration: const InputDecoration(
+                                    labelText: 'Descripción'),
+                              ),
+                            ],
                           ),
-                          TextField(
-                            onChanged: (value) {
-                              setState(() {
-                                descripcionObservacion = value;
-                              });
-                            },
-                            decoration:
-                                const InputDecoration(labelText: 'Descripción'),
-                          ),
+
                           const SizedBox(height: 15),
                           TalleSelector(
                             selectedTalles: selectedTallesForm,
@@ -262,7 +275,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                           ),
                           const SizedBox(height: 15),
                           _buildRadioGroup(
-                            'Tiene avios',
+                            '¿Utiliza avíos?',
                             ['SI', 'NO'],
                             selectedAvios,
                             (value) {
@@ -290,6 +303,16 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                             children: [
                               ElevatedButton(
                                 onPressed: () {
+                                  // Acción para CANCELAR
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  minimumSize:
+                                      const Size(140, 50), // Ajusta el tamaño
+                                ),
+                                child: const Text('Cancelar'),
+                              ),
+                              FilledButton(
+                                onPressed: () {
                                   // Acción para guardar el modelo
                                   _createPost();
                                 },
@@ -299,7 +322,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                                 ),
                                 child: const Text('Guardar Modelo'),
                               ),
-                              ElevatedButton(
+                              /*         ElevatedButton(
                                 onPressed: () {
                                   // Acción para cargar foto
                                 },
@@ -309,6 +332,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                                 ),
                                 child: const Text('Cargar Foto'),
                               ),
+                              */
                             ],
                           ),
                         ],
@@ -386,9 +410,6 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                             onChanged: (bool? value) {
                               setDialogState(() {
                                 esPorTalle = value ?? false;
-                                if (esPorTalle) {
-                                  _showTalleSelectionDialog(setDialogState);
-                                }
                               });
                             },
                           ),
@@ -647,7 +668,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Seleccione si es tela auxiliar:',
+          'Seleccione si tiene tela auxiliar:',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 10),
@@ -680,7 +701,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Seleccione si es tela primaria:',
+          'Seleccione si tiene tela primaria:',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 10),
