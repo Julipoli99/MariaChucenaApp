@@ -116,6 +116,10 @@ class _telaCrudViewState extends State<Telacrudview> {
                           icon: const Icon(Icons.remove_red_eye_outlined),
                         ),
                         IconButton(
+                          onPressed: () {},
+                          icon: const Icon(Icons.create_sharp),
+                        ),
+                        IconButton(
                           onPressed: () {
                             _confirmDelete(context, tela.id);
                           },
