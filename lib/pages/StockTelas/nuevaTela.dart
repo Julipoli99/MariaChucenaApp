@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/TipoProducto.dart';
+import 'package:gestion_indumentaria/pages/Crud/telaCrudView.dart';
 import 'package:gestion_indumentaria/pages/StockTelas/stock_Control_Page.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
 import 'package:http/http.dart' as http; // Importa el paquete http
@@ -138,6 +139,13 @@ class _NuevasTelasState extends State<NuevasTelas> {
                           children: [
                             ElevatedButton(
                               onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const Stockcontrolpage(),
+                                  ),
+                                );
                                 // Acción para CANCELAR
                               },
                               style: ElevatedButton.styleFrom(

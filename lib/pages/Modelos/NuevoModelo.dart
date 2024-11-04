@@ -8,6 +8,7 @@ import 'package:gestion_indumentaria/models/Modelo.dart';
 import 'package:gestion_indumentaria/models/observacion.dart';
 import 'package:gestion_indumentaria/models/Talle.dart';
 import 'package:gestion_indumentaria/pages/Modelos/ModelosRegistradosPage.dart';
+import 'package:gestion_indumentaria/pages/principal.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
 import 'package:gestion_indumentaria/widgets/TalleSelectorWidget.dart';
@@ -303,6 +304,12 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                             children: [
                               ElevatedButton(
                                 onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const HomePage(),
+                                    ),
+                                  );
                                   // Acción para CANCELAR
                                 },
                                 style: ElevatedButton.styleFrom(
