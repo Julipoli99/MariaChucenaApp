@@ -1,25 +1,24 @@
-import 'package:flutter/material.dart';
-import 'package:gestion_indumentaria/pages/Avios/avios.dart';
-import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
-import 'package:gestion_indumentaria/widgets/HomePage.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
-class Nuevoavios extends StatefulWidget {
-  const Nuevoavios({super.key});
+class NuevoaviosDialog extends StatefulWidget {
+  final Function onProductoAgregado; // Callback para recargar el CRUD
+
+  NuevoaviosDialog({required this.onProductoAgregado});
 
   @override
-  _NuevoaviosState createState() => _NuevoaviosState();
+  _NuevoaviosDialogState createState() => _NuevoaviosDialogState();
 }
 
-class _NuevoaviosState extends State<Nuevoavios> {
-  final TextEditingController _tipoController = TextEditingController();
-  final TextEditingController _cantidadController = TextEditingController();
-  final TextEditingController _provedorCodigoController =
-      TextEditingController();
-  String? _selectedProveedor;
+class _NuevoaviosDialogState extends State<NuevoaviosDialog> {
   List<Map<String, dynamic>> proveedores = [];
   int? selectedProveedorId;
+  final TextEditingController _tipoController = TextEditingController();
+  final TextEditingController _cantidadController = TextEditingController();
+  final TextEditingController _codigoProveedorController =
+      TextEditingController();
 
   @override
   void initState() {
@@ -27,177 +26,39 @@ class _NuevoaviosState extends State<Nuevoavios> {
     _cargarProveedores(); // Cargar proveedores al iniciar
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text('Maria Chucena ERP System'),
-        toolbarHeight: 80,
-        actions: [
-          buildLoggedInUser('assets/imagen/logo.png', 'Supervisor'),
-        ],
-      ),
-      drawer: const DrawerMenuLateral(),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Título principal centrado con subtítulo
-              Container(
-                color: Colors.grey[800],
-                width: double.infinity,
-                padding: const EdgeInsets.all(20.0),
-                child: const Center(
-                  child: Column(
-                    children: [
-                      Text(
-                        'Bienvenidos al sistema de Gestion de Nuevos avios',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      Text(
-                        'De Maria Chucena ERP System',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
+  Future<void> _cargarProveedores() async {
+    final url = 'https://maria-chucena-api-production.up.railway.app/proveedor';
+    final response = await http.get(Uri.parse(url));
 
-              // Formulario de Registro de Avios
-              Padding(
-                padding: const EdgeInsets.all(32.0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Expanded(
-                      flex: 2,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Registro de avios',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      flex: 3,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          TextField(
-                            controller: _tipoController,
-                            decoration: const InputDecoration(
-                              labelText: 'Tipo',
-                              hintText: 'nombre',
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          // Dropdown para Proveedores
-                          buildDropdownField(
-                              'Proveedor',
-                              proveedores
-                                  .map((p) => p['nombre'].toString())
-                                  .toList(), (value) {
-                            setState(() {
-                              _selectedProveedor = value;
-                              selectedProveedorId = proveedores.firstWhere(
-                                (p) => p['nombre'] == value,
-                              )['id']; // Asignar el ID del proveedor seleccionado
-                            });
-                          }),
-                          TextField(
-                            controller: _provedorCodigoController,
-                            decoration: const InputDecoration(
-                              labelText: 'Código de proveedor',
-                              hintText: 'Proveedor',
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          TextField(
-                            controller: _cantidadController,
-                            decoration: const InputDecoration(
-                              labelText: 'Cantidad',
-                              hintText: 'Cantidad inicial',
-                            ),
-                            keyboardType: TextInputType.number,
-                          ),
-                          const SizedBox(height: 20),
-                          ElevatedButton(
-                            onPressed: _guardarAvios,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.black,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 50,
-                                vertical: 20,
-                              ),
-                            ),
-                            child: const Text(
-                              'Guardar avios',
-                              style: TextStyle(
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const Divider(),
-              // Pie de página con usuario logueado
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16.0),
-                      child: Center(
-                        child: Text(
-                          '© 2024 Maria Chucena ERP System. All rights reserved.',
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      setState(() {
+        proveedores = data
+            .map((proveedor) => {
+                  'id': proveedor['id'],
+                  'nombre': proveedor['nombre'],
+                })
+            .toList();
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Error al cargar proveedores: ${response.body}')),
+      );
+    }
   }
 
-  Future<void> _guardarAvios() async {
+  Future<void> _guardarAvios(String tipo, String codigoProveedor,
+      int? proveedorId, String cantidad) async {
     const String url =
         'https://maria-chucena-api-production.up.railway.app/avio';
 
     final Map<String, dynamic> avioData = {
-      "codigoProveedor": _provedorCodigoController.text,
-      "proveedorId": selectedProveedorId,
-      "tipoProductoId": 1, // Asegúrate de cambiar esto si el tipo es dinámico
-      "nombre": _tipoController.text,
-      "stock": int.tryParse(_cantidadController.text) ?? 0,
+      "codigoProveedor": codigoProveedor,
+      "proveedorId": proveedorId,
+      "tipoProductoId": 1, // Cambia esto según tu lógica
+      "nombre": tipo,
+      "stock": int.tryParse(cantidad) ?? 0,
     };
 
     final response = await http.post(
@@ -207,72 +68,125 @@ class _NuevoaviosState extends State<Nuevoavios> {
     );
 
     if (response.statusCode == 201) {
-      // Navegar a la pantalla de CRUD de avíos
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-            builder: (context) => Avios()), // Cambia a la pantalla que desees
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Avío guardado con éxito')),
       );
+      widget.onProductoAgregado(); // Llamar al callback para recargar el CRUD
+      Navigator.of(context).pop(); // Cerrar el diálogo
     } else {
-      // Manejo de errores
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error al guardar los avíos: ${response.body}')),
       );
     }
   }
 
-  Future<void> _cargarProveedores() async {
-    final url =
-        'https://maria-chucena-api-production.up.railway.app/proveedor'; // URL de la API de proveedores
-    final response = await http.get(Uri.parse(url));
-
-    if (response.statusCode == 200) {
-      // Éxito, parsear los datos
-      final List<dynamic> data = jsonDecode(response.body);
-      setState(() {
-        proveedores = data
-            .map((proveedor) => {
-                  'id': proveedor['id'],
-                  'nombre': proveedor['nombre'],
-                })
-            .toList(); // Suponiendo que el JSON tiene campos 'id' y 'nombre'
-      });
-    } else {
-      // Manejar error
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text('Error al cargar proveedores: ${response.body}')),
-      );
-    }
-  }
-
-  Widget buildDropdownField(
-      String label, List<String> items, ValueChanged<String?> onChanged) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20.0),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 5,
-            child: DropdownButtonFormField<String>(
-              items: items.map((String item) {
-                return DropdownMenuItem<String>(
-                  value: item,
-                  child: Text(item),
-                );
-              }).toList(),
-              onChanged: onChanged,
-              decoration: InputDecoration(
-                labelText: label,
-                labelStyle: const TextStyle(fontSize: 18),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      title: const Text('Nuevo avio'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 20),
+            TextField(
+              controller: _tipoController,
+              decoration: const InputDecoration(
+                labelText: 'Tipo',
+                hintText: 'Nombre del avío',
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: 20),
+            DropdownButtonFormField<int>(
+              hint: const Text('Seleccione un proveedor'),
+              value: selectedProveedorId,
+              onChanged: (int? newValue) {
+                setState(() {
+                  selectedProveedorId = newValue;
+                });
+              },
+              items: proveedores.map((proveedor) {
+                return DropdownMenuItem<int>(
+                  value: proveedor['id'],
+                  child: Text(proveedor['nombre']),
+                );
+              }).toList(),
+              decoration: const InputDecoration(
+                labelText: 'Proveedor',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: _codigoProveedorController,
+              decoration: const InputDecoration(
+                labelText: 'Código de proveedor',
+                hintText: 'Código del proveedor',
+              ),
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: _cantidadController,
+              decoration: const InputDecoration(
+                labelText: 'Cantidad',
+                hintText: 'Cantidad inicial',
+              ),
+              keyboardType: TextInputType.number,
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    if (_tipoController.text.isNotEmpty &&
+                        selectedProveedorId != null &&
+                        _codigoProveedorController.text.isNotEmpty &&
+                        _cantidadController.text.isNotEmpty) {
+                      _guardarAvios(
+                        _tipoController.text,
+                        _codigoProveedorController.text,
+                        selectedProveedorId,
+                        _cantidadController.text,
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content:
+                                Text('Por favor completa todos los campos.')),
+                      );
+                    }
+                  },
+                  child: const Text('Guardar avíos'),
+                ),
+                const SizedBox(width: 10),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Cerrar el diálogo
+                  },
+                  child: const Text('Cancelar'),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
+}
+
+// Método para mostrar el diálogo desde otro lugar en tu aplicación
+void mostrarDialogoNuevoAvio(
+    BuildContext context, Function onProductoAgregado) {
+  showDialog(
+    context: context,
+    builder: (context) {
+      return NuevoaviosDialog(
+        onProductoAgregado: onProductoAgregado, // Pasar el callback
+      );
+    },
+  );
 }
