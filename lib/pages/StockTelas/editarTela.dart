@@ -1,59 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:gestion_indumentaria/models/Proveedor.dart';
 import 'package:gestion_indumentaria/models/Tela.dart';
+import 'package:gestion_indumentaria/models/TipoProducto.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-class EditarTelaDialog extends StatefulWidget {
-  final Tela tela;
+class EditarTelasDialog extends StatefulWidget {
+  final Tela tela; // ID de la tela a editar
 
-  const EditarTelaDialog({super.key, required this.tela});
+  const EditarTelasDialog(this.tela, {Key? key}) : super(key: key);
 
   @override
-  _EditarTelaDialogState createState() => _EditarTelaDialogState();
+  _EditarTelasDialogState createState() => _EditarTelasDialogState();
 }
 
-class _EditarTelaDialogState extends State<EditarTelaDialog> {
-  final _formKey = GlobalKey<FormState>();
+class _EditarTelasDialogState extends State<EditarTelasDialog> {
+  List<Proveedor> proveedores = [];
+  List<TipoProducto> tipoProductos = [];
+  int? selectedProveedorId;
+  int? selectedTipoProductoId;
+
   double cantidad = 0.0;
   String color = '';
   bool estampado = false;
   String descripcion = '';
   String tipoRollo = '';
-  int? tipoProductoId;
-  int? selectedProveedorId;
-
-  List<String> proveedores = [];
 
   @override
   void initState() {
     super.initState();
-    _cargarDatosTela();
     _cargarProveedores();
+    _cargarTipoProductos();
+    // Inicializar los valores con la tela recibida
+    _initializeValues();
   }
 
-  Future<void> _cargarDatosTela() async {
-    final url =
-        'https://maria-chucena-api-production.up.railway.app/Rollo/${widget.tela.id}';
-    final response = await http.get(Uri.parse(url));
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      setState(() {
-        cantidad = data['cantidad'].toDouble();
-        color = data['color'];
-        estampado = data['estampado'];
-        descripcion = data['descripcion'];
-        tipoRollo = data['tipoRollo'];
-        tipoProductoId = data['tipoProductoId'];
-        selectedProveedorId = data['proveedorId'];
-      });
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error al cargar datos de la tela: ${response.body}'),
-        ),
-      );
-    }
+  void _initializeValues() {
+    // Setear los valores iniciales de la tela a editar
+    setState(() {
+      selectedProveedorId = widget.tela.proveedorId;
+      selectedTipoProductoId = widget.tela.tipoProductoId;
+      cantidad = widget.tela.cantidad;
+      color = widget.tela.color;
+      estampado = widget.tela.estampado;
+      descripcion = widget.tela.descripcion;
+      tipoRollo = widget.tela.tipoDeRollo;
+    });
   }
 
   Future<void> _cargarProveedores() async {
@@ -63,8 +55,7 @@ class _EditarTelaDialogState extends State<EditarTelaDialog> {
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
       setState(() {
-        proveedores =
-            data.map((proveedor) => proveedor['nombre'].toString()).toList();
+        proveedores = data.map((item) => Proveedor.fromJson(item)).toList();
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -74,37 +65,25 @@ class _EditarTelaDialogState extends State<EditarTelaDialog> {
     }
   }
 
-  Future<void> _actualizarTela() async {
-    if (_formKey.currentState!.validate()) {
-      final datosTela = {
-        "cantidad": cantidad,
-        "color": color,
-        "estampado": estampado,
-        "descripcion": descripcion,
-        "tipoRollo": tipoRollo,
-        "tipoProductoId": tipoProductoId,
-        "proveedorId": selectedProveedorId,
-      };
+  Future<void> _cargarTipoProductos() async {
+    final url =
+        'https://maria-chucena-api-production.up.railway.app/tipo-Producto';
+    final response = await http.get(Uri.parse(url));
 
-      final url =
-          'https://maria-chucena-api-production.up.railway.app/Rollo/${widget.tela.id}';
-      final response = await http.patch(
-        Uri.parse(url),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(datosTela),
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      setState(() {
+        tipoProductos = data
+            .map((item) => TipoProducto.fromJson(item))
+            .where((tipo) => tipo.tipo == TipoEnum.TELA)
+            .toList();
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content:
+                Text('Error al cargar tipos de productos: ${response.body}')),
       );
-
-      if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Tela actualizada exitosamente')),
-        );
-        Navigator.pop(context, true); // Cierra el diálogo y devuelve éxito
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('Error al actualizar la tela: ${response.body}')),
-        );
-      }
     }
   }
 
@@ -113,82 +92,142 @@ class _EditarTelaDialogState extends State<EditarTelaDialog> {
     return AlertDialog(
       title: const Text('Editar Tela'),
       content: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              buildTextField('Cantidad', cantidad.toString(), (value) {
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            buildTipoTejidoSelector(),
+            const SizedBox(height: 15),
+            buildProveedorDropdown(),
+            buildDropdownTipoProducto(),
+            buildTextField(
+              'Cantidad',
+              'Cantidad de tela registrada, en metros o kilos',
+              (value) {
                 cantidad = double.tryParse(value) ?? 0.0;
-              }),
-              buildTextField('Color', color, (value) {
+              },
+              initialValue: cantidad.toString(),
+            ),
+            buildTextField(
+              'Color',
+              'Nombre del color',
+              (value) {
                 color = value;
-              }),
-              buildCheckboxField('Estampado', (value) {
+              },
+              initialValue: color,
+            ),
+            buildCheckboxField(
+              'Estampado',
+              (value) {
                 setState(() {
                   estampado = value!;
                 });
-              }),
-              buildTextField('Descripción', descripcion, (value) {
+              },
+              initialValue: estampado,
+            ),
+            buildTextField(
+              'Descripción',
+              'Descripción del estampado',
+              (value) {
                 descripcion = value;
-              }),
-              buildTipoTejidoSelector(),
-              const SizedBox(height: 10),
-              buildDropdownField('Proveedor', proveedores, (value) {
-                setState(() {
-                  selectedProveedorId = proveedores.indexOf(value!) + 1;
-                });
-              }),
-            ],
-          ),
+              },
+              initialValue: descripcion,
+            ),
+          ],
         ),
       ),
       actions: [
         TextButton(
-          onPressed: () =>
-              Navigator.pop(context, false), // Cierra el diálogo sin cambios
+          onPressed: () => Navigator.of(context).pop(),
           child: const Text('Cancelar'),
         ),
         ElevatedButton(
-          onPressed: _actualizarTela,
-          child: const Text('Guardar'),
+          onPressed: _editarTela,
+          child: const Text('Guardar Cambios'),
         ),
       ],
     );
   }
 
-  Widget buildTextField(
-      String label, String initialValue, ValueChanged<String> onChanged) {
+  Future<void> _editarTela() async {
+    final datosTela = {
+      "cantidad": cantidad,
+      "color": color,
+      "estampado": estampado,
+      "descripcion": descripcion,
+      "tipoRollo": tipoRollo,
+      "tipoProductoId": selectedTipoProductoId,
+      "proveedorId": selectedProveedorId,
+    };
+
+    final url =
+        'https://maria-chucena-api-production.up.railway.app/Rollo/${widget.tela.id}';
+    final response = await http.patch(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(datosTela),
+    );
+
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Tela editada exitosamente')),
+      );
+      Navigator.of(context).pop(true); // Cierra el diálogo al guardar
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al editar la tela: ${response.body}')),
+      );
+    }
+  }
+
+  Widget buildProveedorDropdown() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20.0),
-      child: TextFormField(
-        initialValue: initialValue,
-        onChanged: onChanged,
+      child: DropdownButtonFormField<int>(
         decoration: InputDecoration(
-          labelText: label,
+          labelText: 'Proveedor',
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
           ),
         ),
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'Por favor ingrese $label';
-          }
-          return null;
+        items: proveedores.map((proveedor) {
+          return DropdownMenuItem<int>(
+            value: proveedor.id,
+            child: Text(proveedor.nombre),
+          );
+        }).toList(),
+        onChanged: (value) {
+          setState(() {
+            selectedProveedorId = value;
+          });
         },
+        value: selectedProveedorId, // Set the selected value
       ),
     );
   }
 
-  Widget buildCheckboxField(String label, ValueChanged<bool?> onChanged) {
-    return Row(
-      children: [
-        Checkbox(
-          value: estampado,
-          onChanged: onChanged,
+  Widget buildDropdownTipoProducto() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20.0),
+      child: DropdownButtonFormField<int>(
+        decoration: InputDecoration(
+          labelText: 'Tipo de Producto (Tela)',
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
         ),
-        Text(label),
-      ],
+        items: tipoProductos.map((tipoProducto) {
+          return DropdownMenuItem<int>(
+            value: tipoProducto.id,
+            child: Text(tipoProducto.nombre),
+          );
+        }).toList(),
+        onChanged: (value) {
+          setState(() {
+            selectedTipoProductoId = value;
+          });
+        },
+        value: selectedTipoProductoId, // Set the selected value
+      ),
     );
   }
 
@@ -196,17 +235,20 @@ class _EditarTelaDialogState extends State<EditarTelaDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Tipo de Rollo'),
+        const Text(
+          'Tipo de Rollo',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 10),
         Wrap(
           spacing: 10,
-          children: ['PLANO', 'TUBULAR'].map((tipo) {
+          children: ['PLANO', 'TUBULAR'].map((tipoTejido) {
             return ChoiceChip(
-              label: Text(tipo),
-              selected: tipoRollo == tipo,
-              onSelected: (selected) {
+              label: Text(tipoTejido),
+              selected: tipoRollo == tipoTejido,
+              onSelected: (isSelected) {
                 setState(() {
-                  tipoRollo = selected ? tipo : '';
+                  tipoRollo = isSelected ? tipoTejido : '';
                 });
               },
             );
@@ -216,28 +258,33 @@ class _EditarTelaDialogState extends State<EditarTelaDialog> {
     );
   }
 
-  Widget buildDropdownField(
-      String label, List<String> items, ValueChanged<String?> onChanged) {
+  Widget buildTextField(
+      String label, String hintText, ValueChanged<String> onChanged,
+      {String initialValue = ''}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20.0),
-      child: DropdownButtonFormField<String>(
-        value:
-            selectedProveedorId != null && selectedProveedorId! <= items.length
-                ? items[selectedProveedorId! - 1]
-                : null,
-        items: items.map((String item) {
-          return DropdownMenuItem<String>(
-            value: item,
-            child: Text(item),
-          );
-        }).toList(),
+      child: TextFormField(
         onChanged: onChanged,
+        initialValue: initialValue, // Use initialValue for pre-setting text
         decoration: InputDecoration(
           labelText: label,
+          hintText: hintText,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget buildCheckboxField(String label, ValueChanged<bool?> onChanged,
+      {bool initialValue = false}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20.0),
+      child: CheckboxListTile(
+        title: Text(label),
+        value: initialValue,
+        onChanged: onChanged,
       ),
     );
   }

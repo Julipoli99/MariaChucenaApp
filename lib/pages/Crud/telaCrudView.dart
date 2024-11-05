@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Proveedor.dart';
 import 'package:gestion_indumentaria/models/Tela.dart';
+import 'package:gestion_indumentaria/models/TipoProducto.dart';
 import 'package:gestion_indumentaria/pages/StockTelas/editarTela.dart';
 import 'package:gestion_indumentaria/pages/StockTelas/nuevaTela.dart';
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
@@ -24,6 +25,7 @@ class _telaCrudViewState extends State<Telacrudview> {
     super.initState();
     fetchModels();
     fetchProveedores();
+    fetchTipoProductos();
   }
 
   Future<void> fetchProveedores() async {
@@ -53,6 +55,45 @@ class _telaCrudViewState extends State<Telacrudview> {
       (proveedor) => proveedor.id == proveedorId,
     );
     return proveedor.nombre;
+  }
+
+  List<TipoProducto> tipoProductos =
+      []; // Lista para almacenar tipos de productos
+
+  Future<void> fetchTipoProductos() async {
+    const url =
+        'https://maria-chucena-api-production.up.railway.app/tipo-Producto'; // Asegúrate de que esta URL sea correcta
+    final uri = Uri.parse(url);
+
+    try {
+      final response = await http.get(uri);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonData = jsonDecode(response.body);
+
+        setState(() {
+          tipoProductos =
+              jsonData.map((json) => TipoProducto.fromJson(json)).toList();
+        });
+      } else {
+        print("Error: Código de estado ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error al cargar los tipos de productos: $e");
+    }
+  }
+
+  String? getNombreProducto(int tipoProductoId) {
+    try {
+      final tipoProducto = tipoProductos.firstWhere(
+        (tipoProducto) => tipoProducto.id == tipoProductoId,
+      );
+      return tipoProducto
+          .nombre; // Retorna el nombre del tipo de producto encontrado
+    } catch (e) {
+      print('Tipo de producto no encontrado: $tipoProductoId');
+      return null; // Retorna null si no se encuentra
+    }
   }
 
   @override
@@ -141,11 +182,12 @@ class _telaCrudViewState extends State<Telacrudview> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Detalles de la Tela ID: ${tela.id}'),
+          title: Text('Detalles de la Tela : ${tela.descripcion}'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text("Tipo Producto : TELA "),
+              Text(
+                  'Tipo Producto :  ${getNombreProducto(tela.tipoProductoId)}'),
               Text("Proveedor: ${getNombreProveedor(tela.proveedorId)}"),
             ],
           ),
@@ -234,7 +276,7 @@ class _telaCrudViewState extends State<Telacrudview> {
   void _openEditarTelaDialog(BuildContext context, Tela tela) async {
     final result = await showDialog<bool>(
       context: context,
-      builder: (BuildContext context) => EditarTelaDialog(tela: tela),
+      builder: (BuildContext context) => EditarTelasDialog(tela),
     );
 
     if (result == true) {

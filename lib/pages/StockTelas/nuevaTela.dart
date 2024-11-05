@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gestion_indumentaria/models/Proveedor.dart';
 import 'package:gestion_indumentaria/models/TipoProducto.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -13,7 +14,7 @@ class NuevasTelasDialog extends StatefulWidget {
 class _NuevasTelasDialogState extends State<NuevasTelasDialog> {
   List<String> selectedTejidos = [];
   TipoEnum? selectedTipo;
-  List<String> proveedores = [];
+  List<Proveedor> proveedores = [];
   List<TipoProducto> tipoProductos = [];
   int? selectedProveedorId;
   int? selectedTipoProductoId;
@@ -38,8 +39,7 @@ class _NuevasTelasDialogState extends State<NuevasTelasDialog> {
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
       setState(() {
-        proveedores =
-            data.map((proveedor) => proveedor['nombre'].toString()).toList();
+        proveedores = data.map((item) => Proveedor.fromJson(item)).toList();
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -51,7 +51,7 @@ class _NuevasTelasDialogState extends State<NuevasTelasDialog> {
 
   Future<void> _cargarTipoProductos() async {
     final url =
-        'https://maria-chucena-api-production.up.railway.app/tipoProducto';
+        'https://maria-chucena-api-production.up.railway.app/tipo-Producto';
     final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
@@ -59,7 +59,7 @@ class _NuevasTelasDialogState extends State<NuevasTelasDialog> {
       setState(() {
         tipoProductos = data
             .map((item) => TipoProducto.fromJson(item))
-            .where((tipo) => tipo.nombre == 'TELA')
+            .where((tipo) => tipo.tipo == TipoEnum.TELA)
             .toList();
       });
     } else {
@@ -81,11 +81,7 @@ class _NuevasTelasDialogState extends State<NuevasTelasDialog> {
           children: [
             buildTipoTejidoSelector(),
             const SizedBox(height: 15),
-            buildDropdownField('Proveedor', proveedores, (value) {
-              setState(() {
-                selectedProveedorId = proveedores.indexOf(value!) + 1;
-              });
-            }),
+            buildProveedorDropdown(),
             buildDropdownTipoProducto(),
             buildTextField(
                 'Cantidad', 'Cantidad de tela registrada, en metros o kilos',
@@ -141,7 +137,7 @@ class _NuevasTelasDialogState extends State<NuevasTelasDialog> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Tela registrada exitosamente')),
       );
-      Navigator.of(context).pop(); // Cierra el diálogo al guardar
+      Navigator.of(context).pop(true); // Cierra el diálogo al guardar
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error al registrar la tela: ${response.body}')),
@@ -149,24 +145,27 @@ class _NuevasTelasDialogState extends State<NuevasTelasDialog> {
     }
   }
 
-  Widget buildDropdownField(
-      String label, List<String> items, ValueChanged<String?> onChanged) {
+  Widget buildProveedorDropdown() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20.0),
-      child: DropdownButtonFormField<String>(
-        items: items.map((String item) {
-          return DropdownMenuItem<String>(
-            value: item,
-            child: Text(item),
-          );
-        }).toList(),
-        onChanged: onChanged,
+      child: DropdownButtonFormField<int>(
         decoration: InputDecoration(
-          labelText: label,
+          labelText: 'Proveedor',
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
           ),
         ),
+        items: proveedores.map((proveedor) {
+          return DropdownMenuItem<int>(
+            value: proveedor.id,
+            child: Text(proveedor.nombre),
+          );
+        }).toList(),
+        onChanged: (value) {
+          setState(() {
+            selectedProveedorId = value;
+          });
+        },
       ),
     );
   }
