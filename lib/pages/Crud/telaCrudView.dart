@@ -102,7 +102,7 @@ class _telaCrudViewState extends State<Telacrudview> {
                 (tela) => Text(tela.cantidad.toString()),
                 (tela) => Text(tela.color),
                 (tela) => Text(tela.descripcion.toString()),
-                (tela) => Text(tela.estampado.toString()),
+                (tela) => Text(tela.estampado ? 'SI' : 'NO'),
                 (tela) => Text(tela.tipoDeRollo.toString()),
                 // Botones de opciones
                 (tela) => Row(

@@ -52,7 +52,7 @@ class _TipoCrudViewState extends State<TipoProductocrudview> {
           ),
           Expanded(
             child: TablaCrud<TipoProducto>(
-              tituloAppBar: 'Telas registradas', // Titulo del appBar
+              tituloAppBar: 'Tipos productos registrados', // Titulo del appBar
               encabezados: const [
                 "ID",
                 "PRODUCTO",
