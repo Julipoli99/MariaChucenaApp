@@ -1,7 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:gestion_indumentaria/models/Avio.dart';
-import 'package:gestion_indumentaria/models/Modelo.dart';
 import 'package:gestion_indumentaria/models/tipoPrenda.dart';
 import 'package:gestion_indumentaria/widgets/boxDialog/BoxDialogPrendaModificador.dart';
 import 'package:gestion_indumentaria/widgets/boxDialog/boxdialogoPrenda.dart';
