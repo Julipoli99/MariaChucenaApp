@@ -35,8 +35,8 @@ class TablaCrud<T> extends StatelessWidget {
                 defaultVerticalAlignment: TableCellVerticalAlignment.middle,
                 columnWidths: const <int, TableColumnWidth>{
                   0: FixedColumnWidth(80), // Ancho fijo
-                  1: FlexColumnWidth(2), // Espacio flexible
-                  2: FlexColumnWidth(3), // Espacio flexible
+                  1: FlexColumnWidth(1), // Espacio flexible
+                  2: FlexColumnWidth(1), // Espacio flexible
                   3: FlexColumnWidth(1), // Espacio flexible
                   4: FlexColumnWidth(1), // Espacio flexible
                 },
