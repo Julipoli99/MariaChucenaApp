@@ -212,17 +212,6 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                             },
                           ),
                           const SizedBox(height: 15),
-                          _buildRadioGroup(
-                            'Tamaño',
-                            ['BEBÉ', 'NIÑO', 'ADULTO'],
-                            selectedEdad,
-                            (value) {
-                              setState(() {
-                                selectedEdad = value;
-                              });
-                            },
-                          ),
-                          const SizedBox(height: 15),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -347,12 +336,12 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                     ),
                   ),
                   const SizedBox(height: 50),
-                  const Center(
+                  /* const Center(
                     child: Text(
                       '© 2024 Maria Chucena ERP System. All rights reserved.',
                       textAlign: TextAlign.center,
                     ),
-                  ),
+                  ),*/
                 ],
               ),
             ),
@@ -747,8 +736,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
         DataColumn(label: Text('Es por Talle')),
         DataColumn(label: Text('Es por Color')),
         DataColumn(label: Text('Cantidad')),
-        DataColumn(
-            label: Text('Talles Seleccionados')), // Nueva columna para talles
+        // Nueva columna para talles
       ],
       rows: aviosSeleccionados.map((AvioModelo avio) {
         return DataRow(cells: [
@@ -756,8 +744,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
           DataCell(Text(avio.esPorTalle == true ? 'Sí' : 'No')),
           DataCell(Text(avio.esPorColor == true ? 'Sí' : 'No')),
           DataCell(Text(avio.cantidadRequerida.toString())),
-          DataCell(Text(avio.talles?.map((t) => t.nombre).join(', ') ??
-              '')), // Mostrar talles seleccionados
+          // Mostrar talles seleccionados
         ]);
       }).toList(),
     );

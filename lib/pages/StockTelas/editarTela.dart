@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Tela.dart';
-import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-class EditarTela extends StatefulWidget {
-  final Tela tela; // Cambiar 'telaId' a 'tela' para reflejar el uso correcto
+class EditarTelaDialog extends StatefulWidget {
+  final Tela tela;
 
-  const EditarTela({super.key, required this.tela});
+  const EditarTelaDialog({super.key, required this.tela});
 
   @override
-  _EditarTelaState createState() => _EditarTelaState();
+  _EditarTelaDialogState createState() => _EditarTelaDialogState();
 }
 
-class _EditarTelaState extends State<EditarTela> {
+class _EditarTelaDialogState extends State<EditarTelaDialog> {
   final _formKey = GlobalKey<FormState>();
   double cantidad = 0.0;
   String color = '';
@@ -34,7 +33,7 @@ class _EditarTelaState extends State<EditarTela> {
 
   Future<void> _cargarDatosTela() async {
     final url =
-        'https://maria-chucena-api-production.up.railway.app/Rollo/${widget.tela.id}'; // Usar widget.tela.id
+        'https://maria-chucena-api-production.up.railway.app/Rollo/${widget.tela.id}';
     final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
@@ -51,8 +50,8 @@ class _EditarTelaState extends State<EditarTela> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content:
-                Text('Error al cargar datos de la tela: ${response.body}')),
+          content: Text('Error al cargar datos de la tela: ${response.body}'),
+        ),
       );
     }
   }
@@ -88,8 +87,8 @@ class _EditarTelaState extends State<EditarTela> {
       };
 
       final url =
-          'https://maria-chucena-api-production.up.railway.app/Rollo/${widget.tela.id}'; // Usar widget.tela.id
-      final response = await http.put(
+          'https://maria-chucena-api-production.up.railway.app/Rollo/${widget.tela.id}';
+      final response = await http.patch(
         Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(datosTela),
@@ -99,7 +98,7 @@ class _EditarTelaState extends State<EditarTela> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Tela actualizada exitosamente')),
         );
-        Navigator.pop(context); // Regresa a la pantalla anterior
+        Navigator.pop(context, true); // Cierra el diálogo y devuelve éxito
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -111,16 +110,13 @@ class _EditarTelaState extends State<EditarTela> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Editar Tela'),
-      ),
-      drawer: const DrawerMenuLateral(),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+    return AlertDialog(
+      title: const Text('Editar Tela'),
+      content: SingleChildScrollView(
         child: Form(
           key: _formKey,
-          child: ListView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               buildTextField('Cantidad', cantidad.toString(), (value) {
                 cantidad = double.tryParse(value) ?? 0.0;
@@ -137,21 +133,27 @@ class _EditarTelaState extends State<EditarTela> {
                 descripcion = value;
               }),
               buildTipoTejidoSelector(),
+              const SizedBox(height: 10),
               buildDropdownField('Proveedor', proveedores, (value) {
                 setState(() {
-                  selectedProveedorId = proveedores.indexOf(value!) +
-                      1; // +1 si el id empieza en 1
+                  selectedProveedorId = proveedores.indexOf(value!) + 1;
                 });
               }),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _actualizarTela,
-                child: const Text('Actualizar Tela'),
-              ),
             ],
           ),
         ),
       ),
+      actions: [
+        TextButton(
+          onPressed: () =>
+              Navigator.pop(context, false), // Cierra el diálogo sin cambios
+          child: const Text('Cancelar'),
+        ),
+        ElevatedButton(
+          onPressed: _actualizarTela,
+          child: const Text('Guardar'),
+        ),
+      ],
     );
   }
 
@@ -221,7 +223,7 @@ class _EditarTelaState extends State<EditarTela> {
       child: DropdownButtonFormField<String>(
         value:
             selectedProveedorId != null && selectedProveedorId! <= items.length
-                ? items[selectedProveedorId! - 1] // Ajusta aquí si necesario
+                ? items[selectedProveedorId! - 1]
                 : null,
         items: items.map((String item) {
           return DropdownMenuItem<String>(

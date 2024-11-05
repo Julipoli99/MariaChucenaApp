@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Proveedor.dart';
 import 'package:gestion_indumentaria/models/Tela.dart';
+import 'package:gestion_indumentaria/pages/StockTelas/editarTela.dart';
 import 'package:gestion_indumentaria/pages/StockTelas/nuevaTela.dart';
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
 import 'package:http/http.dart' as http;
@@ -22,7 +23,7 @@ class _telaCrudViewState extends State<Telacrudview> {
   void initState() {
     super.initState();
     fetchModels();
-    fetchProveedores(); // Llamamos al fetch cuando la página se carga
+    fetchProveedores();
   }
 
   Future<void> fetchProveedores() async {
@@ -39,8 +40,6 @@ class _telaCrudViewState extends State<Telacrudview> {
           proveedores =
               jsonData.map((json) => Proveedor.fromJson(json)).toList();
         });
-
-        print("Proveedores cargados correctamente.");
       } else {
         print("Error: Código de estado ${response.statusCode}");
       }
@@ -67,13 +66,16 @@ class _telaCrudViewState extends State<Telacrudview> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const NuevasTelas(),
-                      ),
+                  onPressed: () async {
+                    final result = await showDialog<bool>(
+                      context: context,
+                      builder: (BuildContext context) =>
+                          const NuevasTelasDialog(),
                     );
+
+                    if (result == true) {
+                      fetchModels(); // Refresca la lista si se agrega una nueva tela
+                    }
                   },
                   style: TextButton.styleFrom(
                       backgroundColor: Colors.blue[300],
@@ -85,7 +87,7 @@ class _telaCrudViewState extends State<Telacrudview> {
           ),
           Expanded(
             child: TablaCrud<Tela>(
-              tituloAppBar: 'Telas registradas', // Titulo del appBar
+              tituloAppBar: 'Telas registradas',
               encabezados: const [
                 "ID",
                 "CANTIDAD",
@@ -94,17 +96,15 @@ class _telaCrudViewState extends State<Telacrudview> {
                 "ESTAMPADO",
                 "TIPO DE ROLLO",
                 "OPCIONES"
-              ], // Encabezados visibles en la tabla
-              items: telas, // Lista de telas
+              ],
+              items: telas,
               dataMapper: [
-                // Celdas/valores visibles en la tabla
                 (tela) => Text(tela.id.toString()),
                 (tela) => Text(tela.cantidad.toString()),
                 (tela) => Text(tela.color),
                 (tela) => Text(tela.descripcion.toString()),
                 (tela) => Text(tela.estampado ? 'SI' : 'NO'),
                 (tela) => Text(tela.tipoDeRollo.toString()),
-                // Botones de opciones
                 (tela) => Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
@@ -115,8 +115,10 @@ class _telaCrudViewState extends State<Telacrudview> {
                           icon: const Icon(Icons.remove_red_eye_outlined),
                         ),
                         IconButton(
-                          onPressed: () {},
-                          icon: const Icon(Icons.create_sharp),
+                          onPressed: () {
+                            _openEditarTelaDialog(context, tela);
+                          },
+                          icon: const Icon(Icons.edit),
                         ),
                         IconButton(
                           onPressed: () {
@@ -134,7 +136,6 @@ class _telaCrudViewState extends State<Telacrudview> {
     );
   }
 
-  // Función para mostrar el diálogo con detalles adicionales de una tela
   void _showDetailDialog(BuildContext context, Tela tela) {
     showDialog(
       context: context,
@@ -228,5 +229,16 @@ class _telaCrudViewState extends State<Telacrudview> {
         );
       },
     );
+  }
+
+  void _openEditarTelaDialog(BuildContext context, Tela tela) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) => EditarTelaDialog(tela: tela),
+    );
+
+    if (result == true) {
+      fetchModels(); // Refresca la lista si se actualiza una tela
+    }
   }
 }

@@ -1,55 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/TipoProducto.dart';
-import 'package:gestion_indumentaria/pages/StockTelas/stock_Control_Page.dart';
-import 'package:gestion_indumentaria/pages/principal.dart';
-import 'package:gestion_indumentaria/widgets/HomePage.dart';
-import 'package:http/http.dart' as http; // Importa el paquete http
-import 'dart:convert'; // Importa esto para convertir a JSON
-import 'package:gestion_indumentaria/pages/Provedores/NuevoProvedor.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
-
-class NuevasTelas extends StatefulWidget {
-  const NuevasTelas({super.key});
+class NuevasTelasDialog extends StatefulWidget {
+  const NuevasTelasDialog({super.key});
 
   @override
-  _NuevasTelasState createState() => _NuevasTelasState();
+  _NuevasTelasDialogState createState() => _NuevasTelasDialogState();
 }
 
-class _NuevasTelasState extends State<NuevasTelas> {
+class _NuevasTelasDialogState extends State<NuevasTelasDialog> {
   List<String> selectedTejidos = [];
   TipoEnum? selectedTipo;
   List<String> proveedores = [];
+  List<TipoProducto> tipoProductos = [];
   int? selectedProveedorId;
+  int? selectedTipoProductoId;
 
   double cantidad = 0.0;
   String color = '';
   bool estampado = false;
   String descripcion = '';
-  String tipoRollo = ''; // Valor por defecto
-  int? tipoProductoId; // Suponiendo que se cargará desde un API
+  String tipoRollo = '';
 
   @override
   void initState() {
     super.initState();
-    _cargarProveedores(); // Cargar proveedores al iniciar
+    _cargarProveedores();
+    _cargarTipoProductos();
   }
 
   Future<void> _cargarProveedores() async {
-    final url =
-        'https://maria-chucena-api-production.up.railway.app/proveedor'; // URL de la API de proveedores
+    final url = 'https://maria-chucena-api-production.up.railway.app/proveedor';
     final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
-      // Éxito, parsear los datos
       final List<dynamic> data = jsonDecode(response.body);
       setState(() {
-        proveedores = data
-            .map((proveedor) => proveedor['nombre'].toString())
-            .toList(); // Suponiendo que el JSON tiene un campo 'nombre'
+        proveedores =
+            data.map((proveedor) => proveedor['nombre'].toString()).toList();
       });
     } else {
-      // Manejar error
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
             content: Text('Error al cargar proveedores: ${response.body}')),
@@ -57,151 +49,73 @@ class _NuevasTelasState extends State<NuevasTelas> {
     }
   }
 
+  Future<void> _cargarTipoProductos() async {
+    final url =
+        'https://maria-chucena-api-production.up.railway.app/tipoProducto';
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      setState(() {
+        tipoProductos = data
+            .map((item) => TipoProducto.fromJson(item))
+            .where((tipo) => tipo.nombre == 'TELA')
+            .toList();
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content:
+                Text('Error al cargar tipos de productos: ${response.body}')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text('Maria Chucena ERP System'),
-        toolbarHeight: 80,
-        actions: [
-          buildLoggedInUser('assets/imagen/logo.png', 'Supervisor'),
-        ],
-      ),
-      drawer: const DrawerMenuLateral(),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const Expanded(
-                    flex: 2,
-                    child: Padding(
-                      padding: EdgeInsets.only(right: 32.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SizedBox(height: 50),
-                          Text(
-                            'Registro de Telas',
-                            style: TextStyle(
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            'Complete todos los detalles relevantes de la tela',
-                            style: TextStyle(fontSize: 16, color: Colors.grey),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 3,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        buildTipoTejidoSelector(),
-                        const SizedBox(height: 15),
-                        buildDropdownField('Proveedor', proveedores, (value) {
-                          setState(() {
-                            selectedProveedorId = proveedores.indexOf(
-                                value!); // Asignar el índice del proveedor seleccionado
-                          });
-                        }),
-                        buildTextField('Cantidad',
-                            'Cantidad de tela registrada, en metros o kilos',
-                            (value) {
-                          cantidad = double.tryParse(value) ?? 0.0;
-                        }),
-                        buildTextField('Color', 'Nombre del color', (value) {
-                          color = value;
-                        }),
-                        buildCheckboxField('Estampado', (value) {
-                          setState(() {
-                            estampado = value!;
-                          });
-                        }),
-                        buildTextField(
-                            'Descripción', 'Descripción del estampado',
-                            (value) {
-                          descripcion = value;
-                        }),
-                        const SizedBox(height: 20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const HomePage(),
-                                  ),
-                                );
-                                // Acción para CANCELAR
-                              },
-                              style: ElevatedButton.styleFrom(
-                                minimumSize:
-                                    const Size(140, 50), // Ajusta el tamaño
-                              ),
-                              child: const Text('Cancelar'),
-                            ),
-                            FilledButton(
-                              onPressed: () {
-                                _guardarTela();
-                              },
-                              child: const Text('Guardar Tela'),
-                              style: ElevatedButton.styleFrom(
-                                minimumSize:
-                                    const Size(140, 50), // Ajusta el tamaño
-                              ),
-                            ),
-                            /* ElevatedButton(
-                              onPressed: () {
-                                // Lógica para cargar la foto
-                              },
-                              child: const Text('Cargar Foto'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.black,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 40, vertical: 20),
-                              ),
-                            ),*/
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 40),
-              const Divider(),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16.0),
-                      child: Center(
-                        child: Text(
-                          '© 2024 Maria Chucena ERP System. All rights reserved.',
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+    return AlertDialog(
+      title: const Text('Registro de Telas'),
+      content: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            buildTipoTejidoSelector(),
+            const SizedBox(height: 15),
+            buildDropdownField('Proveedor', proveedores, (value) {
+              setState(() {
+                selectedProveedorId = proveedores.indexOf(value!) + 1;
+              });
+            }),
+            buildDropdownTipoProducto(),
+            buildTextField(
+                'Cantidad', 'Cantidad de tela registrada, en metros o kilos',
+                (value) {
+              cantidad = double.tryParse(value) ?? 0.0;
+            }),
+            buildTextField('Color', 'Nombre del color', (value) {
+              color = value;
+            }),
+            buildCheckboxField('Estampado', (value) {
+              setState(() {
+                estampado = value!;
+              });
+            }),
+            buildTextField('Descripción', 'Descripción del estampado', (value) {
+              descripcion = value;
+            }),
+          ],
         ),
       ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancelar'),
+        ),
+        ElevatedButton(
+          onPressed: _guardarTela,
+          child: const Text('Guardar Tela'),
+        ),
+      ],
     );
   }
 
@@ -212,12 +126,11 @@ class _NuevasTelasState extends State<NuevasTelas> {
       "estampado": estampado,
       "descripcion": descripcion,
       "tipoRollo": tipoRollo,
-      "tipoProductoId": 2,
-      "proveedorId":
-          selectedProveedorId != null ? selectedProveedorId! + 1 : null,
+      "tipoProductoId": selectedTipoProductoId,
+      "proveedorId": selectedProveedorId,
     };
-    final url = 'https://maria-chucena-api-production.up.railway.app/Rollo';
 
+    final url = 'https://maria-chucena-api-production.up.railway.app/Rollo';
     final response = await http.post(
       Uri.parse(url),
       headers: {'Content-Type': 'application/json'},
@@ -228,10 +141,7 @@ class _NuevasTelasState extends State<NuevasTelas> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Tela registrada exitosamente')),
       );
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const Stockcontrolpage()),
-      );
+      Navigator.of(context).pop(); // Cierra el diálogo al guardar
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error al registrar la tela: ${response.body}')),
@@ -243,44 +153,45 @@ class _NuevasTelasState extends State<NuevasTelas> {
       String label, List<String> items, ValueChanged<String?> onChanged) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20.0),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 5,
-            child: DropdownButtonFormField<String>(
-              items: items.map((String item) {
-                return DropdownMenuItem<String>(
-                  value: item,
-                  child: Text(item),
-                );
-              }).toList(),
-              onChanged: onChanged,
-              decoration: InputDecoration(
-                labelText: label,
-                labelStyle: const TextStyle(fontSize: 18),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
+      child: DropdownButtonFormField<String>(
+        items: items.map((String item) {
+          return DropdownMenuItem<String>(
+            value: item,
+            child: Text(item),
+          );
+        }).toList(),
+        onChanged: onChanged,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
           ),
-          const SizedBox(width: 10),
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              if (label == 'Proveedor') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => NuevoProveedorDialog(
-                      onProveedorAgregado: () {},
-                    ),
-                  ),
-                );
-              }
-            },
+        ),
+      ),
+    );
+  }
+
+  Widget buildDropdownTipoProducto() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20.0),
+      child: DropdownButtonFormField<int>(
+        decoration: InputDecoration(
+          labelText: 'Tipo de Producto (Tela)',
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
           ),
-        ],
+        ),
+        items: tipoProductos.map((tipoProducto) {
+          return DropdownMenuItem<int>(
+            value: tipoProducto.id,
+            child: Text(tipoProducto.nombre),
+          );
+        }).toList(),
+        onChanged: (value) {
+          setState(() {
+            selectedTipoProductoId = value;
+          });
+        },
       ),
     );
   }
@@ -321,7 +232,6 @@ class _NuevasTelasState extends State<NuevasTelas> {
         decoration: InputDecoration(
           labelText: label,
           hintText: hintText,
-          labelStyle: const TextStyle(fontSize: 18),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
           ),
