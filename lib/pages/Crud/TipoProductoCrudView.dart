@@ -1,11 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:gestion_indumentaria/models/Tela.dart';
 import 'package:gestion_indumentaria/models/TipoProducto.dart';
-import 'package:gestion_indumentaria/pages/StockTelas/nuevaTela.dart';
 import 'package:gestion_indumentaria/pages/TipoProducto/nuevoRegistro.dart';
-import 'package:gestion_indumentaria/pages/principal.dart';
+import 'package:gestion_indumentaria/widgets/boxDialog/BoxDialogTipoProductoModificar.dart';
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
 import 'package:http/http.dart' as http;
 
@@ -37,12 +35,12 @@ class _TipoCrudViewState extends State<TipoProductocrudview> {
               children: [
                 TextButton(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const NuevoTipoDeProducto(),
-                      ),
-                    );
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) =>
+                            NuevoTipoDeProductoDialog(
+                              onProductoAgregado: fetchModels,
+                            ));
                   },
                   style: TextButton.styleFrom(
                       backgroundColor: Colors.blue[300],
@@ -73,6 +71,29 @@ class _TipoCrudViewState extends State<TipoProductocrudview> {
                 (producto) => Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
+                        IconButton(
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) =>
+                                  ModificadorTipoProductoDialog(
+                                tipoProducto: producto,
+                                onTipoProductoModified:
+                                    (TipoProducto updatedTipoProducto) {
+                                  setState(() {
+                                    // Actualizar la prenda en la lista
+                                    final index = productos.indexWhere(
+                                        (p) => p.id == updatedTipoProducto.id);
+                                    if (index != -1) {
+                                      productos[index] = updatedTipoProducto;
+                                    }
+                                  });
+                                },
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.edit),
+                        ),
                         IconButton(
                           onPressed: () {
                             _confirmDelete(context, producto.id);

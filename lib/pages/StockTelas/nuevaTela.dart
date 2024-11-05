@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/TipoProducto.dart';
-import 'package:gestion_indumentaria/pages/Crud/telaCrudView.dart';
 import 'package:gestion_indumentaria/pages/StockTelas/stock_Control_Page.dart';
 import 'package:gestion_indumentaria/pages/principal.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
@@ -273,7 +272,9 @@ class _NuevasTelasState extends State<NuevasTelas> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const Nuevoprovedor(),
+                    builder: (context) => NuevoProveedorDialog(
+                      onProveedorAgregado: () {},
+                    ),
                   ),
                 );
               }

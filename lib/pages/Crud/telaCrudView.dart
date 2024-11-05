@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Proveedor.dart';
 import 'package:gestion_indumentaria/models/Tela.dart';
 import 'package:gestion_indumentaria/pages/StockTelas/nuevaTela.dart';
-import 'package:gestion_indumentaria/pages/principal.dart';
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
 import 'package:http/http.dart' as http;
 
