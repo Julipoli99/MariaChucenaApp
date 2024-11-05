@@ -35,12 +35,12 @@ class _ProvedorCrudViewState extends State<Provedorcrudview> {
               children: [
                 TextButton(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const Nuevoprovedor(),
-                      ),
-                    );
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) =>
+                            NuevoProveedorDialog(
+                              onProveedorAgregado: fetchModels,
+                            ));
                   },
                   style: TextButton.styleFrom(
                       backgroundColor: Colors.blue[300],

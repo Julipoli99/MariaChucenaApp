@@ -66,7 +66,7 @@ class _PrendaCrudViewState extends State<Prendacrudview> {
               dataMapper: [
                 // Celdas/valores
                 (prenda) => Text(prenda.id.toString()),
-                (prenda) => Text(prenda.nombre ?? 'Sin nombre'),
+                (prenda) => Text(prenda.nombre),
                 (prenda) => Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
