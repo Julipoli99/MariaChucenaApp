@@ -5,6 +5,7 @@ import 'package:gestion_indumentaria/models/AviosModelo.dart';
 import 'package:gestion_indumentaria/models/Avio.dart';
 
 import 'package:gestion_indumentaria/models/Modelo.dart';
+import 'package:gestion_indumentaria/models/Proveedor.dart';
 import 'package:gestion_indumentaria/models/observacion.dart';
 import 'package:gestion_indumentaria/models/Talle.dart';
 import 'package:gestion_indumentaria/pages/Modelos/ModelosRegistradosPage.dart';
@@ -43,6 +44,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   bool? selectedPrimForm;
   final List<String> auxOptions = ['auxiliar'];
   final List<String> primOptions = ['primaria'];
+  List<Avio> listadoAvios = [];
 
   // data para la parte de Avio
   String? nombreAvio;
@@ -63,8 +65,41 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   // Lista para almacenar los avios elegidos y sus detalles
   List<AvioModelo> aviosSeleccionados = [];
 
-  void _createPost() {
+  /*void _createPost() {
     //Avios(nombre: selectedTipoAvioDialog!, proveedores: "Proveedor1");
+    Modelo modeloCreado = Modelo(
+        id: 0,
+        codigo: "",
+        nombre: nombreModelo,
+        tieneTelaSecundaria: selectedPrimForm!,
+        tieneTelaAuxiliar: selectedAuxForm!,
+        genero: selectedGenero!,
+        observaciones: [
+          ObservacionModel(
+            id: 1,
+            titulo: tituloObservacion,
+            descripcion: descripcionObservacion,
+          )
+        ],
+        avios: aviosSeleccionados,
+        curva: selectedTallesForm,
+        categoriaTipo: selectedPrenda!);
+
+    print('MODELO POST: ${modeloCreado.toJson()}');
+
+    // metodo post
+    _post(modeloCreado);
+  }*/
+  void _createPost() {
+    if (nombreModelo == null ||
+        selectedPrimForm == null ||
+        selectedAuxForm == null ||
+        selectedGenero == null ||
+        selectedPrenda == null) {
+      print("Por favor, complete todos los campos obligatorios.");
+      return;
+    }
+
     Modelo modeloCreado = Modelo(
         id: 0,
         codigo: "",
@@ -85,7 +120,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
 
     print('MODELO POST: ${modeloCreado.toJson()}');
 
-    // metodo post
+    // Llamada al método POST
     _post(modeloCreado);
   }
 
@@ -726,13 +761,14 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   }
 
   Widget _buildAviosTable() {
+    fetchAvioNombre();
     if (aviosSeleccionados.isEmpty) {
       return const Text('No hay avios seleccionados.');
     }
 
     return DataTable(
       columns: const [
-        DataColumn(label: Text('ID de Avio')),
+        DataColumn(label: Text('Avio')),
         DataColumn(label: Text('Es por Talle')),
         DataColumn(label: Text('Es por Color')),
         DataColumn(label: Text('Cantidad')),
@@ -740,7 +776,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
       ],
       rows: aviosSeleccionados.map((AvioModelo avio) {
         return DataRow(cells: [
-          DataCell(Text(avio.avioId.toString())),
+          DataCell(Text(getAvioNombre(avio.avioId))),
           DataCell(Text(avio.esPorTalle == true ? 'Sí' : 'No')),
           DataCell(Text(avio.esPorColor == true ? 'Sí' : 'No')),
           DataCell(Text(avio.cantidadRequerida.toString())),
@@ -763,26 +799,41 @@ class _NuevomodeloState extends State<Nuevomodelo> {
       throw Exception('Error al cargar los avios');
     }
   }
-/*
-// Función para obtener los avíos desde la API
-  Future<List<Map<String, dynamic>>> fetchAviosFromApi() async {
-    const String apiUrl =
-        'https://maria-chucena-api-production.up.railway.app/avio'; // URL de la API
 
-    try {
-      final response = await http.get(Uri.parse(apiUrl));
+  String getAvioNombre(int avioNombreId) {
+    final avio = listadoAvios.firstWhere(
+      (av) => av.id == avioNombreId,
+      orElse: () => Avio(
+          id: 0,
+          nombre: 'Desconocida',
+          codigoProveedor: '',
+          proveedorId: 0,
+          tipoProductoId: 0,
+          stock: 0,
+          proveedor: Proveedor(id: 0, nombre: 'nombre', telefono: '11111111')),
+    );
+    return avio.nombre;
+  }
 
-      if (response.statusCode == 200) {
-        // Decodificar la respuesta JSON
-        final List<dynamic> data = jsonDecode(response.body);
+  Future<void> fetchAvioNombre() async {
+    const url = "https://maria-chucena-api-production.up.railway.app/avio";
+    final uri = Uri.parse(url);
+    final response = await http.get(uri);
 
-        // Convertir la lista dinámica en una lista de mapas
-        return data.map((avio) => avio as Map<String, dynamic>).toList();
-      } else {
-        throw Exception('Error al cargar los avíos: ${response.statusCode}');
-      }
-    } catch (e) {
-      throw Exception('Error de conexión: $e');
-    }
-  }*/
+    // Decodifica y actualiza la lista de categorías
+    final List<dynamic> jsonData = jsonDecode(response.body);
+    setState(() {
+      listadoAvios = jsonData.map((json) {
+        return Avio(
+          id: json['id'] ?? 0,
+          codigoProveedor: json['codigoProveedor'] ?? '',
+          proveedorId: json['proveedorId'] ?? 0,
+          tipoProductoId: json['tipoProductoId'] ?? 0,
+          nombre: json['nombre'] ?? 'Sin nombre',
+          stock: json['stock'] ?? 0,
+          proveedor: Proveedor.fromJson(json['proveedor'] ?? {}),
+        );
+      }).toList();
+    });
+  }
 }
