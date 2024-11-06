@@ -128,7 +128,7 @@ class _telaCrudViewState extends State<Telacrudview> {
           ),
           Expanded(
             child: TablaCrud<Tela>(
-              tituloAppBar: 'Telas registradas',
+              tituloAppBar: '',
               encabezados: const [
                 "ID",
                 "CANTIDAD",

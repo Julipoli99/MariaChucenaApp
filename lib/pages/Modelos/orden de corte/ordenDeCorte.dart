@@ -4,10 +4,11 @@ import 'package:gestion_indumentaria/models/RolloCorte.dart';
 import 'package:gestion_indumentaria/models/Talle.dart';
 import 'package:gestion_indumentaria/models/Tela.dart';
 import 'package:gestion_indumentaria/models/observacion.dart';
+import 'package:gestion_indumentaria/models/talleRepetecion.dart';
 import 'package:gestion_indumentaria/pages/principal.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
-import 'package:gestion_indumentaria/widgets/TalleSelectorWidget.dart';
+import 'package:gestion_indumentaria/widgets/TalleRepeticionSelector.dart';
 import 'package:http/http.dart' as http;
 
 class OrdenDeCorteScreen extends StatefulWidget {
@@ -21,7 +22,7 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
   List<Tela> tiposDeTela = [];
   List<dynamic> modelosACortar = [];
   List<String> avios = [];
-  List<Talle> selectedTalle = [];
+  List<TalleRepeticion> selectedTalle = [];
   Tela? selectedTipoDeTela;
   String? selectedModelo;
   String? selectedAvio;
@@ -97,11 +98,22 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
     final modeloSeleccionado = modelosACortar
         .firstWhere((modelo) => modelo['nombre'] == selectedModelo);
 
+    // Mapear los talles seleccionados (selectedTalle) a la estructura de corte
+    final talleRepeticionList = selectedTalle.map((talleRepeticion) {
+      return {
+        'talle': talleRepeticion
+            .talle, // Asumiendo que TalleRepeticion tiene un talleId
+        'repeticion': talleRepeticion
+            .repeticion, // Asumiendo que TalleRepeticion tiene un campo de repetición
+      };
+    }).toList();
+
     final orderData = {
       'modelos': [
         {
           'modeloId': modeloSeleccionado['id'],
-          'esParaEstampar': true,
+          'totalPrendas': 1,
+          'esParaEstampar': false,
           'usaTelaSecundaria': false,
           'usaTelaAuxiliar': false,
           'observaciones': [
@@ -109,14 +121,9 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
               id: 1,
               titulo: tituloObservacion,
               descripcion: descripcionObservacion,
-            )
+            ).toJson(),
           ],
-          'curva': selectedTalle.map((talle) {
-            return {
-              'talleId': talle.id,
-              'repeticion': 1,
-            };
-          }).toList(),
+          'curva': talleRepeticionList, // Aquí insertamos la lista de talles
         },
       ],
       'rollos': [
@@ -127,13 +134,14 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
         },
       ],
     };
-
+    print(' PREVIO AL TRYCATCH $orderData');
     try {
       final response = await http.post(
         Uri.parse('https://maria-chucena-api-production.up.railway.app/corte'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode(orderData),
       );
+      print('DENTRO DEL TRYCATCH $orderData');
 
       if (response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -150,11 +158,14 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
               content: Text(
                   'Error al crear la orden de corte: ${responseBody['message'] ?? 'Error desconocido'}')),
         );
+        print(
+            'Error al crear la orden de corte: ${responseBody['message'] + response.statusCode ?? 'Error desconocido'}');
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error de conexión: $e')),
       );
+      print('Error de conexión: $e');
     }
   }
 
@@ -201,7 +212,7 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
         child: Column(
           children: [
             Text(
-              'Bienvenidos al sistema de Gestión de corte',
+              'BCreación de Corte',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 22,
@@ -318,11 +329,11 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
                 });
               }),
               const SizedBox(height: 10),
-              TalleSelector(
-                selectedTalles: selectedTalle,
-                onTalleSelected: (talles) {
+              TalleRepeticionSelector(
+                selectedTalleRepeticion: selectedTalle,
+                onTalleRepeticionSelected: (updatedTalleRepeticion) {
                   setState(() {
-                    selectedTalle = talles;
+                    selectedTalle = updatedTalleRepeticion;
                   });
                 },
               ),

@@ -55,8 +55,8 @@ class _TallesCrudViewState extends State<Tallescrudview> {
           ),
           Expanded(
             child: TablaCrud<Talle>(
-              tituloAppBar: 'Talles',
-              encabezados: const ["ID", "Talle", "Opciones"],
+              tituloAppBar: '',
+              encabezados: const ["ID", "TALLE", "OPCIONES"],
               items: talles,
               dataMapper: [
                 (talle) => Text(talle.id.toString()),

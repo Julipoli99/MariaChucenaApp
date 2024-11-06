@@ -34,7 +34,7 @@ class Usuariosregistrados extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        'Bienvenidos al sistema de Gestion de Usuarios registrados ',
+                        'Gestión de Usuarios registrados ',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 22,

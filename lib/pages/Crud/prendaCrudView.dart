@@ -56,7 +56,7 @@ class _PrendaCrudViewState extends State<Prendacrudview> {
           ),
           Expanded(
             child: TablaCrud<Prenda>(
-              tituloAppBar: 'Prendas registradas', // Titulo del appBar
+              tituloAppBar: '', // Titulo del appBar
               encabezados: const [
                 "ID",
                 "NOMBRE",

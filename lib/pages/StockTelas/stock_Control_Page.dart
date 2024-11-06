@@ -34,7 +34,7 @@ class Stockcontrolpage extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        'Bienvenidos al sistema de Gestion de Stock ',
+                        'Gestión de Rollos Registrados',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 22,

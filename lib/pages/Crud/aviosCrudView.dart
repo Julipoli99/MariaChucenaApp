@@ -79,7 +79,7 @@ class _AvioCrudViewState extends State<Avioscrudview> {
           ),
           Expanded(
             child: TablaCrud<Avio>(
-              tituloAppBar: 'Avios',
+              tituloAppBar: '',
               encabezados: const [
                 "ID",
                 "NOMBRE",
