@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:gestion_indumentaria/models/TipoProducto.dart';
+import 'package:gestion_indumentaria/pages/Crud/TallesCrudView.dart';
 import 'package:gestion_indumentaria/pages/Login/usuariosRegistrados.dart';
+import 'package:gestion_indumentaria/pages/Talles/tallesVista.dart';
+import 'package:gestion_indumentaria/pages/TipoProducto/registroTipoProducto.dart';
+import 'package:gestion_indumentaria/pages/Tizadas/CreacionTizadasPage.dart';
 import 'package:gestion_indumentaria/pages/principal.dart';
 
 class DrawerMenuLateral extends StatelessWidget {
@@ -66,17 +71,25 @@ class DrawerMenuLateral extends StatelessWidget {
               ),
 
               // Icono de Acerca de...
-              const Padding(
-                padding: EdgeInsets.only(left: 25.0),
+              Padding(
+                padding: const EdgeInsets.only(left: 25.0),
                 child: ListTile(
-                  leading: Icon(
-                    Icons.info_outline,
+                  leading: const Icon(
+                    Icons.content_cut,
                     color: Colors.white,
                   ),
-                  title: Text(
-                    'Acerca de',
+                  title: const Text(
+                    'creacion de tizadas ',
                     style: TextStyle(color: Colors.white),
                   ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const CreacionTizadasPage()),
+                    );
+                    print('Presionado boton de tizadas');
+                  },
                 ),
               ),
 
@@ -87,11 +100,16 @@ class DrawerMenuLateral extends StatelessWidget {
                   leading:
                       const Icon(color: Colors.white, Icons.list_alt_rounded),
                   title: const Text(
-                    'Ordenes',
+                    'Talles',
                     style: TextStyle(color: Colors.white),
                   ),
                   onTap: () {
-                    print('Presionado boton Ordenes');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const tallesregistradospage()),
+                    );
+                    print('Presionado boton de talles');
                   },
                 ),
               ),
@@ -104,10 +122,16 @@ class DrawerMenuLateral extends StatelessWidget {
                       color: Colors.white,
                       Icons.production_quantity_limits_sharp),
                   title: const Text(
-                    'Productos',
+                    'Tipo de Productos',
                     style: TextStyle(color: Colors.white),
                   ),
                   onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              const TipoProductoregistradospage()),
+                    );
                     print('Presionado boton Productos');
                   },
                 ),

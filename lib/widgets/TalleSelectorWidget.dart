@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert'; // Para decodificar JSON
+import 'dart:convert';
+import 'package:gestion_indumentaria/models/Talle.dart';
 import 'package:gestion_indumentaria/widgets/boxDialog/boxdialogoTalle.dart';
 
 class TalleSelector extends StatefulWidget {
-  final String? selectedTalle;
-  final ValueChanged<String?> onTalleSelected;
+  final List<Talle> selectedTalles;
+  final ValueChanged<List<Talle>> onTalleSelected;
 
   const TalleSelector({
     Key? key,
-    required this.selectedTalle,
+    required this.selectedTalles,
     required this.onTalleSelected,
   }) : super(key: key);
 
@@ -18,7 +19,7 @@ class TalleSelector extends StatefulWidget {
 }
 
 class _TalleSelectorState extends State<TalleSelector> {
-  List<String> _talles = [];
+  List<Talle> _talles = [];
   bool _isLoading = true;
 
   @override
@@ -29,7 +30,7 @@ class _TalleSelectorState extends State<TalleSelector> {
 
   Future<void> _fetchTallesFromApi() async {
     const String apiUrl =
-        'https://maria-chucena-api-production.up.railway.app/talle'; // Cambia por tu endpoint.
+        'https://maria-chucena-api-production.up.railway.app/talle';
 
     try {
       final response = await http.get(Uri.parse(apiUrl));
@@ -37,7 +38,7 @@ class _TalleSelectorState extends State<TalleSelector> {
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
         setState(() {
-          _talles = data.map((talle) => talle["talle"].toString()).toList();
+          _talles = data.map((json) => Talle.fromJson(json)).toList();
           _isLoading = false;
         });
       } else {
@@ -60,12 +61,23 @@ class _TalleSelectorState extends State<TalleSelector> {
       builder: (context) => AddTalleDialog(
         onTalleAdded: (nuevoTalle) {
           setState(() {
-            _talles.add(nuevoTalle);
+            _talles.add(nuevoTalle as Talle);
           });
-          widget.onTalleSelected(nuevoTalle);
+          _toggleTalleSelection(nuevoTalle as Talle);
         },
       ),
     );
+  }
+
+  void _toggleTalleSelection(Talle talle) {
+    setState(() {
+      if (widget.selectedTalles.contains(talle)) {
+        widget.selectedTalles.remove(talle);
+      } else {
+        widget.selectedTalles.add(talle);
+      }
+      widget.onTalleSelected(List.from(widget.selectedTalles));
+    });
   }
 
   @override
@@ -78,7 +90,7 @@ class _TalleSelectorState extends State<TalleSelector> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Talle',
+          'Talles',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 5),
@@ -87,10 +99,10 @@ class _TalleSelectorState extends State<TalleSelector> {
           children: [
             ..._talles.map((talle) {
               return ChoiceChip(
-                label: Text(talle),
-                selected: widget.selectedTalle == talle,
+                label: Text(talle.nombre),
+                selected: widget.selectedTalles.contains(talle),
                 onSelected: (selected) {
-                  widget.onTalleSelected(selected ? talle : null);
+                  _toggleTalleSelection(talle);
                 },
               );
             }).toList(),

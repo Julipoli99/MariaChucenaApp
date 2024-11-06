@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Proveedor.dart';
+import 'package:gestion_indumentaria/models/Tela.dart';
 import 'package:gestion_indumentaria/models/TipoProducto.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-class NuevasTelasDialog extends StatefulWidget {
-  const NuevasTelasDialog({super.key});
+class EditarTelasDialog extends StatefulWidget {
+  final Tela tela; // ID de la tela a editar
+
+  const EditarTelasDialog(this.tela, {Key? key}) : super(key: key);
 
   @override
-  _NuevasTelasDialogState createState() => _NuevasTelasDialogState();
+  _EditarTelasDialogState createState() => _EditarTelasDialogState();
 }
 
-class _NuevasTelasDialogState extends State<NuevasTelasDialog> {
-  List<String> selectedTejidos = [];
-  TipoEnum? selectedTipo;
+class _EditarTelasDialogState extends State<EditarTelasDialog> {
   List<Proveedor> proveedores = [];
   List<TipoProducto> tipoProductos = [];
   int? selectedProveedorId;
@@ -30,6 +31,21 @@ class _NuevasTelasDialogState extends State<NuevasTelasDialog> {
     super.initState();
     _cargarProveedores();
     _cargarTipoProductos();
+    // Inicializar los valores con la tela recibida
+    _initializeValues();
+  }
+
+  void _initializeValues() {
+    // Setear los valores iniciales de la tela a editar
+    setState(() {
+      selectedProveedorId = widget.tela.proveedorId;
+      selectedTipoProductoId = widget.tela.tipoProductoId;
+      cantidad = widget.tela.cantidad;
+      color = widget.tela.color;
+      estampado = widget.tela.estampado;
+      descripcion = widget.tela.descripcion;
+      tipoRollo = widget.tela.tipoDeRollo;
+    });
   }
 
   Future<void> _cargarProveedores() async {
@@ -74,7 +90,7 @@ class _NuevasTelasDialogState extends State<NuevasTelasDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Registro de Telas'),
+      title: const Text('Editar Tela'),
       content: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -84,21 +100,38 @@ class _NuevasTelasDialogState extends State<NuevasTelasDialog> {
             buildProveedorDropdown(),
             buildDropdownTipoProducto(),
             buildTextField(
-                'Cantidad', 'Cantidad de tela registrada, en metros o kilos',
-                (value) {
-              cantidad = double.tryParse(value) ?? 0.0;
-            }),
-            buildTextField('Color', 'Nombre del color', (value) {
-              color = value;
-            }),
-            buildCheckboxField('Estampado', (value) {
-              setState(() {
-                estampado = value!;
-              });
-            }),
-            buildTextField('Descripción', 'Descripción del estampado', (value) {
-              descripcion = value;
-            }),
+              'Cantidad',
+              'Cantidad de tela registrada, en metros o kilos',
+              (value) {
+                cantidad = double.tryParse(value) ?? 0.0;
+              },
+              initialValue: cantidad.toString(),
+            ),
+            buildTextField(
+              'Color',
+              'Nombre del color',
+              (value) {
+                color = value;
+              },
+              initialValue: color,
+            ),
+            buildCheckboxField(
+              'Estampado',
+              (value) {
+                setState(() {
+                  estampado = value!;
+                });
+              },
+              initialValue: estampado,
+            ),
+            buildTextField(
+              'Descripción',
+              'Descripción del estampado',
+              (value) {
+                descripcion = value;
+              },
+              initialValue: descripcion,
+            ),
           ],
         ),
       ),
@@ -108,14 +141,14 @@ class _NuevasTelasDialogState extends State<NuevasTelasDialog> {
           child: const Text('Cancelar'),
         ),
         ElevatedButton(
-          onPressed: _guardarTela,
-          child: const Text('Guardar Tela'),
+          onPressed: _editarTela,
+          child: const Text('Guardar Cambios'),
         ),
       ],
     );
   }
 
-  Future<void> _guardarTela() async {
+  Future<void> _editarTela() async {
     final datosTela = {
       "cantidad": cantidad,
       "color": color,
@@ -126,21 +159,22 @@ class _NuevasTelasDialogState extends State<NuevasTelasDialog> {
       "proveedorId": selectedProveedorId,
     };
 
-    final url = 'https://maria-chucena-api-production.up.railway.app/Rollo';
-    final response = await http.post(
+    final url =
+        'https://maria-chucena-api-production.up.railway.app/Rollo/${widget.tela.id}';
+    final response = await http.patch(
       Uri.parse(url),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(datosTela),
     );
 
-    if (response.statusCode == 201) {
+    if (response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Tela registrada exitosamente')),
+        const SnackBar(content: Text('Tela editada exitosamente')),
       );
       Navigator.of(context).pop(true); // Cierra el diálogo al guardar
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al registrar la tela: ${response.body}')),
+        SnackBar(content: Text('Error al editar la tela: ${response.body}')),
       );
     }
   }
@@ -166,6 +200,7 @@ class _NuevasTelasDialogState extends State<NuevasTelasDialog> {
             selectedProveedorId = value;
           });
         },
+        value: selectedProveedorId, // Set the selected value
       ),
     );
   }
@@ -191,6 +226,7 @@ class _NuevasTelasDialogState extends State<NuevasTelasDialog> {
             selectedTipoProductoId = value;
           });
         },
+        value: selectedTipoProductoId, // Set the selected value
       ),
     );
   }
@@ -223,11 +259,13 @@ class _NuevasTelasDialogState extends State<NuevasTelasDialog> {
   }
 
   Widget buildTextField(
-      String label, String hintText, ValueChanged<String> onChanged) {
+      String label, String hintText, ValueChanged<String> onChanged,
+      {String initialValue = ''}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20.0),
       child: TextFormField(
         onChanged: onChanged,
+        initialValue: initialValue, // Use initialValue for pre-setting text
         decoration: InputDecoration(
           labelText: label,
           hintText: hintText,
@@ -239,20 +277,14 @@ class _NuevasTelasDialogState extends State<NuevasTelasDialog> {
     );
   }
 
-  Widget buildCheckboxField(String label, ValueChanged<bool?> onChanged) {
+  Widget buildCheckboxField(String label, ValueChanged<bool?> onChanged,
+      {bool initialValue = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20.0),
-      child: Row(
-        children: [
-          Checkbox(
-            value: estampado,
-            onChanged: onChanged,
-          ),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 16),
-          ),
-        ],
+      child: CheckboxListTile(
+        title: Text(label),
+        value: initialValue,
+        onChanged: onChanged,
       ),
     );
   }

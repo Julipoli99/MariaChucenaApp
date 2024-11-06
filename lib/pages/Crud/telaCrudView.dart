@@ -1,9 +1,11 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:gestion_indumentaria/models/Proveedor.dart';
 import 'package:gestion_indumentaria/models/Tela.dart';
+import 'package:gestion_indumentaria/models/TipoProducto.dart';
+import 'package:gestion_indumentaria/pages/StockTelas/editarTela.dart';
 import 'package:gestion_indumentaria/pages/StockTelas/nuevaTela.dart';
-import 'package:gestion_indumentaria/pages/principal.dart';
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
 import 'package:http/http.dart' as http;
 
@@ -16,11 +18,82 @@ class Telacrudview extends StatefulWidget {
 
 class _telaCrudViewState extends State<Telacrudview> {
   List<Tela> telas = [];
+  List<Proveedor> proveedores = [];
 
   @override
   void initState() {
     super.initState();
-    fetchModels(); // Llamamos al fetch cuando la página se carga
+    fetchModels();
+    fetchProveedores();
+    fetchTipoProductos();
+  }
+
+  Future<void> fetchProveedores() async {
+    const url = 'https://maria-chucena-api-production.up.railway.app/proveedor';
+    final uri = Uri.parse(url);
+
+    try {
+      final response = await http.get(uri);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonData = jsonDecode(response.body);
+
+        setState(() {
+          proveedores =
+              jsonData.map((json) => Proveedor.fromJson(json)).toList();
+        });
+      } else {
+        print("Error: Código de estado ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error al cargar los proveedores: $e");
+    }
+  }
+
+  String? getNombreProveedor(int proveedorId) {
+    final proveedor = proveedores.firstWhere(
+      (proveedor) => proveedor.id == proveedorId,
+    );
+    return proveedor.nombre;
+  }
+
+  List<TipoProducto> tipoProductos =
+      []; // Lista para almacenar tipos de productos
+
+  Future<void> fetchTipoProductos() async {
+    const url =
+        'https://maria-chucena-api-production.up.railway.app/tipo-Producto'; // Asegúrate de que esta URL sea correcta
+    final uri = Uri.parse(url);
+
+    try {
+      final response = await http.get(uri);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonData = jsonDecode(response.body);
+
+        setState(() {
+          tipoProductos =
+              jsonData.map((json) => TipoProducto.fromJson(json)).toList();
+        });
+      } else {
+        print("Error: Código de estado ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error al cargar los tipos de productos: $e");
+    }
+  }
+
+  String? getNombreProducto(int tipoProductoId) {
+    try {
+      final tipoProducto = tipoProductos.firstWhere(
+        (tipoProducto) => tipoProducto.id == tipoProductoId,
+      );
+      return tipoProducto
+          .nombre; // Retorna el nombre del tipo de producto encontrado
+    } catch (e) {
+      print('Tipo de producto no encontrado: $tipoProductoId');
+      return null; // Retorna null si no se encuentra
+    }
   }
 
   @override
@@ -34,79 +107,63 @@ class _telaCrudViewState extends State<Telacrudview> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const NuevasTelas(),
-                      ),
+                  onPressed: () async {
+                    final result = await showDialog<bool>(
+                      context: context,
+                      builder: (BuildContext context) =>
+                          const NuevasTelasDialog(),
                     );
+
+                    if (result == true) {
+                      fetchModels(); // Refresca la lista si se agrega una nueva tela
+                    }
                   },
                   style: TextButton.styleFrom(
                       backgroundColor: Colors.blue[300],
                       foregroundColor: Colors.white),
                   child: const Text('Nuevo registro'),
                 ),
-                TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const HomePage(),
-                        ),
-                      );
-                    },
-                    style: TextButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        foregroundColor: Colors.white),
-                    child: const Text('Inicio')),
               ],
             ),
           ),
           Expanded(
             child: TablaCrud<Tela>(
-              tituloAppBar: 'Telas registradas', // Titulo del appBar
+              tituloAppBar: 'Telas registradas',
               encabezados: const [
                 "ID",
                 "CANTIDAD",
                 "COLOR",
-                "ESTAMPADO",
                 "DESCRIPCION",
+                "ESTAMPADO",
                 "TIPO DE ROLLO",
-                "TIPO PRODUCTO ID",
-                "PROVEDOR"
-                    "OPCIONES"
-              ], // Encabezados
-              items: telas, // Lista de usuarios
+                "OPCIONES"
+              ],
+              items: telas,
               dataMapper: [
-                // Celdas/valores
-                (tela) => Text(tela.id),
+                (tela) => Text(tela.id.toString()),
                 (tela) => Text(tela.cantidad.toString()),
                 (tela) => Text(tela.color),
-                (tela) => Text(tela.estampado.toString()),
-                (tela) => Text(tela.descripcion),
-                (tela) => Text(tela.tipoDeRollo),
-                (tela) => Text(tela.tipoProductoId.toString()),
-                (tela) => Text(tela.proveedorId.toString()),
-                //Parte de Opciones, se le pasa una funcion que retorna una List de Widgets en este caso Row.
+                (tela) => Text(tela.descripcion.toString()),
+                (tela) => Text(tela.estampado ? 'SI' : 'NO'),
+                (tela) => Text(tela.tipoDeRollo.toString()),
                 (tela) => Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         IconButton(
                           onPressed: () {
-                            print('Edicion para tela: ${tela.id}');
-                          },
-                          icon: const Icon(Icons.edit),
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            print('Vista para tela: ${tela.id}');
+                            _showDetailDialog(context, tela);
                           },
                           icon: const Icon(Icons.remove_red_eye_outlined),
                         ),
                         IconButton(
                           onPressed: () {
-                            print('Tela borrado: ${tela.id}');
+                            _openEditarTelaDialog(context, tela);
+                          },
+                          icon: const Icon(Icons.edit),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            _confirmDelete(context, tela.id);
                           },
                           icon: const Icon(Icons.delete),
                         ),
@@ -120,38 +177,58 @@ class _telaCrudViewState extends State<Telacrudview> {
     );
   }
 
+  void _showDetailDialog(BuildContext context, Tela tela) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Detalles de la Tela : ${tela.descripcion}'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                  'Tipo Producto :  ${getNombreProducto(tela.tipoProductoId)}'),
+              Text("Proveedor: ${getNombreProveedor(tela.proveedorId)}"),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cerrar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void fetchModels() async {
     const url = "https://maria-chucena-api-production.up.railway.app/rollo";
     final uri = Uri.parse(url);
     final response = await http.get(uri);
-
-    // Imprimir la respuesta de la API para depuración
-    print(response.body);
 
     final List<dynamic> jsonData = jsonDecode(response.body);
 
     setState(() {
       telas = jsonData.map((json) {
         return Tela(
-          id: json['id'] ?? 0, // Valor por defecto si 'id' es nulo
-          tipoDeRollo: json['tipoDeRollo'] ?? 'Sin tipo de rollo',
-          proveedorId: json['provedorId'] ?? 'Sin provedor',
+          id: json['id'] ?? 0,
+          tipoDeRollo: json['tipoRollo'] ?? 'Sin tipo de rollo',
+          proveedorId: json['proveedorId'] ?? 0,
           color: json['color'] ?? 'Sin color',
           cantidad: json['cantidad'] ?? 'Sin cantidad',
           estampado: json['estampado'] ?? 'Sin estampado',
           descripcion: json['descripcion'] ?? 'Sin descripcion',
-          tipoProductoId:
-              json['tipoProductoId'] ?? 0, // Asignar un valor por defecto
+          tipoProductoId: json['tipoProductoId'] ?? 0,
         );
       }).toList();
     });
-
-    print("rollos cargados");
   }
 
   Future<void> deleteTela(int id) async {
-    final url =
-        'https://maria-chucena-api-production.up.railway.app/rollo/$id'; // Endpoint para eliminar un avio
+    final url = 'https://maria-chucena-api-production.up.railway.app/rollo/$id';
     final uri = Uri.parse(url);
 
     try {
@@ -159,9 +236,8 @@ class _telaCrudViewState extends State<Telacrudview> {
 
       if (response.statusCode == 200 || response.statusCode == 204) {
         setState(() {
-          telas.removeWhere((tela) => tela.id == id); // Remover avio localmente
+          telas.removeWhere((tela) => tela.id == id);
         });
-        print('rollo eliminado correctamente.');
       } else {
         print(
             'Error: No se pudo eliminar el rollo. Código de estado ${response.statusCode}');
@@ -186,8 +262,8 @@ class _telaCrudViewState extends State<Telacrudview> {
             ),
             ElevatedButton(
               onPressed: () {
-                deleteTela(id); // Llama a la función para eliminar el avio
-                Navigator.of(context).pop(); // Cierra el diálogo
+                deleteTela(id);
+                Navigator.of(context).pop();
               },
               child: const Text('Eliminar'),
             ),
@@ -195,5 +271,16 @@ class _telaCrudViewState extends State<Telacrudview> {
         );
       },
     );
+  }
+
+  void _openEditarTelaDialog(BuildContext context, Tela tela) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) => EditarTelasDialog(tela),
+    );
+
+    if (result == true) {
+      fetchModels(); // Refresca la lista si se actualiza una tela
+    }
   }
 }

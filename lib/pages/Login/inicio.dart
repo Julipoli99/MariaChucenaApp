@@ -78,45 +78,6 @@ class LoginScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 20.0),
-                          const Row(
-                            children: [
-                              Expanded(child: Divider()),
-                              Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 10.0),
-                                child: Text('Or'),
-                              ),
-                              Expanded(child: Divider()),
-                            ],
-                          ),
-                          const SizedBox(height: 20.0),
-                          ElevatedButton.icon(
-                            onPressed: () {
-                              // Acción para iniciar sesión con Google
-                            },
-                            icon: Image.asset(
-                              'imagen/logo-google.png', // Imagen de Google desde la carpeta 'imagenes'
-                              height: 24.0,
-                              width: 24.0,
-                            ),
-                            label: const Text('Sign in with Google'),
-                            style: ElevatedButton.styleFrom(
-                              side: const BorderSide(color: Colors.grey),
-                              minimumSize: const Size(double.infinity, 50),
-                            ),
-                          ),
-                          const SizedBox(height: 20.0),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const registroScreen()),
-                              );
-                            },
-                            child:
-                                const Text('No tienes una cuenta? Inscríbete'),
-                          ),
                         ],
                       ),
                     ),

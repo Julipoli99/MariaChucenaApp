@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:gestion_indumentaria/models/Talle.dart';
 
 class AddTalleDialog extends StatefulWidget {
-  final ValueChanged<String> onTalleAdded;
+  final ValueChanged<Talle> onTalleAdded;
 
   const AddTalleDialog({Key? key, required this.onTalleAdded})
       : super(key: key);
@@ -13,22 +14,23 @@ class AddTalleDialog extends StatefulWidget {
 
 class _AddTalleDialogState extends State<AddTalleDialog> {
   final TextEditingController _talleController = TextEditingController();
-  bool _isSaving = false; // Para mostrar un loader mientras se guarda.
+  bool _isSaving = false;
 
-  Future<void> _saveTalleToApi(String talle) async {
+  Future<void> _saveTalleToApi(String talleNombre) async {
     const String apiUrl =
-        'https://maria-chucena-api-production.up.railway.app/talle'; // Cambia por tu endpoint.
+        'https://maria-chucena-api-production.up.railway.app/talle';
 
     try {
       setState(() => _isSaving = true);
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {'Content-Type': 'application/json'},
-        body: '{"talle": "$talle"}',
+        body: '{"talle": "$talleNombre"}',
       );
 
       if (response.statusCode == 201) {
-        widget.onTalleAdded(talle); // Agregar a la lista local.
+        final nuevoTalle = Talle(id: 0, nombre: talleNombre);
+        widget.onTalleAdded(nuevoTalle);
       } else {
         _showError('Error al guardar el talle en la API.');
       }
@@ -36,7 +38,7 @@ class _AddTalleDialogState extends State<AddTalleDialog> {
       _showError('Ocurrió un error: $e');
     } finally {
       setState(() => _isSaving = false);
-      Navigator.of(context).pop(); // Cerrar el diálogo.
+      Navigator.of(context).pop();
     }
   }
 

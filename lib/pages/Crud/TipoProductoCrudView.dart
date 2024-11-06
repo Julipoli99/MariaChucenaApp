@@ -1,21 +1,21 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:gestion_indumentaria/models/Proveedor.dart';
-import 'package:gestion_indumentaria/pages/Provedores/NuevoProvedor.dart';
-import 'package:gestion_indumentaria/widgets/boxDialog/BoxDialogoProvedorModificador.dart';
+import 'package:gestion_indumentaria/models/TipoProducto.dart';
+import 'package:gestion_indumentaria/pages/TipoProducto/nuevoRegistro.dart';
+import 'package:gestion_indumentaria/widgets/boxDialog/BoxDialogTipoProductoModificar.dart';
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
 import 'package:http/http.dart' as http;
 
-class Provedorcrudview extends StatefulWidget {
-  const Provedorcrudview({super.key});
+class TipoProductocrudview extends StatefulWidget {
+  const TipoProductocrudview({super.key});
 
   @override
-  State<Provedorcrudview> createState() => _ProvedorCrudViewState();
+  State<TipoProductocrudview> createState() => _TipoCrudViewState();
 }
 
-class _ProvedorCrudViewState extends State<Provedorcrudview> {
-  List<Proveedor> provedores = [];
+class _TipoCrudViewState extends State<TipoProductocrudview> {
+  List<TipoProducto> productos = [];
 
   @override
   void initState() {
@@ -38,8 +38,8 @@ class _ProvedorCrudViewState extends State<Provedorcrudview> {
                     showDialog(
                         context: context,
                         builder: (BuildContext context) =>
-                            NuevoProveedorDialog(
-                              onProveedorAgregado: fetchModels,
+                            NuevoTipoDeProductoDialog(
+                              onProductoAgregado: fetchModels,
                             ));
                   },
                   style: TextButton.styleFrom(
@@ -51,51 +51,52 @@ class _ProvedorCrudViewState extends State<Provedorcrudview> {
             ),
           ),
           Expanded(
-            child: TablaCrud<Proveedor>(
-              tituloAppBar: 'Proveedores', // Titulo del appBar
+            child: TablaCrud<TipoProducto>(
+              tituloAppBar: 'Tipos productos registrados', // Titulo del appBar
               encabezados: const [
                 "ID",
-                "NOMBRE",
-                "TELEFONO",
+                "PRODUCTO",
+                "TIPO",
+                "MEDIDA",
                 "OPCIONES"
-              ], // Encabezados
-              items: provedores, // Lista de proveedores
+              ], // Encabezados visibles en la tabla
+              items: productos, // Lista de telas
               dataMapper: [
-                // Celdas/valores
-                (proveedor) => Text(proveedor.id.toString()),
-                (proveedor) => Text(proveedor.nombre),
-                (proveedor) => Text(proveedor.telefono),
-                //Parte de Opciones, se le pasa una funcion que retorna una List de Widgets en este caso Row.
-                (proveedor) => Row(
+                // Celdas/valores visibles en la tabla
+                (producto) => Text(producto.id.toString()),
+                (producto) => Text(producto.nombre.toString()),
+                (producto) => Text(producto.tipo.name),
+                (producto) => Text(producto.unidadMetrica.name),
+                // Botones de opciones
+                (producto) => Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         IconButton(
                           onPressed: () {
                             showDialog(
                               context: context,
-                              builder: (context) => ModificadorProvedorDialog(
-                                proveedor: proveedor,
-                                onProvedorModified:
-                                    (Proveedor updatedProveedor) {
+                              builder: (context) =>
+                                  ModificadorTipoProductoDialog(
+                                tipoProducto: producto,
+                                onTipoProductoModified:
+                                    (TipoProducto updatedTipoProducto) {
                                   setState(() {
                                     // Actualizar la prenda en la lista
-                                    final index = provedores.indexWhere(
-                                        (p) => p.id == updatedProveedor.id);
+                                    final index = productos.indexWhere(
+                                        (p) => p.id == updatedTipoProducto.id);
                                     if (index != -1) {
-                                      provedores[index] = updatedProveedor;
+                                      productos[index] = updatedTipoProducto;
                                     }
                                   });
                                 },
                               ),
                             );
-                            print('editar  proveedor: ${proveedor.nombre}');
                           },
-                          icon: const Icon(Icons.create_sharp),
+                          icon: const Icon(Icons.edit),
                         ),
                         IconButton(
                           onPressed: () {
-                            _confirmDelete(context, proveedor.id);
-                            print('proveedor borrado: ${proveedor.nombre}');
+                            _confirmDelete(context, producto.id);
                           },
                           icon: const Icon(Icons.delete),
                         ),
@@ -110,32 +111,30 @@ class _ProvedorCrudViewState extends State<Provedorcrudview> {
   }
 
   void fetchModels() async {
-    const url = "https://maria-chucena-api-production.up.railway.app/proveedor";
+    const url =
+        "https://maria-chucena-api-production.up.railway.app/tipo-producto";
     final uri = Uri.parse(url);
     final response = await http.get(uri);
-
-    // Imprimir la respuesta de la API para depuración
-    print(response.body);
 
     final List<dynamic> jsonData = jsonDecode(response.body);
 
     setState(() {
-      provedores = jsonData.map((json) {
-        return Proveedor(
-          id: json['id'] ?? 0, // Asignar un valor por defecto si es null
-          nombre:
-              json['nombre'] ?? 'Sin nombre', // Asignar un valor por defecto
-          telefono: json['telefono'] ?? 'Sin telefono',
+      productos = jsonData.map((json) {
+        return TipoProducto(
+          id: json['id'] ?? 0,
+          nombre: json['nombre'] ?? 'Sin nombre',
+          tipo: TipoEnum.values
+              .firstWhere((e) => e.toString().split('.').last == json['tipo']),
+          unidadMetrica: UnidadMetricaEnum.values.firstWhere(
+              (e) => e.toString().split('.').last == json['unidadMetrica']),
         );
       }).toList();
     });
-
-    print("proveedores cargados");
   }
 
-  Future<void> deleteProvedor(int id) async {
+  Future<void> deleteprenda(int id) async {
     final url =
-        'https://maria-chucena-api-production.up.railway.app/proveedor/$id'; // Endpoint para eliminar un avio
+        'https://maria-chucena-api-production.up.railway.app/tipo-producto/$id';
     final uri = Uri.parse(url);
 
     try {
@@ -143,16 +142,14 @@ class _ProvedorCrudViewState extends State<Provedorcrudview> {
 
       if (response.statusCode == 200 || response.statusCode == 204) {
         setState(() {
-          provedores.removeWhere(
-              (prenda) => prenda.id == id); // Remover avio localmente
+          productos.removeWhere((tela) => tela.id == id);
         });
-        print('proveedor eliminado correctamente.');
       } else {
         print(
-            'Error: No se pudo eliminar el proveedor. Código de estado ${response.statusCode}');
+            'Error: No se pudo eliminar el producto. Código de estado ${response.statusCode}');
       }
     } catch (e) {
-      print('Error al eliminar la proveedor: $e');
+      print('Error al eliminar el producto: $e');
     }
   }
 
@@ -163,7 +160,7 @@ class _ProvedorCrudViewState extends State<Provedorcrudview> {
         return AlertDialog(
           title: const Text('Confirmar eliminación'),
           content:
-              const Text('¿Estás seguro de que deseas eliminar este provedor?'),
+              const Text('¿Estás seguro de que deseas eliminar este producto?'),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -171,8 +168,8 @@ class _ProvedorCrudViewState extends State<Provedorcrudview> {
             ),
             ElevatedButton(
               onPressed: () {
-                deleteProvedor(id); // Llama a la función para eliminar el avio
-                Navigator.of(context).pop(); // Cierra el diálogo
+                deleteprenda(id);
+                Navigator.of(context).pop();
               },
               child: const Text('Eliminar'),
             ),

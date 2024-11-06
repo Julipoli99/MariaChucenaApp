@@ -1,232 +1,139 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
-import 'package:gestion_indumentaria/widgets/HomePage.dart';
+import 'package:gestion_indumentaria/models/Avio.dart';
+import 'package:http/http.dart' as http;
 
-class Modificadoravios extends StatelessWidget {
-  const Modificadoravios({super.key});
+class ModificadoraviosDialog extends StatefulWidget {
+  final Avio? avio;
+  final int? avioId;
+
+  const ModificadoraviosDialog({super.key, this.avio, this.avioId});
+
+  @override
+  _ModificadoraviosDialogState createState() => _ModificadoraviosDialogState();
+}
+
+class _ModificadoraviosDialogState extends State<ModificadoraviosDialog> {
+  Avio? avioData;
+  int cantidadInicial = 0;
+  int cantidadActual = 0;
+  List<String> proveedores = [];
+  String? selectedProveedor;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.avio != null) {
+      avioData = widget.avio;
+      cantidadInicial = avioData!.stock;
+      cantidadActual = cantidadInicial;
+      _cargarProveedores();
+    } else if (widget.avioId != null) {
+      fetchAvioById(widget.avioId!);
+      _cargarProveedores();
+    }
+  }
+
+  Future<void> _cargarProveedores() async {
+    final url = 'https://maria-chucena-api-production.up.railway.app/proveedor';
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      setState(() {
+        proveedores = data.map((p) => p['nombre'].toString()).toList();
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al cargar proveedores: ${response.body}'),
+        ),
+      );
+    }
+  }
+
+  Future<void> fetchAvioById(int avioId) async {
+    final url =
+        'https://maria-chucena-api-production.up.railway.app/avio/$avioId';
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      setState(() {
+        avioData = Avio.fromJson(jsonDecode(response.body));
+        cantidadInicial = avioData!.stock;
+        cantidadActual = cantidadInicial;
+      });
+    } else {
+      throw Exception('Error al cargar el avío');
+    }
+  }
+
+  Future<void> updateStock() async {
+    if (avioData != null) {
+      final nuevaCantidad = cantidadActual;
+      final response = await http.patch(
+        Uri.parse(
+            'https://maria-chucena-api-production.up.railway.app/avio/${avioData!.id}'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'stock': nuevaCantidad}),
+      );
+
+      if (response.statusCode == 200) {
+        Navigator.of(context).pop(true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Stock actualizado correctamente')),
+        );
+      } else {
+        throw Exception('Error al actualizar el stock: ${response.body}');
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text('Maria Chucena ERP System'),
-        toolbarHeight: 80,
-        actions: [
-          buildLoggedInUser('assets/imagen/logo.png',
-              'Supervisor'), //el tipo de rango lo tendria que traer de la base de datos
-        ],
-      ),
-      drawer: const DrawerMenuLateral(),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return AlertDialog(
+      title: const Text('Modificar avío'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            avioData?.nombre ?? 'Modificar Avío',
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          Text('Proveedor: ${avioData?.proveedor.nombre ?? 'No disponible'}'),
+          const SizedBox(height: 10),
+          Text('Cantidad Inicial: $cantidadInicial'),
+          const SizedBox(height: 16),
+          TextField(
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(labelText: 'Cantidad Actual'),
+            onChanged: (value) {
+              setState(() {
+                cantidadActual = int.tryParse(value) ?? cantidadInicial;
+              });
+            },
+          ),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Título principal centrado con subtítulo
-              Container(
-                color: Colors.grey[800],
-                width: double.infinity,
-                padding: const EdgeInsets.all(20.0),
-                child: const Center(
-                  child: Column(
-                    children: [
-                      Text(
-                        'Bienvenidos al sistema de Gestion de Stock De avios',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      Text(
-                        'De Maria Chucena ERP System',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+              ElevatedButton(
+                onPressed: updateStock,
+                child: const Text('Guardar cambios'),
               ),
-              const SizedBox(height: 20),
-
-              // Formulario de Registro de Avios
-              Padding(
-                padding: const EdgeInsets.all(32.0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Expanded(
-                      flex: 2,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'modificar Stock de avios',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      flex: 3,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          DropdownButtonFormField<String>(
-                            decoration: const InputDecoration(
-                              labelText: 'Tipo',
-                              hintText: 'Tipo de avios',
-                            ),
-                            items: <String>['boton', 'piluso', 'manga']
-                                .map((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value),
-                              );
-                            }).toList(),
-                            onChanged: (newValue) {
-                              // Acción al seleccionar un proveedor de prueba
-                              // Aquí puedes agregar cualquier acción temporal
-                              print('tipo de avios : $newValue');
-                            },
-                          ),
-                          const SizedBox(height: 20),
-                          // Dropdown para Proveedores con valores de prueba
-                          DropdownButtonFormField<String>(
-                            decoration: const InputDecoration(
-                              labelText: 'Proveedor',
-                              hintText: 'proveedor',
-                            ),
-                            items: <String>[
-                              'Proveedor de prueba 1',
-                              'Proveedor de prueba 2',
-                              'Proveedor de prueba 3'
-                            ].map((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value),
-                              );
-                            }).toList(),
-                            onChanged: (newValue) {
-                              // Acción al seleccionar un proveedor de prueba
-                              // Aquí puedes agregar cualquier acción temporal
-                              print('Proveedor seleccionado: $newValue');
-                            },
-                          ),
-                          const SizedBox(height: 20),
-                          const Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              // Campo de "Cantidad Inicial"
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Cantidad Inicial',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    SizedBox(
-                                        height:
-                                            8), // Espacio entre título y campo
-                                    TextField(
-                                      enabled: false,
-                                      decoration: InputDecoration(
-                                        hintText: 'Cantidad inicial',
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(
-                                  width: 16), // Separación entre los campos
-
-                              // Campo de "Cantidad Actual"
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Cantidad Actual',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    SizedBox(
-                                        height:
-                                            8), // Espacio entre título y campo
-                                    TextField(
-                                      decoration: InputDecoration(
-                                        hintText: 'Cantidad actual',
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-                          ElevatedButton(
-                            onPressed: () {
-                              // Acción al guardar el avío
-                              // Agrega cualquier acción temporal para probar
-                              print('Avíos guardados');
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.black,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 50,
-                                vertical: 20,
-                              ),
-                            ),
-                            child: const Text(
-                              'Guardar avios',
-                              style: TextStyle(
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const Divider(),
-              // Pie de página con usuario logueado
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16.0),
-                      child: Center(
-                        child: Text(
-                          '© 2024 Maria Chucena ERP System. All rights reserved.',
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context)
+                      .pop(); // Cierra el diálogo sin hacer cambios
+                },
+                child: const Text('Cancelar'),
               ),
             ],
           ),
-        ),
+        ],
       ),
     );
   }

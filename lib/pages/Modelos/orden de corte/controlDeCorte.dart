@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:gestion_indumentaria/pages/Crud/corteCrudView.dart';
 import 'package:gestion_indumentaria/pages/Crud/modeloCrudView.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
 
-class Modelosregistradospage extends StatelessWidget {
-  const Modelosregistradospage({super.key});
+class ordenDeCorteregistradospage extends StatelessWidget {
+  const ordenDeCorteregistradospage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +35,7 @@ class Modelosregistradospage extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        'Bienvenidos al sistema de Gestion de Modelos Registrados ',
+                        'Bienvenidos al sistema de Gestion de orden de corte ',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 22,
@@ -55,9 +56,9 @@ class Modelosregistradospage extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               // Aquí mostramos el AviosCrudView
-              const SizedBox(
+              SizedBox(
                 height: 600, // Ajusta el alto según lo necesario
-                child: ModelCrudView(),
+                child: Cortecrudview(),
               ),
 
               const Divider(),

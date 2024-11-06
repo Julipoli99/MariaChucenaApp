@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:gestion_indumentaria/models/tipoPrenda.dart';
 import 'package:http/http.dart' as http;
 
 class AddPrendaDialog extends StatefulWidget {
-  final ValueChanged<String> onPrendaAdded;
+  final ValueChanged<Prenda> onPrendaAdded; // Cambiado a Prenda
 
   const AddPrendaDialog({Key? key, required this.onPrendaAdded})
       : super(key: key);
@@ -17,27 +20,30 @@ class _AddPrendaDialogState extends State<AddPrendaDialog> {
 
   Future<void> _savePrendaToApi(String prenda) async {
     const String apiUrl =
-        'https://maria-chucena-api-production.up.railway.app/categoria'; // Cambia por tu endpoint.
-
+        'https://maria-chucena-api-production.up.railway.app/categoria';
     try {
       setState(() => _isSaving = true);
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {'Content-Type': 'application/json'},
-        body: '{"tipo": "$prenda"}',
+        body: jsonEncode({'tipo': prenda}),
       );
 
       if (response.statusCode == 201) {
-        widget.onPrendaAdded(prenda); // Agregar a la lista local.
+        final responseData = jsonDecode(response.body);
+        final newPrenda = Prenda(
+          id: responseData['id'],
+          nombre: responseData['tipo'],
+        );
+        widget.onPrendaAdded(newPrenda); // Envía el objeto Prenda al callback
       } else {
-        print('Error: ${response.statusCode} ${response.body}');
-        _showError('Error al guardar el prenda en la API.${response.body}');
+        _showError('Error al guardar la prenda en la API. ${response.body}');
       }
     } catch (e) {
       _showError('Ocurrió un error: $e');
     } finally {
       setState(() => _isSaving = false);
-      Navigator.of(context).pop(); // Cerrar el diálogo.
+      Navigator.of(context).pop();
     }
   }
 

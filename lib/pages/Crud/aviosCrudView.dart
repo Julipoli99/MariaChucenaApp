@@ -1,9 +1,9 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Avio.dart';
 import 'package:gestion_indumentaria/pages/Avios/modificadorAvios.dart';
 import 'package:gestion_indumentaria/pages/Avios/nuevoAvios.dart';
+import 'package:gestion_indumentaria/widgets/boxDialog/BoxDialogoAviosDetalles.dart';
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
 import 'package:http/http.dart' as http;
 
@@ -20,7 +20,35 @@ class _AvioCrudViewState extends State<Avioscrudview> {
   @override
   void initState() {
     super.initState();
-    fetchModels();
+    _fetchAvios();
+  }
+
+  void showBox(Avio avio) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return BoxDialogAvio(
+          avio: avio,
+          onCancel: onCancel,
+        );
+      },
+    );
+  }
+
+  Future<void> _showEditAvioDialog(Avio avio) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => ModificadoraviosDialog(avio: avio),
+    );
+
+    if (result == true) {
+      // Si se modifica el avío, actualizar la lista
+      _fetchAvios();
+    }
+  }
+
+  void onCancel() {
+    Navigator.of(context).pop();
   }
 
   @override
@@ -33,47 +61,18 @@ class _AvioCrudViewState extends State<Avioscrudview> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const Nuevoavios(),
-                          ),
-                        );
-                      },
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.blue[300],
-                        foregroundColor: Colors.white,
-                      ),
-                      child: const Text('Nuevo registro'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const Modificadoravios(),
-                          ),
-                        );
-                      },
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.blue[300],
-                        foregroundColor: Colors.white,
-                      ),
-                      child: const Text('Modificar stock'),
-                    ),
-                  ],
-                ),
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) => NuevoaviosDialog(
+                              onProductoAgregado: _fetchAvios,
+                            ));
+                  },
                   style: TextButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    foregroundColor: Colors.white,
-                  ),
-                  child: const Text('Inicio'),
+                      backgroundColor: Colors.blue[300],
+                      foregroundColor: Colors.white),
+                  child: const Text('Nuevo registro'),
                 ),
               ],
             ),
@@ -92,21 +91,26 @@ class _AvioCrudViewState extends State<Avioscrudview> {
               dataMapper: [
                 (avio) => Text(avio.id.toString()),
                 (avio) => Text(avio.nombre),
-                (avio) => Text(avio.codigoProveedor),
+                (avio) => Text(avio.proveedor.nombre.toString()),
                 (avio) => Text(avio.stock.toString()),
                 (avio) => Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         IconButton(
                           onPressed: () {
-                            print('Vista para avio: ${avio.nombre}');
+                            showBox(avio);
                           },
                           icon: const Icon(Icons.remove_red_eye_outlined),
                         ),
                         IconButton(
                           onPressed: () {
+                            _showEditAvioDialog(avio);
+                          },
+                          icon: const Icon(Icons.edit),
+                        ),
+                        IconButton(
+                          onPressed: () {
                             _confirmDelete(context, avio.id);
-                            print('Avio borrado: ${avio.nombre}');
                           },
                           icon: const Icon(Icons.delete),
                         ),
@@ -120,7 +124,7 @@ class _AvioCrudViewState extends State<Avioscrudview> {
     );
   }
 
-  Future<void> fetchModels() async {
+  Future<void> _fetchAvios() async {
     const url = "https://maria-chucena-api-production.up.railway.app/avio";
     final uri = Uri.parse(url);
 
@@ -156,24 +160,24 @@ class _AvioCrudViewState extends State<Avioscrudview> {
   }
 
   Future<void> deleteAvio(int id) async {
-    final url =
-        'https://maria-chucena-api-production.up.railway.app/avio/$id'; // Endpoint para eliminar un avio
+    final url = 'https://maria-chucena-api-production.up.railway.app/avio/$id';
     final uri = Uri.parse(url);
 
     try {
       final response = await http.delete(uri);
 
-      if (response.statusCode == 204) {
+      if (response.statusCode == 204 || response.statusCode == 200) {
         setState(() {
-          avios.removeWhere((avio) => avio.id == id); // Remover avio localmente
+          avios.removeWhere((avio) => avio.id == id);
         });
-        print('avio eliminado correctamente.');
+        print('Avio eliminado correctamente.');
+        await _fetchAvios(); // Recarga la lista después de eliminar un registro
       } else {
         print(
             'Error: No se pudo eliminar el avio. Código de estado ${response.statusCode}');
       }
     } catch (e) {
-      print('Error al eliminar la avio: $e');
+      print('Error al eliminar el avio: $e');
     }
   }
 
@@ -192,9 +196,8 @@ class _AvioCrudViewState extends State<Avioscrudview> {
             ),
             ElevatedButton(
               onPressed: () async {
-                await deleteAvio(id); // Esperar a que se elimine el avio
-                Navigator.of(context)
-                    .pop(); // Cierra el diálogo después de la eliminación
+                await deleteAvio(id);
+                Navigator.of(context).pop();
               },
               child: const Text('Eliminar'),
             ),

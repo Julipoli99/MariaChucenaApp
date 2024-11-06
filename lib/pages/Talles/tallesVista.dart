@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:gestion_indumentaria/pages/Crud/tipoTelaCrudView.dart';
+import 'package:gestion_indumentaria/pages/Crud/TallesCrudView.dart';
+import 'package:gestion_indumentaria/pages/Crud/modeloCrudView.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
 
-class Stockcontrolpage extends StatelessWidget {
-  const Stockcontrolpage({super.key});
+class tallesregistradospage extends StatelessWidget {
+  const tallesregistradospage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +35,7 @@ class Stockcontrolpage extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        'Bienvenidos al sistema de Gestion de tipo de telas ',
+                        'Bienvenidos al sistema de Gestion de Talles Registrados ',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 22,
@@ -57,7 +58,7 @@ class Stockcontrolpage extends StatelessWidget {
               // Aquí mostramos el AviosCrudView
               SizedBox(
                 height: 600, // Ajusta el alto según lo necesario
-                child: TipoTelaCrudView(),
+                child: Tallescrudview(),
               ),
 
               const Divider(),

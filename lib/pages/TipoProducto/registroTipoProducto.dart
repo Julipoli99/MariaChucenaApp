@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:gestion_indumentaria/pages/Crud/TipoProductoCrudView.dart';
 import 'package:gestion_indumentaria/pages/Crud/modeloCrudView.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
 
-class Modelosregistradospage extends StatelessWidget {
-  const Modelosregistradospage({super.key});
+class TipoProductoregistradospage extends StatelessWidget {
+  const TipoProductoregistradospage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +35,7 @@ class Modelosregistradospage extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        'Bienvenidos al sistema de Gestion de Modelos Registrados ',
+                        'Bienvenidos al sistema de Gestion de Tipo de Productos ',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 22,
@@ -57,7 +58,7 @@ class Modelosregistradospage extends StatelessWidget {
               // Aquí mostramos el AviosCrudView
               const SizedBox(
                 height: 600, // Ajusta el alto según lo necesario
-                child: ModelCrudView(),
+                child: TipoProductocrudview(),
               ),
 
               const Divider(),

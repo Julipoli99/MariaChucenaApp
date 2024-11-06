@@ -1,15 +1,15 @@
-class prenda {
+class Prenda {
   int id;
-  String? nombre;
+  String nombre;
 
-  prenda({
+  Prenda({
     this.id = 0,
-    this.nombre,
+    required this.nombre,
   });
 
   /// **Fábrica para crear un Avios desde JSON**
-  factory prenda.fromJson(Map<String, dynamic> json) {
-    return prenda(
+  factory Prenda.fromJson(Map<String, dynamic> json) {
+    return Prenda(
       id: json['id'] ?? 0, // Valor por defecto si 'id' es nulo
       nombre: json['tipo'] ?? 'Sin nombre',
     );

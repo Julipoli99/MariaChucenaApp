@@ -1,107 +1,100 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
-import 'package:gestion_indumentaria/widgets/HomePage.dart';
+import 'package:http/http.dart' as http;
 
-class Nuevoprovedor extends StatelessWidget {
-  const Nuevoprovedor({super.key});
+class NuevoProveedorDialog extends StatefulWidget {
+  final VoidCallback onProveedorAgregado;
+  const NuevoProveedorDialog({super.key, required this.onProveedorAgregado});
+
+  @override
+  _NuevoProveedorDialogState createState() => _NuevoProveedorDialogState();
+}
+
+class _NuevoProveedorDialogState extends State<NuevoProveedorDialog> {
+  final TextEditingController _nombreController = TextEditingController();
+  final TextEditingController _telefonoController = TextEditingController();
+  bool _isSaving = false;
+
+  Future<void> _guardarProveedor() async {
+    const String apiUrl =
+        'https://maria-chucena-api-production.up.railway.app/proveedor';
+    final Map<String, dynamic> proveedorData = {
+      'nombre': _nombreController.text.trim(),
+      'telefono': _telefonoController.text.trim(),
+    };
+
+    try {
+      setState(() => _isSaving = true);
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(proveedorData),
+      );
+
+      if (response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Proveedor guardado con éxito.')),
+        );
+        widget.onProveedorAgregado();
+
+        Navigator.of(context).pop(true); // Retorna true para indicar éxito
+        _nombreController.clear();
+        _telefonoController.clear();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${response.body}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Ocurrió un error: $e')),
+      );
+    } finally {
+      setState(() => _isSaving = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text('Maria Chucena ERP System'),
-        toolbarHeight: 80,
-        actions: [
-          buildLoggedInUser('assets/imagen/logo.png',
-              'Supervisor'), // El tipo de rango lo tendria que traer de la base de datos
-        ],
-      ),
-      drawer: const DrawerMenuLateral(),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center, // Centrar en el medio
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const Expanded(
-                    flex: 2,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Registro de proveedores',
-                          style: TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    flex: 3,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        buildTextField('Proveedor', 'nombre de proveedor'),
-                        const SizedBox(height: 20),
-                        buildTextField('Teléfono', 'número de teléfono'),
-                        const SizedBox(height: 20),
-                        buildTextField('Local', 'nombre del local'),
-                        const SizedBox(height: 30),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            ElevatedButton(
-                              onPressed: () {
-                                // Acción al guardar el proveedor
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.black,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 40, vertical: 20),
-                              ),
-                              child: const Text('Guardar proveedor'),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 60),
-              const Divider(),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16.0),
-                      child: Center(
-                        child: Text(
-                          '© 2024 Maria Chucena ERP System. All rights reserved.',
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+    return AlertDialog(
+      title: const Text('Nuevo Proveedor'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildTextField(
+                'Proveedor', 'nombre de proveedor', _nombreController),
+            const SizedBox(height: 20),
+            _buildTextField(
+                'Teléfono', 'número de teléfono', _telefonoController),
+          ],
         ),
       ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context)
+              .pop(false), // Retorna false para indicar cancelación
+          child: const Text('Cancelar'),
+        ),
+        ElevatedButton(
+          onPressed: _isSaving ? null : _guardarProveedor,
+          child: _isSaving
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Text('Guardar'),
+        ),
+      ],
     );
   }
 
-  // Función para construir los campos de texto
-  static Widget buildTextField(String label, String hintText) {
+  Widget _buildTextField(
+      String label, String hintText, TextEditingController controller) {
     return TextField(
+      controller: controller,
       decoration: InputDecoration(
         labelText: label,
         labelStyle: const TextStyle(fontSize: 18),
@@ -112,5 +105,12 @@ class Nuevoprovedor extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _nombreController.dispose();
+    _telefonoController.dispose();
+    super.dispose();
   }
 }

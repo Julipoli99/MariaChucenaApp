@@ -1,9 +1,6 @@
-import 'dart:convert';
-
 import 'package:gestion_indumentaria/models/Avio.dart';
 import 'package:gestion_indumentaria/models/Talle.dart';
 
-// Clase AvioModelo
 class AvioModelo {
   final int? id;
   final int? modeloId;
@@ -12,7 +9,7 @@ class AvioModelo {
   final bool esPorColor;
   final int cantidadRequerida;
   final Avio? avio;
-  final List<Talle>? talle;
+  final List<Talle>? talles;
 
   AvioModelo({
     this.id,
@@ -22,14 +19,20 @@ class AvioModelo {
     required this.esPorColor,
     required this.cantidadRequerida,
     this.avio,
-    this.talle,
+    this.talles,
   });
 
   factory AvioModelo.fromJson(Map<String, dynamic> json) {
-    List<Talle> talles = (json['curva'] as List).map((t) {
-      return Talle.fromJson(
-          t); // Asumiendo que la API devuelve talles en formato JSON
+    List<Talle> talles = (json['curva'] as List? ?? []).map((t) {
+      return Talle.fromJson(t);
     }).toList();
+
+    // Verificar que el objeto `avio` no sea null en el JSON
+    Avio? avio = json['avio'] != null ? Avio.fromJson(json['avio']) : null;
+
+    // Imprimir el JSON recibido para verificar su estructura
+    print('JSON de AvioModelo: $json');
+
     return AvioModelo(
       id: json['id'],
       modeloId: json['modeloId'],
@@ -37,8 +40,8 @@ class AvioModelo {
       esPorTalle: json['esPorTalle'],
       esPorColor: json['esPorColor'],
       cantidadRequerida: json['cantidadRequerida'],
-      avio: Avio.fromJson(json['avio']),
-      talle: talles,
+      avio: avio,
+      talles: talles,
     );
   }
 
@@ -51,7 +54,7 @@ class AvioModelo {
       'esPorColor': esPorColor,
       'cantidadRequerida': cantidadRequerida,
       'avio': avio?.toJson(),
-      'curva': talle?.map((t) => t.toJson()).toList(),
+      'curva': talles?.map((t) => t.toJson()).toList(),
     };
   }
 }

@@ -1,10 +1,10 @@
 class Talle {
   int id;
-  String? nombre;
+  String nombre;
 
   Talle({
     this.id = 0,
-    this.nombre,
+    required this.nombre,
   });
 
   /// **Fábrica para crear un Avios desde JSON**

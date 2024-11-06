@@ -7,6 +7,8 @@ import 'package:gestion_indumentaria/models/Avio.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
 import 'package:gestion_indumentaria/models/observacion.dart';
 import 'package:gestion_indumentaria/models/Talle.dart';
+import 'package:gestion_indumentaria/pages/Modelos/ModelosRegistradosPage.dart';
+import 'package:gestion_indumentaria/pages/principal.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
 import 'package:gestion_indumentaria/widgets/TalleSelectorWidget.dart';
@@ -27,15 +29,16 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   String? selectedGenero;
   String? selectedEdad;
   String? selectedAvios;
-  String? selectedPrenda;
-  String? selectedTallesForm; // Lista de talles en el formulario principal
+  int? selectedPrenda;
+  List<Talle> selectedTallesForm =
+      []; // Lista de talles en el formulario principal
   String? codigoModelo;
   String? nombreModelo;
   List<ObservacionModel>? observaciones;
   String? cantidad;
   String? tipoEdad;
-  String? titulo;
-  String? descripcion;
+  String tituloObservacion = "Sin titulo";
+  String descripcionObservacion = "Sin descripción";
   bool? selectedAuxForm;
   bool? selectedPrimForm;
   final List<String> auxOptions = ['auxiliar'];
@@ -44,8 +47,8 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   // data para la parte de Avio
   String? nombreAvio;
   String? tipoTalleAvio;
-  List<String> selectedTallesDialog = [];
-  bool esPorTalle = true;
+  List<Talle>? selectedTallesDialog = [];
+  bool esPorTalle = false;
   bool esPorColor = false;
   final int cantRequerida = 2;
 
@@ -63,19 +66,22 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   void _createPost() {
     //Avios(nombre: selectedTipoAvioDialog!, proveedores: "Proveedor1");
     Modelo modeloCreado = Modelo(
-        id: 10000,
-        codigo: " codigo-prueba",
+        id: 0,
+        codigo: "",
         nombre: nombreModelo!,
         tieneTelaSecundaria: selectedPrimForm!,
         tieneTelaAuxiliar: selectedAuxForm!,
         genero: selectedGenero!,
         observaciones: [
           ObservacionModel(
-              id: 1, titulo: "Probando observacion", descripcion: "prueba")
+            id: 1,
+            titulo: tituloObservacion,
+            descripcion: descripcionObservacion,
+          )
         ],
         avios: aviosSeleccionados,
-        curva: [Talle(id: 1, nombre: "T1")],
-        categoriaTipo: 4);
+        curva: selectedTallesForm,
+        categoriaTipo: selectedPrenda!);
 
     print('MODELO POST: ${modeloCreado.toJson()}');
 
@@ -103,7 +109,11 @@ class _NuevomodeloState extends State<Nuevomodelo> {
       // Verificar el estado de la respuesta
       if (response.statusCode == 201) {
         print("Modelo creado con éxito: ${response.body}");
-
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const Modelosregistradospage()),
+        );
         // Suponiendo que el servidor devuelve el modelo completo, lo puedes parsear
         Modelo modeloCreado = Modelo.fromJson(jsonDecode(response.body));
         print("Código del modelo creado: ${modeloCreado.codigo}");
@@ -174,21 +184,22 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                             onChanged: (value) {
                               setState(() {
                                 nombreModelo = value;
-                                print('Nombre del modelo: $nombreModelo');
                               });
                             },
                             decoration: const InputDecoration(
                                 labelText: 'Nombre de Modelo'),
                           ),
                           const SizedBox(height: 15),
-                          Prendaselectorwidget(
-                            selectedprenda: selectedPrenda,
-                            onPrendaSelected: (prenda) {
+                          PrendaSelectorWidget(
+                            selectedPrendaId: selectedPrenda,
+                            onPrendaSelected: (id) {
                               setState(() {
-                                selectedPrenda = prenda;
+                                selectedPrenda =
+                                    id; // Guarda el id seleccionado
                               });
                             },
                           ),
+
                           const SizedBox(height: 15),
                           _buildRadioGroup(
                             'Género',
@@ -197,19 +208,6 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                             (value) {
                               setState(() {
                                 selectedGenero = value;
-                                print('Genero del modelo: $selectedGenero');
-                              });
-                            },
-                          ),
-                          const SizedBox(height: 15),
-                          _buildRadioGroup(
-                            'edad de la tela',
-                            ['BEBE', 'chico', 'adulto'],
-                            selectedEdad,
-                            (value) {
-                              setState(() {
-                                selectedEdad = value;
-                                print('Genero del modelo: $selectedEdad');
                               });
                             },
                           ),
@@ -225,38 +223,49 @@ class _NuevomodeloState extends State<Nuevomodelo> {
 
                           const SizedBox(height: 15),
 
-                          TextField(
-                            onChanged: (value) {
-                              setState(() {
-                                titulo = value;
-                                print('Título: $titulo');
-                              });
-                            },
-                            decoration:
-                                const InputDecoration(labelText: 'Título'),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Observación',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              TextField(
+                                onChanged: (value) {
+                                  setState(() {
+                                    tituloObservacion = value;
+                                  });
+                                },
+                                decoration:
+                                    const InputDecoration(labelText: 'Título'),
+                              ),
+                              TextField(
+                                onChanged: (value) {
+                                  setState(() {
+                                    descripcionObservacion = value;
+                                  });
+                                },
+                                decoration: const InputDecoration(
+                                    labelText: 'Descripción'),
+                              ),
+                            ],
                           ),
-                          TextField(
-                            onChanged: (value) {
-                              setState(() {
-                                descripcion = value;
-                                print('Subtítulo: $descripcion');
-                              });
-                            },
-                            decoration:
-                                const InputDecoration(labelText: 'Descripción'),
-                          ),
+
                           const SizedBox(height: 15),
                           TalleSelector(
-                            selectedTalle: selectedTallesForm,
-                            onTalleSelected: (talle) {
+                            selectedTalles: selectedTallesForm,
+                            onTalleSelected: (talles) {
                               setState(() {
-                                selectedTallesForm = talle;
+                                selectedTallesForm = talles;
                               });
                             },
                           ),
                           const SizedBox(height: 15),
                           _buildRadioGroup(
-                            'Tiene avios',
+                            '¿Utiliza avíos?',
                             ['SI', 'NO'],
                             selectedAvios,
                             (value) {
@@ -284,6 +293,22 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                             children: [
                               ElevatedButton(
                                 onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const HomePage(),
+                                    ),
+                                  );
+                                  // Acción para CANCELAR
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  minimumSize:
+                                      const Size(140, 50), // Ajusta el tamaño
+                                ),
+                                child: const Text('Cancelar'),
+                              ),
+                              FilledButton(
+                                onPressed: () {
                                   // Acción para guardar el modelo
                                   _createPost();
                                 },
@@ -293,7 +318,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                                 ),
                                 child: const Text('Guardar Modelo'),
                               ),
-                              ElevatedButton(
+                              /*         ElevatedButton(
                                 onPressed: () {
                                   // Acción para cargar foto
                                 },
@@ -303,6 +328,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                                 ),
                                 child: const Text('Cargar Foto'),
                               ),
+                              */
                             ],
                           ),
                         ],
@@ -310,12 +336,12 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                     ),
                   ),
                   const SizedBox(height: 50),
-                  const Center(
+                  /* const Center(
                     child: Text(
                       '© 2024 Maria Chucena ERP System. All rights reserved.',
                       textAlign: TextAlign.center,
                     ),
-                  ),
+                  ),*/
                 ],
               ),
             ),
@@ -399,6 +425,26 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                             ),
                             keyboardType: TextInputType.number,
                           ),
+                          const SizedBox(height: 10),
+                          // Mostrar los talles seleccionados
+                          if (selectedTallesDialog != null &&
+                              selectedTallesDialog!.isNotEmpty)
+                            Column(
+                              children: [
+                                const Text('Talles Seleccionados:',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold)),
+                                Wrap(
+                                  spacing: 8.0,
+                                  children: selectedTallesDialog!.map((talle) {
+                                    return Chip(
+                                      label: Text(talle
+                                          .nombre), // Asegúrate de que Talle tiene la propiedad nombre
+                                    );
+                                  }).toList(),
+                                ),
+                              ],
+                            ),
                           const SizedBox(height: 15),
                         ],
                       ),
@@ -418,7 +464,8 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                                   avioId: avioSeleccionado.id,
                                   esPorTalle: esPorTalle,
                                   esPorColor: esPorColor,
-                                  talle: [Talle(id: 1, nombre: "T1")],
+                                  talles: List<Talle>.from(
+                                      selectedTallesDialog!), // Asigna talles seleccionados
                                   cantidadRequerida:
                                       int.parse(_cantidadController.text),
                                 ),
@@ -431,7 +478,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                             _cantidadController.clear();
                             esPorTalle = false;
                             esPorColor = false;
-                            selectedTallesDialog.clear();
+                            selectedTallesDialog?.clear();
                           });
                         },
                         child: const Text('Agregar Avio'),
@@ -453,11 +500,9 @@ class _NuevomodeloState extends State<Nuevomodelo> {
     );
   }
 
-  // Agregar el avio seleccionado a la lista
-
-  // Diálogo para seleccionar los talles
+// Diálogo para seleccionar los talles
   void _showTalleSelectionDialog(StateSetter setState) async {
-    List<String> talles = [];
+    List<Talle> talles = [];
     bool isLoading = true;
 
     // Llamada a la API para obtener los talles
@@ -467,7 +512,9 @@ class _NuevomodeloState extends State<Nuevomodelo> {
       final response = await http.get(Uri.parse(apiUrl));
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
-        talles = data.map((talle) => talle["talle"].toString()).toList();
+        talles = data
+            .map((talle) => Talle.fromJson(talle))
+            .toList(); // Asumiendo que tienes un método fromJson en Talle
         isLoading = false;
       } else {
         _showErrorDialog('Error al obtener los talles: ${response.statusCode}');
@@ -486,16 +533,17 @@ class _NuevomodeloState extends State<Nuevomodelo> {
               ? const Center(child: CircularProgressIndicator())
               : Wrap(
                   spacing: 10,
-                  children: talles.map((talle) {
+                  children: talles.map((Talle talle) {
                     return ChoiceChip(
-                      label: Text(talle),
-                      selected: selectedTallesDialog.contains(talle),
+                      label: Text(talle
+                          .nombre), // Asegúrate de que Talle tiene la propiedad nombre
+                      selected: selectedTallesDialog!.contains(talle),
                       onSelected: (selected) {
                         setState(() {
                           if (selected) {
-                            selectedTallesDialog.add(talle);
+                            selectedTallesDialog?.add(talle);
                           } else {
-                            selectedTallesDialog.remove(talle);
+                            selectedTallesDialog?.remove(talle);
                           }
                         });
                       },
@@ -605,12 +653,18 @@ class _NuevomodeloState extends State<Nuevomodelo> {
     );
   }
 
+// Define variables para almacenar las opciones seleccionadas
+
+// Añade variables para rastrear qué opción está seleccionada
+  String? selectedAux; // Opción auxiliar seleccionada
+  String? selectedPrim; // Opción primaria seleccionada
+
   Widget _buildAuxSelection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Seleccione si es tela auxiliar:',
+          'Seleccione si tiene tela auxiliar:',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 10),
@@ -619,13 +673,15 @@ class _NuevomodeloState extends State<Nuevomodelo> {
           children: auxOptions.map((aux) {
             return ChoiceChip(
               label: Text(aux),
-              selected: selectedAuxForm = false,
+              selected: selectedAux == aux, // Compara con la opción actual
               onSelected: (selected) {
                 setState(() {
                   if (selected) {
-                    selectedAuxForm = true; // Solo permitir una selección
+                    selectedAux = aux; // Asigna la opción seleccionada
+                    selectedAuxForm = true; // Marca como seleccionada
                   } else {
-                    selectedAuxForm = false;
+                    selectedAux = null; // Deselect all
+                    selectedAuxForm = false; // Desmarca
                   }
                 });
               },
@@ -641,7 +697,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Seleccione si es tela primaria:',
+          'Seleccione si tiene tela primaria:',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 10),
@@ -650,13 +706,15 @@ class _NuevomodeloState extends State<Nuevomodelo> {
           children: primOptions.map((prim) {
             return ChoiceChip(
               label: Text(prim),
-              selected: selectedPrimForm = false,
+              selected: selectedPrim == prim, // Compara con la opción actual
               onSelected: (selected) {
                 setState(() {
                   if (selected) {
-                    selectedPrimForm = true; // Solo permitir una selección
+                    selectedPrim = prim; // Asigna la opción seleccionada
+                    selectedPrimForm = true; // Marca como seleccionada
                   } else {
-                    selectedPrimForm = false;
+                    selectedPrim = null; // Deselect all
+                    selectedPrimForm = false; // Desmarca
                   }
                 });
               },
@@ -678,6 +736,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
         DataColumn(label: Text('Es por Talle')),
         DataColumn(label: Text('Es por Color')),
         DataColumn(label: Text('Cantidad')),
+        // Nueva columna para talles
       ],
       rows: aviosSeleccionados.map((AvioModelo avio) {
         return DataRow(cells: [
@@ -685,6 +744,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
           DataCell(Text(avio.esPorTalle == true ? 'Sí' : 'No')),
           DataCell(Text(avio.esPorColor == true ? 'Sí' : 'No')),
           DataCell(Text(avio.cantidadRequerida.toString())),
+          // Mostrar talles seleccionados
         ]);
       }).toList(),
     );
