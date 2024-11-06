@@ -40,8 +40,8 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   String? tipoEdad;
   String tituloObservacion = "Sin titulo";
   String descripcionObservacion = "Sin descripción";
-  bool? selectedAuxForm;
-  bool? selectedPrimForm;
+  bool? selectedAuxForm = false;
+  bool? selectedPrimForm = false;
   final List<String> auxOptions = ['auxiliar'];
   final List<String> primOptions = ['primaria'];
   List<Avio> listadoAvios = [];
@@ -818,22 +818,78 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   Future<void> fetchAvioNombre() async {
     const url = "https://maria-chucena-api-production.up.railway.app/avio";
     final uri = Uri.parse(url);
-    final response = await http.get(uri);
 
-    // Decodifica y actualiza la lista de categorías
-    final List<dynamic> jsonData = jsonDecode(response.body);
-    setState(() {
-      listadoAvios = jsonData.map((json) {
-        return Avio(
-          id: json['id'] ?? 0,
-          codigoProveedor: json['codigoProveedor'] ?? '',
-          proveedorId: json['proveedorId'] ?? 0,
-          tipoProductoId: json['tipoProductoId'] ?? 0,
-          nombre: json['nombre'] ?? 'Sin nombre',
-          stock: json['stock'] ?? 0,
-          proveedor: Proveedor.fromJson(json['proveedor'] ?? {}),
-        );
-      }).toList();
-    });
+    try {
+      final response = await http.get(uri);
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonData = jsonDecode(response.body);
+
+        if (mounted) {
+          setState(() {
+            listadoAvios = jsonData.map((json) {
+              return Avio(
+                id: json['id'] ?? 0,
+                codigoProveedor: json['codigoProveedor'] ?? '',
+                proveedorId: json['proveedorId'] ?? 0,
+                tipoProductoId: json['tipoProductoId'] ?? 0,
+                nombre: json['nombre'] ?? 'Sin nombre',
+                stock: json['stock'] ?? 0,
+                proveedor: json['proveedor'] != null
+                    ? Proveedor.fromJson(json['proveedor'])
+                    : Proveedor(id: 0, nombre: '', telefono: ''),
+              );
+            }).toList();
+          });
+        }
+      } else {
+        print(
+            "Error en la solicitud: ${response.statusCode} - ${response.body}");
+        throw Exception("Failed to load avios");
+      }
+    } catch (e) {
+      print("Error en fetchAvioNombre: $e");
+    }
   }
+
+  /*
+  Future<void> fetchAvioNombre() async {
+    const url = "https://maria-chucena-api-production.up.railway.app/avio";
+    final uri = Uri.parse(url);
+
+    try {
+      final response = await http.get(uri);
+
+      // Verifica el estado de la respuesta antes de decodificar el JSON
+      if (response.statusCode == 200) {
+        // Decodifica el JSON
+        final List<dynamic> jsonData = jsonDecode(response.body);
+
+        // Actualiza la lista de categorías en el estado
+        setState(() {
+          listadoAvios = jsonData.map((json) {
+            return Avio(
+              id: json['id'] ?? 0,
+              codigoProveedor: json['codigoProveedor'] ?? '',
+              proveedorId: json['proveedorId'] ?? 0,
+              tipoProductoId: json['tipoProductoId'] ?? 0,
+              nombre: json['nombre'] ?? 'Sin nombre',
+              stock: json['stock'] ?? 0,
+              proveedor: json['proveedor'] != null
+                  ? Proveedor.fromJson(json['proveedor'])
+                  : Proveedor(
+                      id: 0,
+                      nombre: '',
+                      telefono: ''), // Manejo de proveedor nulo
+            );
+          }).toList();
+        });
+      } else {
+        print(
+            "Error en la solicitud: ${response.statusCode} - ${response.body}");
+        throw Exception("Failed to load avios");
+      }
+    } catch (e) {
+      print("Error en fetchAvioNombre: $e");
+    }
+  }*/
 }

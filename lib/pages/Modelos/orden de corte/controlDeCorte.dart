@@ -55,14 +55,12 @@ class ordenDeCorteregistradospage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              // Aquí mostramos el AviosCrudView
               SizedBox(
-                height: 600, // Ajusta el alto según lo necesario
+                height: 600, 
                 child: Cortecrudview(),
               ),
 
               const Divider(),
-              // Pie de página con usuario logueado
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.0),
                 child: Column(

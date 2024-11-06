@@ -60,8 +60,8 @@ class _CorteCrudViewState extends State<Cortecrudview> {
               tituloAppBar: '',
               encabezados: const [
                 "ID",
-                "Modelo",
-                "Rollo",
+                "MODELO",
+                "ROLLO",
                 "OPCIONES",
               ],
               items: cortes,
