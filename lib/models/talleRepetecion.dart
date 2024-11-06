@@ -3,7 +3,7 @@ import 'Talle.dart';
 class TalleRepeticion {
   final int id;
   final Talle talle;
-  final int repeticion;
+  int repeticion;
 
   TalleRepeticion({
     required this.id,

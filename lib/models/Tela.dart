@@ -19,6 +19,8 @@ class Tela {
     required this.tipoProductoId,
   });
 
+ 
+
   /// **Fábrica para crear un Avios desde JSON**
   factory Tela.fromJson(Map<String, dynamic> json) {
     return Tela(

@@ -14,8 +14,8 @@ class BoxDialogCorte extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: Colors.grey[200],
-      title: Text('Detalles del Corte: ID ${corte.id}'),
+//      backgroundColor: Colors.grey[200],
+      title: Text('Detalles del Corte: ${corte.id}'),
       content: SizedBox(
         height: 500,
         width: 600,
@@ -33,7 +33,9 @@ class BoxDialogCorte extends StatelessWidget {
                   final modeloCorte = corte.modelos[index];
                   return Card(
                     child: ListTile(
-                      title: Text('Modelo: ${modeloCorte.modelo.nombre}'),
+                      title: Text(
+                        modeloCorte.modelo.nombre,
+                      ),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -45,7 +47,7 @@ class BoxDialogCorte extends StatelessWidget {
                           const Text('Curva:'),
                           ...modeloCorte.curvas.map((curva) {
                             return Text(
-                                ' - Talle ID: ${curva.talle.id.toString()}, talle numero:${curva.talle.nombre.toString()}, Repetición: ${curva.repeticion}');
+                                '${curva.talle.nombre.toString()} - repetición: ${curva.repeticion}');
                           }),
                         ],
                       ),
@@ -65,10 +67,16 @@ class BoxDialogCorte extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final rolloCorte = corte.rollos[index];
                   return ListTile(
-                    title: Text(
-                        'Rollo: ${rolloCorte.rollo?.descripcion}, Cantidad Utilizada: ${rolloCorte.cantidadUtilizada}'),
-                    subtitle: Text(
-                        'Categoría: ${rolloCorte.categoria.name.toString()}'),
+                    title: Text('${rolloCorte.rollo?.descripcion}'),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                            'Categoría: ${rolloCorte.categoria.name.toString()}'),
+                        Text(
+                            'Cantidad Utilizada: ${rolloCorte.cantidadUtilizada}')
+                      ],
+                    ),
                   );
                 },
               ),
