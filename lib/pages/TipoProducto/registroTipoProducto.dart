@@ -35,7 +35,7 @@ class TipoProductoregistradospage extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        'Bienvenidos al sistema de Gestion de Tipo de Productos ',
+                        'Gestión de Tipos de Productos Registrados',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 22,

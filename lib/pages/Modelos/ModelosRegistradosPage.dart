@@ -34,7 +34,7 @@ class Modelosregistradospage extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        'Bienvenidos al sistema de Gestion de Modelos Registrados ',
+                        'Gestión de Modelos Registrados ',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 22,

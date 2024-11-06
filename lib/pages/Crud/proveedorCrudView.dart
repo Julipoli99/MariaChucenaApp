@@ -37,8 +37,7 @@ class _ProvedorCrudViewState extends State<Provedorcrudview> {
                   onPressed: () {
                     showDialog(
                         context: context,
-                        builder: (BuildContext context) =>
-                            NuevoProveedorDialog(
+                        builder: (BuildContext context) => NuevoProveedorDialog(
                               onProveedorAgregado: fetchModels,
                             ));
                   },
@@ -52,7 +51,7 @@ class _ProvedorCrudViewState extends State<Provedorcrudview> {
           ),
           Expanded(
             child: TablaCrud<Proveedor>(
-              tituloAppBar: 'Proveedores', // Titulo del appBar
+              tituloAppBar: '', // Titulo del appBar
               encabezados: const [
                 "ID",
                 "NOMBRE",

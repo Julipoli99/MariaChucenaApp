@@ -35,7 +35,7 @@ class ordenDeCorteregistradospage extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        'Bienvenidos al sistema de Gestion de orden de corte ',
+                        'Gestión de Ordenes de Corte Resgistradas',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 22,

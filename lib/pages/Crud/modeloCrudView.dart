@@ -4,6 +4,7 @@ import 'package:gestion_indumentaria/models/AviosModelo.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
 import 'package:gestion_indumentaria/models/observacion.dart';
 import 'package:gestion_indumentaria/models/Talle.dart';
+import 'package:gestion_indumentaria/models/tipoPrenda.dart';
 import 'package:gestion_indumentaria/pages/Modelos/NuevoModelo.dart';
 import 'package:gestion_indumentaria/pages/Modelos/editarModelos.dart';
 import 'package:gestion_indumentaria/widgets/boxDialog/BoxDialogModelo.dart';
@@ -20,11 +21,13 @@ class ModelCrudView extends StatefulWidget {
 
 class _ModelCrudViewState extends State<ModelCrudView> {
   List<Modelo> models = [];
+  List<Prenda> prendas = [];
 
   @override
   void initState() {
     super.initState();
-    fetchModels(); // Llamamos al fetch cuando la página se carga
+    fetchModels();
+    fetchPrendas(); // Llamamos al fetch cuando la página se carga
   }
 
   void showBox(Modelo modelo) {
@@ -78,7 +81,7 @@ class _ModelCrudViewState extends State<ModelCrudView> {
           ),
           Expanded(
             child: TablaCrud<Modelo>(
-              tituloAppBar: 'Modelos registrados',
+              tituloAppBar: '',
               encabezados: const [
                 "ID",
                 "CODIGO",
@@ -93,7 +96,7 @@ class _ModelCrudViewState extends State<ModelCrudView> {
                 (model) => Text(model.codigo),
                 (model) => Text(model.nombre),
                 (model) => Text(model.genero),
-                (model) => Text(model.categoriaTipo.toString()),
+                (model) => Text(getCategoriaNombre(model.categoriaTipo)),
                 (model) => Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
@@ -111,7 +114,7 @@ class _ModelCrudViewState extends State<ModelCrudView> {
                                 builder: (context) => EditModelScreen(
                                   modelo: model,
                                   onModeloModified: (Modelo value) {},
-                                ), // Aquí pasas el modelId
+                                ),
                               ),
                             );
                           },
@@ -150,6 +153,14 @@ class _ModelCrudViewState extends State<ModelCrudView> {
         ],
       ),
     );
+  }
+
+  String getCategoriaNombre(int categoriaId) {
+    final categoria = prendas.firstWhere(
+      (cat) => cat.id == categoriaId,
+      orElse: () => Prenda(id: 0, nombre: 'Desconocida'),
+    );
+    return categoria.nombre;
   }
 
   void fetchModels() async {
@@ -260,5 +271,22 @@ class _ModelCrudViewState extends State<ModelCrudView> {
     } else {
       print("Error al actualizar modelo: ${response.statusCode}");
     }
+  }
+
+  Future<void> fetchPrendas() async {
+    const url = "https://maria-chucena-api-production.up.railway.app/categoria";
+    final uri = Uri.parse(url);
+    final response = await http.get(uri);
+
+    // Decodifica y actualiza la lista de categorías
+    final List<dynamic> jsonData = jsonDecode(response.body);
+    setState(() {
+      prendas = jsonData.map((json) {
+        return Prenda(
+          id: json['id'] ?? 0,
+          nombre: json['tipo'] ?? 'Sin nombre',
+        );
+      }).toList();
+    });
   }
 }

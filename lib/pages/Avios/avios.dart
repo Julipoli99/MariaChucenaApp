@@ -34,7 +34,7 @@ class Avios extends StatelessWidget {
                 child: Column(
                   children: [
                     Text(
-                      'Bienvenidos al sistema de Gestión de Avios',
+                      'Gestión de Avios Registrados',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 22,

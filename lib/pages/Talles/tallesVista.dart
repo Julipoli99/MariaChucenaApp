@@ -35,7 +35,7 @@ class tallesregistradospage extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        'Bienvenidos al sistema de Gestion de Talles Registrados ',
+                        'Gestión de Talles Registrados ',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 22,

@@ -70,29 +70,6 @@ class DrawerMenuLateral extends StatelessWidget {
                 ),
               ),
 
-              // Icono de Acerca de...
-              Padding(
-                padding: const EdgeInsets.only(left: 25.0),
-                child: ListTile(
-                  leading: const Icon(
-                    Icons.content_cut,
-                    color: Colors.white,
-                  ),
-                  title: const Text(
-                    'creacion de tizadas ',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const CreacionTizadasPage()),
-                    );
-                    print('Presionado boton de tizadas');
-                  },
-                ),
-              ),
-
               // Icono de Ordenes
               Padding(
                 padding: const EdgeInsets.only(left: 25.0),

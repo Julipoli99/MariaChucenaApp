@@ -34,7 +34,7 @@ class Provedorespage extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        'Bienvenidos al sistema de Gestion de Provedores ',
+                        'Gestión de Proveedores Registrados',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 22,

@@ -34,7 +34,7 @@ class Prendasregistradospage extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        'Bienvenidos al sistema de Gestion de prendas Registradas ',
+                        'Gestión de Prendas Registradas ',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 22,

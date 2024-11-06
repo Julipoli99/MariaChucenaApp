@@ -57,7 +57,7 @@ class _CorteCrudViewState extends State<Cortecrudview> {
           ),
           Expanded(
             child: TablaCrud<Corte>(
-              tituloAppBar: 'Órdenes de Corte',
+              tituloAppBar: '',
               encabezados: const [
                 "ID",
                 "Modelo",

@@ -201,7 +201,7 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
         child: Column(
           children: [
             Text(
-              'Bienvenidos al sistema de Gestión de corte',
+              'BCreación de Corte',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 22,
