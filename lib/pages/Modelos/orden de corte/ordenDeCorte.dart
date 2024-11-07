@@ -117,11 +117,10 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
           'usaTelaSecundaria': false,
           'usaTelaAuxiliar': false,
           'observaciones': [
-            ObservacionModel(
-              id: 1,
-              titulo: tituloObservacion,
-              descripcion: descripcionObservacion,
-            ).toJson(),
+            {
+              'titulo': tituloObservacion,
+              'descripcion': descripcionObservacion,
+            }
           ],
           'curva': talleRepeticionList, // Aquí insertamos la lista de talles
         },
