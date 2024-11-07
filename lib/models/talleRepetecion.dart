@@ -1,4 +1,4 @@
-import 'Talle.dart';
+import 'talle.dart';
 
 class TalleRepeticion {
   final int id;

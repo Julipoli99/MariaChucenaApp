@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:gestion_indumentaria/models/Talle.dart';
+import 'package:gestion_indumentaria/models/talle.dart';
 import 'package:gestion_indumentaria/pages/principal.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
 import 'package:http/http.dart' as http;

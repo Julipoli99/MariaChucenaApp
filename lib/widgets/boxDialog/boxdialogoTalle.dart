@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:gestion_indumentaria/models/Talle.dart';
+import 'package:gestion_indumentaria/models/talle.dart';
 
 class AddTalleDialog extends StatefulWidget {
   final ValueChanged<Talle> onTalleAdded;

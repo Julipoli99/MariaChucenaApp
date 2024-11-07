@@ -4,7 +4,7 @@ import 'package:gestion_indumentaria/models/AviosModelo.dart';
 import 'package:gestion_indumentaria/models/Curva.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
 import 'package:gestion_indumentaria/models/observacion.dart';
-import 'package:gestion_indumentaria/models/Talle.dart';
+import 'package:gestion_indumentaria/models/talle.dart';
 import 'package:gestion_indumentaria/models/tipoPrenda.dart';
 import 'package:gestion_indumentaria/pages/Modelos/NuevoModelo.dart';
 import 'package:gestion_indumentaria/pages/Modelos/editarModelos.dart';

@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/RolloCorte.dart';
-import 'package:gestion_indumentaria/models/Talle.dart';
+import 'package:gestion_indumentaria/models/talle.dart';
 import 'package:gestion_indumentaria/models/Tela.dart';
 import 'package:gestion_indumentaria/models/observacion.dart';
 import 'package:gestion_indumentaria/models/talleRepetecion.dart';
