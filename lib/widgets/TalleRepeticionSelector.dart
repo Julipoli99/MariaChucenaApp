@@ -59,8 +59,9 @@ class _TalleRepeticionSelectorState extends State<TalleRepeticionSelector> {
   void _toggleTalleSelection(Talle talle) {
     setState(() {
       final existingTalleRepeticion = widget.selectedTalleRepeticion.firstWhere(
-          (tr) => tr.talle == talle,
-          orElse: () => TalleRepeticion(talle: talle, repeticion: 1, id: 0));
+          (tr) => tr.talleId == talle.id,
+          orElse: () =>
+              TalleRepeticion(talleId: talle.id, repeticion: 1, id: 0));
 
       if (widget.selectedTalleRepeticion.contains(existingTalleRepeticion)) {
         widget.selectedTalleRepeticion.remove(existingTalleRepeticion);
@@ -75,7 +76,7 @@ class _TalleRepeticionSelectorState extends State<TalleRepeticionSelector> {
   void _updateRepeticion(Talle talle, int newRepeticion) {
     setState(() {
       final talleRepeticion = widget.selectedTalleRepeticion.firstWhere(
-        (tr) => tr.talle == talle,
+        (tr) => tr.talleId == talle.id,
       );
       talleRepeticion.repeticion = newRepeticion;
       widget
@@ -101,13 +102,13 @@ class _TalleRepeticionSelectorState extends State<TalleRepeticionSelector> {
           spacing: 10,
           children: [
             ..._talles.map((talle) {
-              final isSelected =
-                  widget.selectedTalleRepeticion.any((tr) => tr.talle == talle);
+              final isSelected = widget.selectedTalleRepeticion
+                  .any((tr) => tr.talleId == talle.id);
               final selectedTalleRepeticion =
                   widget.selectedTalleRepeticion.firstWhere(
-                (tr) => tr.talle == talle,
+                (tr) => tr.talleId == talle.id,
                 orElse: () =>
-                    TalleRepeticion(talle: talle, repeticion: 1, id: 0),
+                    TalleRepeticion(talleId: talle.id, repeticion: 1, id: 0),
               );
 
               return ChoiceChip(

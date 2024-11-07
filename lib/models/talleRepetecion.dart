@@ -2,20 +2,23 @@ import 'Talle.dart';
 
 class TalleRepeticion {
   final int id;
-  final Talle talle;
+//  final Talle talle;
   int repeticion;
+  int talleId;
 
   TalleRepeticion({
     required this.id,
-    required this.talle,
+    //  required this.talle,
+    required this.talleId,
     required this.repeticion,
   });
 
   factory TalleRepeticion.fromJson(Map<String, dynamic> json) {
     return TalleRepeticion(
       id: json['id'],
-      talle: Talle.fromJson(
-          json['talle']), // Asumiendo que Talle tiene un fromJson
+      talleId: json['talleId'],
+      //     talle: Talle.fromJson(
+      //        json['talle']), // Asumiendo que Talle tiene un fromJson
       repeticion: json['repeticion'],
     );
   }
@@ -23,7 +26,8 @@ class TalleRepeticion {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'talle': talle.toJson(), // Asumiendo que Talle tiene un toJson
+      'talleId': talleId,
+      //   'talle': talle.toJson(), // Asumiendo que Talle tiene un toJson
       'repeticion': repeticion,
     };
   }
