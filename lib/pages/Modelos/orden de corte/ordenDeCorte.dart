@@ -21,6 +21,7 @@ class OrdenDeCorteScreen extends StatefulWidget {
 class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
   List<Tela> tiposDeTela = [];
   List<dynamic> modelosACortar = [];
+  Map<String, dynamic>? modeloSeleccionadoCompleto;
   List<String> avios = [];
   List<TalleRepeticion> selectedTalle = [];
   Tela? selectedTipoDeTela;
@@ -111,7 +112,7 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
     final orderData = {
       'modelos': [
         {
-          'modeloId': modeloSeleccionado['id'],
+          'modeloId': modeloSeleccionadoCompleto?['id'],
           'totalPrendas': 1,
           'esParaEstampar': false,
           'usaTelaSecundaria': false,
@@ -257,16 +258,23 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
               const SizedBox(height: 10),
 
               // Para Modelo a Cortar
-              buildDropdownField(
-                'Modelo a Cortar',
-                modelosACortar
-                    .map((modelo) => modelo['nombre'].toString())
-                    .toList(),
-                context,
-                (value) {
+
+              DropdownButtonFormField<String>(
+                decoration: const InputDecoration(
+                  labelText: 'Modelo',
+                  border: OutlineInputBorder(),
+                ),
+                items: modelosACortar.map((modelo) {
+                  return DropdownMenuItem<String>(
+                    value: modelo['nombre'],
+                    child: Text(modelo['nombre']),
+                  );
+                }).toList(),
+                onChanged: (value) {
                   setState(() {
-                    // Encuentra el modelo completo según el nombre seleccionado
                     selectedModelo = value;
+                    modeloSeleccionadoCompleto = modelosACortar.firstWhere(
+                        (modelo) => modelo['nombre'] == selectedModelo);
                   });
                 },
               ),
@@ -382,27 +390,6 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
     );
   }
 
-  Widget _buildSummaryCard() {
-    return const Card(
-      elevation: 2,
-      child: Padding(
-        padding: EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Resumen',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            Divider(),
-            Text('Aquí aparecerá el resumen de la orden de corte.'),
-            // Agrega más detalles del resumen aquí según sea necesario
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget buildDropdownField(String label, List<String> items,
       BuildContext context, ValueChanged<String?> onChanged) {
     return DropdownButtonFormField<String>(
@@ -428,6 +415,67 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
         border: const OutlineInputBorder(),
       ),
       onChanged: onChanged,
+    );
+  }
+
+  Widget _buildSummaryCard() {
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Resumen',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+            const Divider(),
+            selectedModelo != null
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Modelo seleccionado: $selectedModelo'),
+                      Text(
+                          'Tipo de tela: ${selectedTipoDeTela?.descripcion ?? 'Ninguno'}'),
+                      Text(
+                          'Cantidad utilizada: ${cantidadUtilizada ?? 'No especificada'}'),
+                      Text(
+                          'Categoría: ${selectedCategoriaTela?.toString().split('.').last ?? 'No especificada'}'),
+                      const SizedBox(height: 10),
+                      const Text(
+                        'Observación:',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text('Título: $tituloObservacion'),
+                      Text('Descripción: $descripcionObservacion'),
+                      const SizedBox(height: 10),
+                      const Text(
+                        'Detalles completos del modelo:',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                          'ID: ${modeloSeleccionadoCompleto?['id'] ?? 'No disponible'}'),
+                      Text(
+                          'Nombre: ${modeloSeleccionadoCompleto?['nombre'] ?? 'No disponible'}'),
+                      Text(
+                          'Categoría: ${modeloSeleccionadoCompleto?['categoria'] ?? 'No disponible'}'),
+                      Text(
+                          'Género: ${modeloSeleccionadoCompleto?['genero'] ?? 'No disponible'}'),
+                      const SizedBox(height: 10),
+                      const Text(
+                        'Talles seleccionados:',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      for (var talle in selectedTalle)
+                        Text(
+                            'Talle ID: ${talle.talleId}, Repetición: ${talle.repeticion}'),
+                    ],
+                  )
+                : const Text('No se ha seleccionado ningún modelo.'),
+          ],
+        ),
+      ),
     );
   }
 }
