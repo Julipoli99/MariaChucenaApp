@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:gestion_indumentaria/models/Corte.dart'; // Asegúrate de que la ruta sea correcta
-import 'package:gestion_indumentaria/models/Talle.dart'; // Asegúrate de que la ruta sea correcta
+import 'package:gestion_indumentaria/models/talle.dart'; // Asegúrate de que la ruta sea correcta
 
 class BoxDialogCorte extends StatefulWidget {
   const BoxDialogCorte({

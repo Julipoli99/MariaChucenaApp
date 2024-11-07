@@ -1,7 +1,7 @@
 import 'package:gestion_indumentaria/models/AviosModelo.dart';
 
 import 'observacion.dart'; // Asegúrate de que este archivo exista
-import 'Talle.dart'; // Asegúrate de que este archivo exista
+import 'talle.dart'; // Asegúrate de que este archivo exista
 // Asegúrate de que este archivo exista
 
 class Modelo {
