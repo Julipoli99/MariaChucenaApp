@@ -35,7 +35,7 @@ class ordenDeCorteregistradospage extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        'Gestión de Ordenes de Corte Resgistradas',
+                        'Gestión de Ordenes de Corte Registradas',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 22,
@@ -56,7 +56,7 @@ class ordenDeCorteregistradospage extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               SizedBox(
-                height: 600, 
+                height: 600,
                 child: Cortecrudview(),
               ),
 

@@ -117,11 +117,10 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
           'usaTelaSecundaria': false,
           'usaTelaAuxiliar': false,
           'observaciones': [
-            ObservacionModel(
-              id: 1,
-              titulo: tituloObservacion,
-              descripcion: descripcionObservacion,
-            ).toJson(),
+            {
+              'titulo': tituloObservacion,
+              'descripcion': descripcionObservacion,
+            }
           ],
           'curva': talleRepeticionList, // Aquí insertamos la lista de talles
         },
@@ -212,7 +211,7 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
         child: Column(
           children: [
             Text(
-              'BCreación de Corte',
+              'Creación de Corte',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 22,
@@ -337,6 +336,7 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
                   });
                 },
               ),
+
               const SizedBox(height: 20),
               _buildActionButtons(),
             ],

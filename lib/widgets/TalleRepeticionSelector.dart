@@ -22,6 +22,7 @@ class TalleRepeticionSelector extends StatefulWidget {
 class _TalleRepeticionSelectorState extends State<TalleRepeticionSelector> {
   List<Talle> _talles = [];
   bool _isLoading = true;
+  final Map<int, TextEditingController> _controllers = {};
 
   @override
   void initState() {
@@ -65,8 +66,12 @@ class _TalleRepeticionSelectorState extends State<TalleRepeticionSelector> {
 
       if (widget.selectedTalleRepeticion.contains(existingTalleRepeticion)) {
         widget.selectedTalleRepeticion.remove(existingTalleRepeticion);
+        _controllers.remove(talle.id);
       } else {
         widget.selectedTalleRepeticion.add(existingTalleRepeticion);
+        _controllers[talle.id] = TextEditingController(
+          text: existingTalleRepeticion.repeticion.toString(),
+        );
       }
       widget
           .onTalleRepeticionSelected(List.from(widget.selectedTalleRepeticion));
@@ -94,7 +99,7 @@ class _TalleRepeticionSelectorState extends State<TalleRepeticionSelector> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Selecciona Talles y Repeticiones',
+          'Selecciona Talles y Especifica Cantidad',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 5),
@@ -104,12 +109,18 @@ class _TalleRepeticionSelectorState extends State<TalleRepeticionSelector> {
             ..._talles.map((talle) {
               final isSelected = widget.selectedTalleRepeticion
                   .any((tr) => tr.talleId == talle.id);
-              final selectedTalleRepeticion =
-                  widget.selectedTalleRepeticion.firstWhere(
-                (tr) => tr.talleId == talle.id,
-                orElse: () =>
-                    TalleRepeticion(talleId: talle.id, repeticion: 1, id: 0),
-              );
+
+              if (!_controllers.containsKey(talle.id)) {
+                _controllers[talle.id] = TextEditingController(
+                    text: widget.selectedTalleRepeticion
+                        .firstWhere(
+                          (tr) => tr.talleId == talle.id,
+                          orElse: () => TalleRepeticion(
+                              talleId: talle.id, repeticion: 1, id: 0),
+                        )
+                        .repeticion
+                        .toString());
+              }
 
               return ChoiceChip(
                 label: Row(
@@ -118,18 +129,26 @@ class _TalleRepeticionSelectorState extends State<TalleRepeticionSelector> {
                     if (isSelected) ...[
                       const SizedBox(width: 5),
                       SizedBox(
-                        width: 40,
+                        width: 50,
                         child: TextFormField(
-                          initialValue:
-                              selectedTalleRepeticion.repeticion.toString(),
+                          controller: _controllers[talle.id],
                           keyboardType: TextInputType.number,
                           onChanged: (value) {
                             final newRepeticion = int.tryParse(value) ?? 1;
-                            _updateRepeticion(talle, newRepeticion);
+                            if (newRepeticion > 0) {
+                              _updateRepeticion(talle, newRepeticion);
+                            } else {
+                              _showError('La cantidad debe ser mayor a 0');
+                            }
                           },
+                          autofocus: true, // Agregar autofocus
                           decoration: const InputDecoration(
                             labelText: 'Cant',
                             labelStyle: TextStyle(fontSize: 10),
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 5, vertical: 5),
+                            enabled:
+                                true, // Asegurarse de que el campo esté habilitado
                           ),
                         ),
                       ),
@@ -146,5 +165,13 @@ class _TalleRepeticionSelectorState extends State<TalleRepeticionSelector> {
         ),
       ],
     );
+  }
+
+  @override
+  void dispose() {
+    for (var controller in _controllers.values) {
+      controller.dispose();
+    }
+    super.dispose();
   }
 }
