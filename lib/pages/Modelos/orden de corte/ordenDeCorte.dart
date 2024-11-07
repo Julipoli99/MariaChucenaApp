@@ -212,7 +212,7 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
         child: Column(
           children: [
             Text(
-              'BCreación de Corte',
+              'Creación de Corte',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 22,
