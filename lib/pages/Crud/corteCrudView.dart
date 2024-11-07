@@ -83,13 +83,13 @@ class _CorteCrudViewState extends State<Cortecrudview> {
                           },
                           icon: const Icon(Icons.remove_red_eye_outlined),
                         ),
-                        IconButton(
+                        /*IconButton(
                           onPressed: () {
                             _editCorte(context, corte);
                             print('Editando corte: ${corte.id}');
                           },
                           icon: const Icon(Icons.edit),
-                        ),
+                        ),*/
                         IconButton(
                           onPressed: () {
                             _confirmDelete(context, corte.id);
@@ -219,17 +219,15 @@ class _CorteCrudViewState extends State<Cortecrudview> {
     );
   }
 
-  void _editCorte(BuildContext context, Corte corte) {
+  /*void _editCorte(BuildContext context, Corte corte) {
     // Navega a una pantalla de edición o muestra un cuadro de diálogo para editar el corte
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ModificarOrdenDeCorteScreen(
-          corteExistente: corte,
-          ordenId:
-              corte.id, // Asegúrate de manejar esto en la pantalla de edición
-        ),
+        builder: (context) => const EditarOrdenDeCorteScreen(
+            // Asegúrate de manejar esto en la pantalla de edición
+            ),
       ),
     );
-  }
+  }*/
 }
