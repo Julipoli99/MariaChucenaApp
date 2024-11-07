@@ -1,52 +1,50 @@
-import 'dart:convert';
+/*import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:gestion_indumentaria/models/RolloCorte.dart';
 import 'package:gestion_indumentaria/models/talle.dart';
+import 'package:gestion_indumentaria/models/Tela.dart';
+import 'package:gestion_indumentaria/models/observacion.dart';
+import 'package:gestion_indumentaria/models/talleRepetecion.dart';
 import 'package:gestion_indumentaria/pages/principal.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
+import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
+import 'package:gestion_indumentaria/widgets/TalleRepeticionSelector.dart';
 import 'package:http/http.dart' as http;
-import 'package:gestion_indumentaria/widgets/TalleSelectorWidget.dart';
 
-class ModificarOrdenDeCorteScreen extends StatefulWidget {
-  final int ordenId; // ID de la orden de corte a modificar
-  final dynamic corteExistente; // Corte existente para prellenar los campos
-
-  const ModificarOrdenDeCorteScreen({
-    super.key,
-    required this.ordenId,
-    this.corteExistente, // Parámetro opcional
-  });
+class EditarOrdenDeCorteScreen extends StatefulWidget {
+  const EditarOrdenDeCorteScreen({super.key});
 
   @override
-  _ModificarOrdenDeCorteScreenState createState() =>
-      _ModificarOrdenDeCorteScreenState();
+  _EditarOrdenDeCorteScreenState createState() =>
+      _EditarOrdenDeCorteScreenState();
 }
 
-class _ModificarOrdenDeCorteScreenState
-    extends State<ModificarOrdenDeCorteScreen> {
-  List<String> tiposDeTela = [];
+class _EditarOrdenDeCorteScreenState extends State<EditarOrdenDeCorteScreen> {
+  List<Tela> tiposDeTela = [];
   List<dynamic> modelosACortar = [];
+  Map<String, dynamic>? modeloSeleccionadoCompleto;
   List<String> avios = [];
-  List<Talle> selectedTalle = [];
-  String? selectedTipoDeTela;
+  List<TalleRepeticion> selectedTalle = [];
+  Tela? selectedTipoDeTela;
   String? selectedModelo;
   String? selectedAvio;
-  String? observaciones;
-  bool isLoading = true;
+  CategoriaTela? selectedCategoriaTela;
+
+  double? cantidadUtilizada;
+  List<ObservacionModel>? observaciones;
+
+  String tituloObservacion = "Sin titulo";
+  String descripcionObservacion = "Sin descripción";
 
   @override
   void initState() {
     super.initState();
-    fetchInitialData();
+    // fetchAvios();
+    fetchModelo();
+    fetchTiposDeTela();
   }
 
-  Future<void> fetchInitialData() async {
-    await fetchAvios();
-    await fetchModelo();
-    await fetchTiposDeTela();
-    await fetchOrdenCorte();
-  }
-
-  Future<void> fetchAvios() async {
+  /*Future<void> fetchAvios() async {
     final response = await http.get(
         Uri.parse('https://maria-chucena-api-production.up.railway.app/avio'));
     if (response.statusCode == 200) {
@@ -57,7 +55,7 @@ class _ModificarOrdenDeCorteScreenState
     } else {
       print('Error al cargar los avíos');
     }
-  }
+  }*/
 
   Future<void> fetchModelo() async {
     final response = await http.get(Uri.parse(
@@ -73,48 +71,26 @@ class _ModificarOrdenDeCorteScreenState
   }
 
   Future<void> fetchTiposDeTela() async {
-    final response = await http.get(Uri.parse(
-        'https://maria-chucena-api-production.up.railway.app/tipo-Producto'));
+    final response = await http.get(
+        Uri.parse('https://maria-chucena-api-production.up.railway.app/rollo'));
+
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       setState(() {
-        tiposDeTela.addAll(data
-            .where((tipo) => tipo['tipo'] == 'TELA')
-            .map<String>((tipo) => tipo['nombre'].toString()));
+        // Crea objetos de tipo Tela en lugar de solo Strings
+        tiposDeTela = List<Tela>.from(
+          data.map((tipo) => Tela.fromJson(tipo)),
+        );
       });
     } else {
-      print('Error al cargar los tipos de producto');
+      print('Error al cargar los tipos de tela');
     }
   }
 
-  Future<void> fetchOrdenCorte() async {
-    final response = await http.get(Uri.parse(
-        'https://maria-chucena-api-production.up.railway.app/corte/${widget.ordenId}'));
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      setState(() {
-        selectedTipoDeTela = data['tipoDeTela'];
-        selectedModelo = data['modeloNombre'];
-        selectedAvio = data['avioNombre'];
-        observaciones = data['observaciones'];
-        selectedTalle =
-            List<Talle>.from(data['curva'].map((t) => Talle.fromJson(t)));
-        isLoading = false;
-      });
-    } else {
-      print('Error al cargar la orden de corte');
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
-  Future<void> modifyOrdenDeCorte() async {
+  Future<void> createOrdenDeCorte() async {
     if (selectedTipoDeTela == null ||
         selectedModelo == null ||
-        selectedAvio == null ||
-        selectedTalle.isEmpty ||
-        observaciones == null) {
+        selectedTalle.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Por favor, complete todos los campos.')),
       );
@@ -124,49 +100,53 @@ class _ModificarOrdenDeCorteScreenState
     final modeloSeleccionado = modelosACortar
         .firstWhere((modelo) => modelo['nombre'] == selectedModelo);
 
+    // Mapear los talles seleccionados (selectedTalle) a la estructura de corte
+    final talleRepeticionList = selectedTalle.map((talleRepeticion) {
+      return {
+        'talleId': talleRepeticion
+            .talleId, // Asumiendo que TalleRepeticion tiene un talleId
+        'repeticion': talleRepeticion
+            .repeticion, // Asumiendo que TalleRepeticion tiene un campo de repetición
+      };
+    }).toList();
+
     final orderData = {
-      'id': widget.ordenId,
       'modelos': [
         {
-          'modeloId': modeloSeleccionado['id'],
-          'esParaEstampar': true,
+          'modeloId': modeloSeleccionadoCompleto?['id'],
+          'totalPrendas': 1,
+          'esParaEstampar': false,
           'usaTelaSecundaria': false,
           'usaTelaAuxiliar': false,
           'observaciones': [
             {
-              'titulo': 'Collareta',
-              'descripcion': observaciones ?? '',
-            },
+              'titulo': tituloObservacion,
+              'descripcion': descripcionObservacion,
+            }
           ],
-          'curva': selectedTalle.map((talle) {
-            return {
-              'talleId': talle.id,
-              'repeticion': 1,
-            };
-          }).toList(),
+          'curva': talleRepeticionList, // Aquí insertamos la lista de talles
         },
       ],
       'rollos': [
         {
-          'rolloId': 1,
-          'categoria': 'PRIMARIA',
-          'cantidadUtilizada': 25.6,
+          'rolloId': selectedTipoDeTela?.id,
+          'categoria': selectedCategoriaTela.toString().split('.').last,
+          'cantidadUtilizada': cantidadUtilizada,
         },
       ],
     };
-
+    print(' PREVIO AL TRYCATCH $orderData');
     try {
-      final response = await http.put(
-        Uri.parse(
-            'https://maria-chucena-api-production.up.railway.app/corte/${widget.ordenId}'),
+      final response = await http.patch(
+        Uri.parse('https://maria-chucena-api-production.up.railway.app/corte/$corteId'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode(orderData),
       );
+      print('DENTRO DEL TRYCATCH $orderData');
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Orden de corte modificada exitosamente.')),
+          const SnackBar(content: Text('Orden de corte editar exitosamente.')),
         );
         Navigator.pushReplacement(
           context,
@@ -177,75 +157,206 @@ class _ModificarOrdenDeCorteScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content: Text(
-                  'Error al modificar la orden de corte: ${responseBody['message'] ?? 'Error desconocido'}')),
+                  'Error al crear la orden de corte: ${responseBody['message'] ?? 'Error desconocido'}')),
         );
+        print(
+            'Error al crear la orden de corte: ${responseBody['message'] + response.statusCode ?? 'Error desconocido'}');
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error de conexión: $e')),
       );
+      print('Error de conexión: $e');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Modificar Orden de Corte'),
+        title: const Text('Maria Chucena ERP System'),
         toolbarHeight: 80,
+        actions: [
+          buildLoggedInUser('assets/imagen/logo.png', 'Supervisor'),
+        ],
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    buildDropdownField('Tipo de Tela', tiposDeTela, context,
-                        (value) {
-                      setState(() {
-                        selectedTipoDeTela = value;
-                      });
-                    }, initialValue: selectedTipoDeTela),
-                    const SizedBox(height: 10),
-                    buildDropdownField(
-                        'Modelo a Cortar',
-                        modelosACortar
-                            .map((modelo) => modelo['nombre'].toString())
-                            .toList(),
-                        context, (value) {
-                      setState(() {
-                        selectedModelo = value;
-                      });
-                    }, initialValue: selectedModelo),
-                    const SizedBox(height: 10),
-                    buildDropdownField('Avíos', avios, context, (value) {
-                      setState(() {
-                        selectedAvio = value;
-                      });
-                    }, initialValue: selectedAvio),
-                    const SizedBox(height: 10),
-                    buildTextField('Observaciones', (value) {
-                      setState(() {
-                        observaciones = value;
-                      });
-                    }, initialValue: observaciones),
-                    const SizedBox(height: 10),
-                    TalleSelector(
-                      selectedTalles: selectedTalle,
-                      onTalleSelected: (talles) {
-                        setState(() {
-                          selectedTalle = talles;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 20),
-                    _buildActionButtons(),
-                  ],
+      drawer: const DrawerMenuLateral(),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildWelcomeBanner(),
+              const SizedBox(height: 20),
+              _buildMainContent(context),
+              const SizedBox(height: 40),
+              const Center(
+                child: Text(
+                  '© 2024 Maria Chucena ERP System. All rights reserved.',
                 ),
               ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWelcomeBanner() {
+    return Container(
+      color: Colors.grey[800],
+      width: double.infinity,
+      padding: const EdgeInsets.all(20.0),
+      child: const Center(
+        child: Column(
+          children: [
+            Text(
+              'modificador de Corte',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
             ),
+            SizedBox(height: 10),
+            Text(
+              'De Maria Chucena ERP System',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMainContent(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          flex: 2,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Para Tipo de Tela
+              buildDropdownField(
+                'Tipo de Tela',
+                tiposDeTela.map((tipo) => tipo.descripcion).toList(),
+                context,
+                (value) {
+                  setState(() {
+                    // Encuentra el rollo completo según el nombre seleccionado
+                    selectedTipoDeTela = tiposDeTela
+                        .firstWhere((tipo) => tipo.descripcion == value);
+                  });
+                },
+              ),
+              const SizedBox(height: 10),
+
+              // Para Modelo a Cortar
+
+              DropdownButtonFormField<String>(
+                decoration: const InputDecoration(
+                  labelText: 'Modelo',
+                  border: OutlineInputBorder(),
+                ),
+                items: modelosACortar.map((modelo) {
+                  return DropdownMenuItem<String>(
+                    value: modelo['nombre'],
+                    child: Text(modelo['nombre']),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedModelo = value;
+                    modeloSeleccionadoCompleto = modelosACortar.firstWhere(
+                        (modelo) => modelo['nombre'] == selectedModelo);
+                  });
+                },
+              ),
+
+              const SizedBox(height: 10),
+              buildDropdownField(
+                'Categoría',
+                CategoriaTela.values
+                    .map((e) => e.toString().split('.').last)
+                    .toList(),
+                context,
+                (value) {
+                  setState(() {
+                    selectedCategoriaTela = CategoriaTela.values.firstWhere(
+                        (e) => e.toString().split('.').last == value);
+                  });
+                },
+              ),
+              const SizedBox(height: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Observación',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  TextField(
+                    onChanged: (value) {
+                      setState(() {
+                        tituloObservacion = value;
+                      });
+                    },
+                    decoration: const InputDecoration(labelText: 'Título'),
+                  ),
+                  TextField(
+                    onChanged: (value) {
+                      setState(() {
+                        descripcionObservacion = value;
+                      });
+                    },
+                    decoration: const InputDecoration(labelText: 'Descripción'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              buildTextField('Cantidad Utilizada', (value) {
+                setState(() {
+                  // Convert the input string to a double
+                  if (value != null && value.isNotEmpty) {
+                    cantidadUtilizada = double.tryParse(
+                        value); // Safely parse the string to a double
+                  } else {
+                    cantidadUtilizada =
+                        null; // Set to null if the input is empty
+                  }
+                });
+              }),
+              const SizedBox(height: 10),
+              TalleRepeticionSelector(
+                selectedTalleRepeticion: selectedTalle,
+                onTalleRepeticionSelected: (updatedTalleRepeticion) {
+                  setState(() {
+                    selectedTalle = updatedTalleRepeticion;
+                  });
+                },
+              ),
+
+              const SizedBox(height: 20),
+              _buildActionButtons(),
+            ],
+          ),
+        ),
+        const SizedBox(width: 20),
+        Expanded(
+          flex: 1,
+          child: _buildSummaryCard(),
+        ),
+      ],
     );
   }
 
@@ -254,7 +365,12 @@ class _ModificarOrdenDeCorteScreenState
       children: [
         ElevatedButton(
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const HomePage(),
+              ),
+            );
           },
           child: const Text('Cancelar'),
           style: ElevatedButton.styleFrom(
@@ -263,35 +379,104 @@ class _ModificarOrdenDeCorteScreenState
         ),
         const SizedBox(width: 10),
         ElevatedButton(
-          onPressed: modifyOrdenDeCorte,
-          child: const Text('Modificar Orden'),
+          onPressed: createOrdenDeCorte,
+          child: const Text('Crear Orden'),
+        ),
+        const SizedBox(width: 10),
+        ElevatedButton(
+          onPressed: () {}, // Lógica para crear tizadas
+          child: const Text('Crear Tizadas'),
         ),
       ],
     );
   }
 
   Widget buildDropdownField(String label, List<String> items,
-      BuildContext context, ValueChanged<String?> onChanged,
-      {String? initialValue}) {
+      BuildContext context, ValueChanged<String?> onChanged) {
     return DropdownButtonFormField<String>(
-      decoration: InputDecoration(labelText: label),
-      value: initialValue,
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+      ),
+      items: items
+          .map((item) => DropdownMenuItem<String>(
+                value: item,
+                child: Text(item),
+              ))
+          .toList(),
       onChanged: onChanged,
-      items: items.map((String value) {
-        return DropdownMenuItem<String>(
-          value: value,
-          child: Text(value),
-        );
-      }).toList(),
+      hint: const Text('Selecciona una opción'),
     );
   }
 
-  Widget buildTextField(String label, ValueChanged<String?> onChanged,
-      {String? initialValue}) {
-    return TextFormField(
-      decoration: InputDecoration(labelText: label),
-      initialValue: initialValue,
+  Widget buildTextField(String label, ValueChanged<String?> onChanged) {
+    return TextField(
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+      ),
       onChanged: onChanged,
     );
   }
-}
+
+  Widget _buildSummaryCard() {
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Resumen',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+            const Divider(),
+            selectedModelo != null
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Modelo seleccionado: $selectedModelo'),
+                      Text(
+                          'Tipo de tela: ${selectedTipoDeTela?.descripcion ?? 'Ninguno'}'),
+                      Text(
+                          'Cantidad utilizada: ${cantidadUtilizada ?? 'No especificada'}'),
+                      Text(
+                          'Categoría: ${selectedCategoriaTela?.toString().split('.').last ?? 'No especificada'}'),
+                      const SizedBox(height: 10),
+                      const Text(
+                        'Observación:',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text('Título: $tituloObservacion'),
+                      Text('Descripción: $descripcionObservacion'),
+                      const SizedBox(height: 10),
+                      const Text(
+                        'Detalles completos del modelo:',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                          'ID: ${modeloSeleccionadoCompleto?['id'] ?? 'No disponible'}'),
+                      Text(
+                          'Nombre: ${modeloSeleccionadoCompleto?['nombre'] ?? 'No disponible'}'),
+                      Text(
+                          'Categoría: ${modeloSeleccionadoCompleto?['categoria'] ?? 'No disponible'}'),
+                      Text(
+                          'Género: ${modeloSeleccionadoCompleto?['genero'] ?? 'No disponible'}'),
+                      const SizedBox(height: 10),
+                      const Text(
+                        'Talles seleccionados:',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      for (var talle in selectedTalle)
+                        Text(
+                            'Talle ID: ${talle.talleId}, Repetición: ${talle.repeticion}'),
+                    ],
+                  )
+                : const Text('No se ha seleccionado ningún modelo.'),
+          ],
+        ),
+      ),
+    );
+  }
+}*/
