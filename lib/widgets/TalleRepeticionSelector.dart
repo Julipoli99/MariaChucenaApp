@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:gestion_indumentaria/models/Talle.dart';
+import 'package:gestion_indumentaria/models/talle.dart';
 import 'package:gestion_indumentaria/models/talleRepetecion.dart';
 
 class TalleRepeticionSelector extends StatefulWidget {
@@ -114,7 +114,7 @@ class _TalleRepeticionSelectorState extends State<TalleRepeticionSelector> {
               return ChoiceChip(
                 label: Row(
                   children: [
-                    Text(talle.nombre),
+                    //     Text(talle.talle),
                     if (isSelected) ...[
                       const SizedBox(width: 5),
                       SizedBox(

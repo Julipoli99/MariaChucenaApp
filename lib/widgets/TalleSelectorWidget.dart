@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:gestion_indumentaria/models/Talle.dart';
+import 'package:gestion_indumentaria/models/talle.dart';
 import 'package:gestion_indumentaria/widgets/boxDialog/boxdialogoTalle.dart';
 
 class TalleSelector extends StatefulWidget {
@@ -99,7 +99,7 @@ class _TalleSelectorState extends State<TalleSelector> {
           children: [
             ..._talles.map((talle) {
               return ChoiceChip(
-                label: Text(talle.nombre),
+                label: Text(talle.talle),
                 selected: widget.selectedTalles.contains(talle),
                 onSelected: (selected) {
                   _toggleTalleSelection(talle);

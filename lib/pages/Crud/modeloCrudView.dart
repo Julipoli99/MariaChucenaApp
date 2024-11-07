@@ -4,7 +4,7 @@ import 'package:gestion_indumentaria/models/AviosModelo.dart';
 import 'package:gestion_indumentaria/models/Curva.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
 import 'package:gestion_indumentaria/models/observacion.dart';
-import 'package:gestion_indumentaria/models/Talle.dart';
+import 'package:gestion_indumentaria/models/talle.dart';
 import 'package:gestion_indumentaria/models/tipoPrenda.dart';
 import 'package:gestion_indumentaria/pages/Modelos/NuevoModelo.dart';
 import 'package:gestion_indumentaria/pages/Modelos/editarModelos.dart';
@@ -46,8 +46,6 @@ class _ModelCrudViewState extends State<ModelCrudView> {
   void onCancel() {
     Navigator.of(context).pop();
   }
-
-  
 
   @override
   Widget build(BuildContext context) {
@@ -112,15 +110,10 @@ class _ModelCrudViewState extends State<ModelCrudView> {
                         IconButton(
                           onPressed: () {
                             Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => EditModelScreen(
-          modelo: model, 
-          onModeloModified: (updatedModelo) {
-
-          }
-          )
-        )
-    );
+                                MaterialPageRoute(
+                                    builder: (context) => EditModelScreen(
+                                        modelo: model,
+                                        onModeloModified: (updatedModelo) {})));
                           },
 
                           /*     onPressed: () {

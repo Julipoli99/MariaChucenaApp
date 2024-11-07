@@ -1,5 +1,5 @@
 import 'package:gestion_indumentaria/models/Avio.dart';
-import 'package:gestion_indumentaria/models/Talle.dart';
+import 'package:gestion_indumentaria/models/talle.dart';
 
 class AvioModelo {
   final int? id;

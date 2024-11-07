@@ -60,7 +60,7 @@ class _TallesCrudViewState extends State<Tallescrudview> {
               items: talles,
               dataMapper: [
                 (talle) => Text(talle.id.toString()),
-                (talle) => Text(talle.nombre),
+                (talle) => Text(talle.talle),
                 (talle) => Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
@@ -91,7 +91,12 @@ class _TallesCrudViewState extends State<Tallescrudview> {
           final List<dynamic> jsonData = jsonDecode(body);
           setState(() {
             talles = jsonData.map((json) => Talle.fromJson(json)).toList();
+            print(talles);
+            print(jsonData);
           });
+          print(jsonData);
+
+          print(talles);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("Talles cargados correctamente.")),
           );

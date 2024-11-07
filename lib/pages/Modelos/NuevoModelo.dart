@@ -7,7 +7,7 @@ import 'package:gestion_indumentaria/models/Avio.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
 import 'package:gestion_indumentaria/models/Proveedor.dart';
 import 'package:gestion_indumentaria/models/observacion.dart';
-import 'package:gestion_indumentaria/models/Talle.dart';
+import 'package:gestion_indumentaria/models/talle.dart';
 import 'package:gestion_indumentaria/pages/Modelos/ModelosRegistradosPage.dart';
 import 'package:gestion_indumentaria/pages/principal.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
@@ -474,7 +474,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                                   children: selectedTallesDialog!.map((talle) {
                                     return Chip(
                                       label: Text(talle
-                                          .nombre), // Asegúrate de que Talle tiene la propiedad nombre
+                                          .talle), // Asegúrate de que Talle tiene la propiedad nombre
                                     );
                                   }).toList(),
                                 ),
@@ -571,7 +571,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                   children: talles.map((Talle talle) {
                     return ChoiceChip(
                       label: Text(talle
-                          .nombre), // Asegúrate de que Talle tiene la propiedad nombre
+                          .talle), // Asegúrate de que Talle tiene la propiedad nombre
                       selected: selectedTallesDialog!.contains(talle),
                       onSelected: (selected) {
                         setState(() {

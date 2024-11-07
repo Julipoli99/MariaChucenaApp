@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:gestion_indumentaria/models/Talle.dart';
+import 'package:gestion_indumentaria/models/talle.dart';
 
 class AddTalleDialog extends StatefulWidget {
   final ValueChanged<Talle> onTalleAdded;
@@ -29,7 +29,7 @@ class _AddTalleDialogState extends State<AddTalleDialog> {
       );
 
       if (response.statusCode == 201) {
-        final nuevoTalle = Talle(id: 0, nombre: talleNombre);
+        final nuevoTalle = Talle(id: 0, talle: talleNombre);
         widget.onTalleAdded(nuevoTalle);
       } else {
         _showError('Error al guardar el talle en la API.');

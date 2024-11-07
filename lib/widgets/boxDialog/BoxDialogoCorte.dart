@@ -47,7 +47,7 @@ class BoxDialogCorte extends StatelessWidget {
                           /*     const Text('Curva:'),
                           ...modeloCorte.curvas.map((curva) {
                             return Text(
-                                '${curva.talle.nombre.toString()} - repetición: ${curva.repeticion}');
+                                '${curva.talle.talle.toString()} - repetición: ${curva.repeticion}');
                           }),
                           */
                         ],
