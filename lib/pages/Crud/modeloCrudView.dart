@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/AviosModelo.dart';
+import 'package:gestion_indumentaria/models/Curva.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
 import 'package:gestion_indumentaria/models/observacion.dart';
 import 'package:gestion_indumentaria/models/Talle.dart';
@@ -45,6 +46,8 @@ class _ModelCrudViewState extends State<ModelCrudView> {
   void onCancel() {
     Navigator.of(context).pop();
   }
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -108,15 +111,16 @@ class _ModelCrudViewState extends State<ModelCrudView> {
                         ),
                         IconButton(
                           onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => EditModelScreen(
-                                  modelo: model,
-                                  onModeloModified: (Modelo value) {},
-                                ),
-                              ),
-                            );
+                            Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => EditModelScreen(
+          modelo: model, 
+          onModeloModified: (updatedModelo) {
+
+          }
+          )
+        )
+    );
                           },
 
                           /*     onPressed: () {
@@ -172,6 +176,9 @@ class _ModelCrudViewState extends State<ModelCrudView> {
       print("Respuesta de la API: ${response.body}");
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = jsonDecode(response.body);
+        print(response.body);
+
+        print("###################");
 
         setState(() {
           models = jsonData.map((json) {
