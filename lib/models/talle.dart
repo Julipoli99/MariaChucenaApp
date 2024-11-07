@@ -7,16 +7,13 @@ class Talle {
     required this.nombre,
   });
 
-  @override
-  String toString() {
-    return nombre; // Devuelve solo el nombre del talle
-  }
+
 
   /// **Fábrica para crear un Avios desde JSON**
   factory Talle.fromJson(Map<String, dynamic> json) {
     return Talle(
       id: json['id'] ?? 0, // Valor por defecto si 'id' es nulo
-      nombre: json['nombre'] ?? 'Sin talle',
+      nombre: json['talle'] ?? 'Sin talle',
     );
   }
   Map<String, dynamic> toJson() {

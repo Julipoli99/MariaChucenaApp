@@ -337,6 +337,7 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
                   });
                 },
               ),
+
               const SizedBox(height: 20),
               _buildActionButtons(),
             ],
