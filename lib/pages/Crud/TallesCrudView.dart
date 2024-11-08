@@ -60,7 +60,7 @@ class _TallesCrudViewState extends State<Tallescrudview> {
               items: talles,
               dataMapper: [
                 (talle) => Text(talle.id.toString()),
-                (talle) => Text(talle.talle),
+                (talle) => Text(talle.nombre),
                 (talle) => Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [

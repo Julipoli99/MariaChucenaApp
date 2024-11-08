@@ -474,7 +474,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                                   children: selectedTallesDialog!.map((talle) {
                                     return Chip(
                                       label: Text(talle
-                                          .talle), // Asegúrate de que Talle tiene la propiedad nombre
+                                          .nombre), // Asegúrate de que Talle tiene la propiedad nombre
                                     );
                                   }).toList(),
                                 ),
@@ -571,7 +571,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                   children: talles.map((Talle talle) {
                     return ChoiceChip(
                       label: Text(talle
-                          .talle), // Asegúrate de que Talle tiene la propiedad nombre
+                          .nombre), // Asegúrate de que Talle tiene la propiedad nombre
                       selected: selectedTallesDialog!.contains(talle),
                       onSelected: (selected) {
                         setState(() {

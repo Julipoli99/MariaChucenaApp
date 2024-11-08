@@ -125,7 +125,7 @@ class _TalleRepeticionSelectorState extends State<TalleRepeticionSelector> {
               return ChoiceChip(
                 label: Row(
                   children: [
-                    //     Text(talle.talle),
+                    Text(talle.nombre),
                     if (isSelected) ...[
                       const SizedBox(width: 5),
                       SizedBox(

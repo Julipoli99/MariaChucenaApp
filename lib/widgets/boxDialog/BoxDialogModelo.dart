@@ -94,7 +94,7 @@ class BoxDialogModelo extends StatelessWidget {
                                         TextStyle(fontWeight: FontWeight.bold)),
                                 ...avioModelo.talles!.map((talle) {
                                   return Text(
-                                      ' - ${talle.talle}'); // Asegúrate de que `talle` tiene la propiedad `nombre`
+                                      ' - ${talle.nombre}'); // Asegúrate de que `talle` tiene la propiedad `nombre`
                                 }).toList(),
                               ],
                             ),
@@ -119,7 +119,7 @@ class BoxDialogModelo extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final talle = modelo.curva[index];
                       return ListTile(
-                        title: Text('Talle: ${talle.talle}'),
+                        title: Text('Talle: ${talle.nombre}'),
                       );
                     },
                   ),

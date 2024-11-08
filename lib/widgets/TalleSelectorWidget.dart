@@ -99,7 +99,7 @@ class _TalleSelectorState extends State<TalleSelector> {
           children: [
             ..._talles.map((talle) {
               return ChoiceChip(
-                label: Text(talle.talle),
+                label: Text(talle.nombre),
                 selected: widget.selectedTalles.contains(talle),
                 onSelected: (selected) {
                   _toggleTalleSelection(talle);

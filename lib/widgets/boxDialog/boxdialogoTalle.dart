@@ -29,7 +29,7 @@ class _AddTalleDialogState extends State<AddTalleDialog> {
       );
 
       if (response.statusCode == 201) {
-        final nuevoTalle = Talle(id: 0, talle: talleNombre);
+        final nuevoTalle = Talle(id: 0, nombre: talleNombre);
         widget.onTalleAdded(nuevoTalle);
       } else {
         _showError('Error al guardar el talle en la API.');
