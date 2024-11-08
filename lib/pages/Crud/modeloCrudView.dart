@@ -47,8 +47,6 @@ class _ModelCrudViewState extends State<ModelCrudView> {
     Navigator.of(context).pop();
   }
 
-  
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -112,15 +110,10 @@ class _ModelCrudViewState extends State<ModelCrudView> {
                         IconButton(
                           onPressed: () {
                             Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => EditModelScreen(
-          modelo: model, 
-          onModeloModified: (updatedModelo) {
-
-          }
-          )
-        )
-    );
+                                MaterialPageRoute(
+                                    builder: (context) => EditModelScreen(
+                                        modelo: model,
+                                        onModeloModified: (updatedModelo) {})));
                           },
 
                           /*     onPressed: () {

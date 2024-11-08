@@ -73,43 +73,12 @@ class _BoxDialogCorteState extends State<BoxDialogCorte> {
                           ...modeloCorte.observacion!.map((obs) {
                             return Text(' - ${obs.titulo}: ${obs.descripcion}');
                           }),
-                          const Text('Curvas:'),
-                          // Aquí iteramos sobre las curvas para mostrar cada talle
-                          FutureBuilder<List<Talle>>(
-                            future: _tallesFuture,
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const CircularProgressIndicator();
-                              } else if (snapshot.hasError) {
-                                return Text('Error: ${snapshot.error}');
-                              } else if (snapshot.hasData) {
-                                // Iterar sobre las curvas y mostrar los talles correspondientes
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children:
-                                      modeloCorte.curvas.map<Widget>((curva) {
-                                    // Filtrar los talles correspondientes
-                                    final tallesCurva = snapshot.data!
-                                        .where((t) => curva.talleId == t.id)
-                                        .toList();
-                                    return Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        ...tallesCurva.map((talle) {
-                                          return Text(
-                                              '${talle.nombre} - Repetición: ${curva.repeticion}');
-                                        }).toList()
-                                      ],
-                                    );
-                                  }).toList(),
-                                );
-                              } else {
-                                return const Text('No se encontraron talles.');
-                              }
-                            },
-                          ),
+                          /*     const Text('Curva:'),
+                          ...modeloCorte.curvas.map((curva) {
+                            return Text(
+                                '${curva.talle.nombre.toString()} - repetición: ${curva.repeticion}');
+                          }),
+                          */
                         ],
                       ),
                     ),

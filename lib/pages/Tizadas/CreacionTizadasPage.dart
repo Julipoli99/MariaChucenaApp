@@ -1,9 +1,70 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:gestion_indumentaria/models/Corte.dart';
+import 'package:gestion_indumentaria/models/ModeloCorte.dart';
+import 'package:gestion_indumentaria/models/rolloCorte.dart';
+import 'package:gestion_indumentaria/models/talleRepetecion.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
+import 'package:gestion_indumentaria/widgets/TalleRepeticionSelector.dart';
+import 'package:http/http.dart' as http;
 
-class CreacionTizadasPage extends StatelessWidget {
-  const CreacionTizadasPage({super.key});
+class CreacionTizadasPage extends StatefulWidget {
+  CreacionTizadasPage({super.key, required this.idCorte});
+  final int idCorte;
+
+  _CreacionTizadasPageState createState() => _CreacionTizadasPageState();
+}
+
+class _CreacionTizadasPageState extends State<CreacionTizadasPage> {
+  List<TalleRepeticion> selectedTalle = [];
+  List<dynamic> modelosACortar = [];
+  Map<String, dynamic>? modeloSeleccionadoCompleto;
+  String? selectedModelo;
+
+  double? consumo;
+  double? capas;
+  double? ancho;
+  double? largo;
+
+  late Corte corte;
+
+  List<dynamic> rollosDeTela = [];
+  Map<String, dynamic>? selectedRolloCompleto;
+  String? selectedRollo;
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarCorte(widget.idCorte);
+  }
+
+  Future<void> _cargarCorte(int idCorte) async {
+    final url =
+        'https://maria-chucena-api-production.up.railway.app/corte/$idCorte';
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = jsonDecode(response.body);
+
+      setState(() {
+        corte = Corte.fromJson(data);
+
+        modelosACortar = (data['modelos'] as List)
+            .map((modeloJson) => ModeloCorte.fromJson(modeloJson))
+            .toList();
+        rollosDeTela = (data['rollos'] as List)
+            .map((rolloJson) => RolloCorte.fromJson(rolloJson))
+            .toList();
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al cargar el corte: ${response.body}'),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,15 +89,15 @@ class CreacionTizadasPage extends StatelessWidget {
                   CrossAxisAlignment.center, // Para centrar verticalmente
               children: [
                 // Título en la parte izquierda centrado verticalmente
-                Expanded(
+                const Expanded(
                   flex: 1,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
+                    padding: EdgeInsets.symmetric(
                         vertical: 100.0), // Ajuste de posición vertical
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment
                           .center, // Para centrar horizontalmente
-                      children: const [
+                      children: [
                         Text(
                           'Registrar Tizada',
                           style: TextStyle(
@@ -67,29 +128,55 @@ class CreacionTizadasPage extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        const SizedBox(height: 20),
+
+                        // Campo de Ancho de la tizada
+                        const TextField(
+                          decoration: InputDecoration(
+                            labelText: 'Ancho de la tizada',
+                            hintText: 'Ancho',
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // Campo de Largo de la tizada
+                        const TextField(
+                          decoration: InputDecoration(
+                            labelText: 'Largo de la tizada',
+                            hintText: 'Largo',
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
                         // Dropdown para Nombre del Modelo
                         const Text(
-                          'Nombre de Modelo',
+                          'Modelo',
                           style: TextStyle(fontSize: 16),
                         ),
                         DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
-                            hintText: 'nombre del modelo',
+                            labelText: 'Modelo',
+                            border: OutlineInputBorder(),
                           ),
-                          items: <String>[
-                            'Ma123',
-                            'Ma124',
-                            'Ma125',
-                          ].map((String value) {
+                          items: modelosACortar.map((modelo) {
                             return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
+                              value: modelo.modelo.nombre,
+                              child: Text(modelo.modelo.nombre),
                             );
                           }).toList(),
-                          onChanged: (newValue) {
-                            print('Modelo seleccionado: $newValue');
+                          onChanged: (value) {
+                            setState(() {
+                              selectedModelo = value;
+                              modeloSeleccionadoCompleto =
+                                  modelosACortar.firstWhere((modelo) =>
+                                      modelo.modelo.nombre == selectedModelo);
+                            });
                           },
                         ),
+                        const SizedBox(height: 20),
+
                         const SizedBox(height: 20),
 
                         // Tabla de repetición
@@ -98,96 +185,62 @@ class CreacionTizadasPage extends StatelessWidget {
                           style: TextStyle(fontSize: 16),
                         ),
                         const SizedBox(height: 10),
-                        Table(
-                          border: TableBorder.all(color: Colors.black),
-                          children: [
-                            const TableRow(
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: Text('T1'),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: Text('T2'),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: Text('T3'),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: Text('T4'),
-                                ),
-                              ],
-                            ),
-                            TableRow(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: TextField(
-                                    decoration: const InputDecoration(
-                                      labelText: 'Cantidad',
-                                      hintText: '0',
-                                    ),
-                                    keyboardType: TextInputType.number,
-                                    onChanged: (value) {
-                                      print('Cantidad T1: $value');
-                                    },
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: TextField(
-                                    decoration: const InputDecoration(
-                                      labelText: 'Cantidad',
-                                      hintText: '0',
-                                    ),
-                                    keyboardType: TextInputType.number,
-                                    onChanged: (value) {
-                                      print('Cantidad T2: $value');
-                                    },
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: TextField(
-                                    decoration: const InputDecoration(
-                                      labelText: 'Cantidad',
-                                      hintText: '0',
-                                    ),
-                                    keyboardType: TextInputType.number,
-                                    onChanged: (value) {
-                                      print('Cantidad T3: $value');
-                                    },
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: TextField(
-                                    decoration: const InputDecoration(
-                                      labelText: 'Cantidad',
-                                      hintText: '0',
-                                    ),
-                                    keyboardType: TextInputType.number,
-                                    onChanged: (value) {
-                                      print('Cantidad T4: $value');
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+                        TalleRepeticionSelector(
+                          selectedTalleRepeticion: selectedTalle,
+                          onTalleRepeticionSelected: (updatedTalleRepeticion) {
+                            setState(() {
+                              selectedTalle = updatedTalleRepeticion;
+                            });
+                          },
                         ),
+
                         const SizedBox(height: 20),
 
                         // Campo de Consumo de tela
                         const TextField(
                           decoration: InputDecoration(
-                            labelText: 'Consumo de tela',
-                            hintText: 'Seleccione el consumo de tela',
+                            labelText: 'Consumo',
+                            hintText: 'Seleccione el consumo',
                           ),
                         ),
+
+                        const SizedBox(height: 20),
+
+                        const Text(
+                          'Rollo',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                        DropdownButtonFormField<String>(
+                          decoration: const InputDecoration(
+                            labelText: 'Rollo',
+                            border: OutlineInputBorder(),
+                          ),
+                          items: rollosDeTela.map((rollo) {
+                            return DropdownMenuItem<String>(
+                              value: rollo.rollo?.descripcion,
+                              child: Text(rollo.rollo!.descripcion),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              selectedRollo = value;
+                              selectedRolloCompleto = rollosDeTela.firstWhere(
+                                  (rollo) =>
+                                      rollo.rollo?.descripcion ==
+                                      selectedRollo);
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 20),
+
+                        // Campo de Capas del rollo
+                        const TextField(
+                          decoration: InputDecoration(
+                            labelText: 'Capas del rollo',
+                            hintText: 'Capas',
+                          ),
+                        ),
+
                         const SizedBox(height: 20),
 
                         // Botón de guardar

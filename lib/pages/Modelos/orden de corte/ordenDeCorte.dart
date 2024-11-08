@@ -5,6 +5,7 @@ import 'package:gestion_indumentaria/models/talle.dart';
 import 'package:gestion_indumentaria/models/Tela.dart';
 import 'package:gestion_indumentaria/models/observacion.dart';
 import 'package:gestion_indumentaria/models/talleRepetecion.dart';
+import 'package:gestion_indumentaria/pages/Tizadas/CreacionTizadasPage.dart';
 import 'package:gestion_indumentaria/pages/principal.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
@@ -383,7 +384,16 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
         ),
         const SizedBox(width: 10),
         ElevatedButton(
-          onPressed: () {}, // Lógica para crear tizadas
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => CreacionTizadasPage(
+                  idCorte: 3,
+                ),
+              ),
+            );
+          }, // Lógica para crear tizadas
           child: const Text('Crear Tizadas'),
         ),
       ],
