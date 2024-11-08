@@ -7,7 +7,8 @@ import 'package:gestion_indumentaria/models/observacion.dart';
 import 'package:gestion_indumentaria/models/talle.dart';
 import 'package:gestion_indumentaria/models/tipoPrenda.dart';
 import 'package:gestion_indumentaria/pages/Modelos/NuevoModelo.dart';
-import 'package:gestion_indumentaria/pages/Modelos/editarModelos.dart';
+
+import 'package:gestion_indumentaria/pages/Provedores/editarModelos.dart';
 import 'package:gestion_indumentaria/widgets/boxDialog/BoxDialogModelo.dart';
 
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
