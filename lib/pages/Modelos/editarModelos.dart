@@ -44,6 +44,7 @@ class _EditModelScreenState extends State<EditModelScreen> {
     _nombreController.text = widget.modelo.nombre;
     _tieneTelaSecundaria = widget.modelo.tieneTelaSecundaria;
     _tieneTelaAuxiliar = widget.modelo.tieneTelaAuxiliar;
+    selectedTallesDialog = widget.modelo.curva.cast<Talle>();
     _aviosSeleccionados =
         widget.modelo.avios ?? []; // Inicializar con avíos existentes
   }
