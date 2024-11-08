@@ -44,6 +44,7 @@ class _EditModelScreenState extends State<EditModelScreen> {
     _nombreController.text = widget.modelo.nombre;
     _tieneTelaSecundaria = widget.modelo.tieneTelaSecundaria;
     _tieneTelaAuxiliar = widget.modelo.tieneTelaAuxiliar;
+    selectedTallesDialog = widget.modelo.curva.cast<Talle>();
     _aviosSeleccionados =
         widget.modelo.avios ?? []; // Inicializar con avíos existentes
   }
@@ -54,44 +55,42 @@ class _EditModelScreenState extends State<EditModelScreen> {
 
     setState(() => _isSaving = true);
 
-try {
-  final response = await http.patch(
-    Uri.parse(apiUrl),
-    headers: {'Content-Type': 'application/json'},
-    body: jsonEncode({
-      'codigo': _codigoController.text.trim(),
-      'nombre': _nombreController.text.trim(),
-      'tieneTelaSecundaria': _tieneTelaSecundaria,
-      'tieneTelaAuxiliar': _tieneTelaAuxiliar,
-      'avios': _aviosSeleccionados
-          .map((avio) => avio.toJson())
-          .toList(), // Incluir avíos en la actualización
-    }),
-  );
+    try {
+      final response = await http.patch(
+        Uri.parse(apiUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'codigo': _codigoController.text.trim(),
+          'nombre': _nombreController.text.trim(),
+          'tieneTelaSecundaria': _tieneTelaSecundaria,
+          'tieneTelaAuxiliar': _tieneTelaAuxiliar,
+          'avios': _aviosSeleccionados
+              .map((avio) => avio.toJson())
+              .toList(), // Incluir avíos en la actualización
+        }),
+      );
 
-  if (response.statusCode == 200) {
-    final responseData = jsonDecode(response.body);
-    print("*****************+");
-    print(responseData);
-    final updatedModelo = Modelo.fromJson(responseData); // Usar el método fromJson
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        print("*****************+");
+        print(responseData);
+        final updatedModelo =
+            Modelo.fromJson(responseData); // Usar el método fromJson
 
-    // Llamar a la función para actualizar la lista de modelos en CrudModelosPage
-    widget.onModeloModified(updatedModelo);
+        // Llamar a la función para actualizar la lista de modelos en CrudModelosPage
+        widget.onModeloModified(updatedModelo);
 
-    // Regresar a la vista de CRUD para ver los cambios aplicados
-    // Regresa a la home
-    Navigator.of(context).pop();
-  } else {
-    _showError('Error al actualizar el modelo en la API. ${response.body}');
-  }
-} catch (e) {
-  _showError('Ocurrió un error: $e');
-} finally {
-  setState(() => _isSaving = false);
-}
-
-
-
+        // Regresar a la vista de CRUD para ver los cambios aplicados
+        // Regresa a la home
+        Navigator.of(context).pop();
+      } else {
+        _showError('Error al actualizar el modelo en la API. ${response.body}');
+      }
+    } catch (e) {
+      _showError('Ocurrió un error: $e');
+    } finally {
+      setState(() => _isSaving = false);
+    }
   }
 
   void _showError(String message) {

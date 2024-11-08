@@ -43,7 +43,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   bool? selectedAuxForm = false;
   bool? selectedPrimForm = false;
   final List<String> auxOptions = ['auxiliar'];
-  final List<String> primOptions = ['primaria'];
+  final List<String> primOptions = ['secundaria'];
   List<Avio> listadoAvios = [];
 
   // data para la parte de Avio
@@ -65,31 +65,6 @@ class _NuevomodeloState extends State<Nuevomodelo> {
   // Lista para almacenar los avios elegidos y sus detalles
   List<AvioModelo> aviosSeleccionados = [];
 
-  /*void _createPost() {
-    //Avios(nombre: selectedTipoAvioDialog!, proveedores: "Proveedor1");
-    Modelo modeloCreado = Modelo(
-        id: 0,
-        codigo: "",
-        nombre: nombreModelo,
-        tieneTelaSecundaria: selectedPrimForm!,
-        tieneTelaAuxiliar: selectedAuxForm!,
-        genero: selectedGenero!,
-        observaciones: [
-          ObservacionModel(
-            id: 1,
-            titulo: tituloObservacion,
-            descripcion: descripcionObservacion,
-          )
-        ],
-        avios: aviosSeleccionados,
-        curva: selectedTallesForm,
-        categoriaTipo: selectedPrenda!);
-
-    print('MODELO POST: ${modeloCreado.toJson()}');
-
-    // metodo post
-    _post(modeloCreado);
-  }*/
   void _createPost() {
     if (nombreModelo == null ||
         selectedPrimForm == null ||
@@ -353,17 +328,6 @@ class _NuevomodeloState extends State<Nuevomodelo> {
                                 ),
                                 child: const Text('Guardar Modelo'),
                               ),
-                              /*         ElevatedButton(
-                                onPressed: () {
-                                  // Acción para cargar foto
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  minimumSize:
-                                      const Size(140, 50), // Ajusta el tamaño
-                                ),
-                                child: const Text('Cargar Foto'),
-                              ),
-                              */
                             ],
                           ),
                         ],
@@ -732,7 +696,7 @@ class _NuevomodeloState extends State<Nuevomodelo> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Seleccione si tiene tela primaria:',
+          'Seleccione si tiene tela secundaria:',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 10),
