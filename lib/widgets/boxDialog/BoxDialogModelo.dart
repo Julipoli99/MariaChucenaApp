@@ -19,58 +19,73 @@ class BoxDialogModelo extends StatelessWidget {
       backgroundColor: Colors.grey[200],
       title: Text('Detalles del Modelo: ${modelo.nombre}'),
       content: SizedBox(
-        height: 400,
-        width: 500,
+        height: 600,
+        width: 600,
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Observaciones:',
-                style: TextStyle(fontWeight: FontWeight.bold)),
+            // Observaciones - con Card para destacar cada una
+            Text(
+              'Observaciones:',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
             Flexible(
-              child: Scrollbar(
-                thumbVisibility: true,
-                child: ListView.builder(
-                  itemCount: modelo.observaciones?.length ?? 0,
-                  itemBuilder: (context, index) {
-                    final observacion = modelo.observaciones?[index];
-                    return ListTile(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: modelo.observaciones?.length ?? 0,
+                itemBuilder: (context, index) {
+                  final observacion = modelo.observaciones?[index];
+                  return Card(
+                    margin: const EdgeInsets.symmetric(vertical: 4),
+                    child: ListTile(
                       title: Text(
                           'Observación: ${observacion?.titulo ?? 'Sin título'}'),
                       subtitle: Text(
                           'Descripción: ${observacion?.descripcion ?? 'Sin descripción'}'),
-                    );
-                  },
-                ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () {
+                          // Implementar funcionalidad para editar la observación
+                        },
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '¿Tiene tela primaria? ${modelo.tieneTelaAuxiliar ? 'Sí' : 'No'}',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 5), // Espacio entre los textos
-                Text(
-                  '¿Tiene tela secundaria? ${modelo.tieneTelaSecundaria ? 'Sí' : 'No'}',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 5), // Espacio entre los textos
-              ],
+            const SizedBox(height: 10),
+            // Información de telas - sin Card
+            Text(
+              'Telas:',
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 5),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                      '¿Tiene tela primaria? ${modelo.tieneTelaAuxiliar ? 'Sí' : 'No'}'),
+                  Text(
+                      '¿Tiene tela secundaria? ${modelo.tieneTelaSecundaria ? 'Sí' : 'No'}'),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            // Avios - con Card para cada uno
             Text(
               'Avios (${modelo.avios?.length ?? 0}):',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             Flexible(
-              child: Scrollbar(
-                thumbVisibility: true,
-                child: ListView.builder(
-                  itemCount: modelo.avios?.length ?? 0,
-                  itemBuilder: (context, index) {
-                    final avioModelo = modelo.avios?[index];
-
-                    return ListTile(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: modelo.avios?.length ?? 0,
+                itemBuilder: (context, index) {
+                  final avioModelo = modelo.avios?[index];
+                  return Card(
+                    margin: const EdgeInsets.symmetric(vertical: 4),
+                    child: ListTile(
                       title: Text(
                           'Avio: ${avioModelo?.avio?.nombre ?? 'Sin nombre'}'),
                       subtitle: Column(
@@ -82,7 +97,6 @@ class BoxDialogModelo extends StatelessWidget {
                               'Por Talle: ${avioModelo?.esPorTalle ?? false ? "Sí" : "No"}'),
                           Text(
                               'Por Color: ${avioModelo?.esPorColor ?? false ? "Sí" : "No"}'),
-                          // Mostrar talles si es por talle
                           if (avioModelo?.esPorTalle == true &&
                               avioModelo?.talles != null &&
                               avioModelo!.talles!.isNotEmpty)
@@ -93,36 +107,40 @@ class BoxDialogModelo extends StatelessWidget {
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold)),
                                 ...avioModelo.talles!.map((talle) {
-                                  return Text(
-                                      ' - ${talle.nombre}'); // Asegúrate de que `talle` tiene la propiedad `nombre`
+                                  return Text(' - ${talle.nombre}');
                                 }).toList(),
                               ],
                             ),
                         ],
                       ),
-                    );
-                  },
-                ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () {
+                          // Implementar funcionalidad para editar el avio
+                        },
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
             const SizedBox(height: 10),
+            // Curvas - sin Card
             Text(
               'Curva (${modelo.curva.length}):',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             if (modelo.curva.isNotEmpty)
               Flexible(
-                child: Scrollbar(
-                  thumbVisibility: true,
-                  child: ListView.builder(
-                    itemCount: modelo.curva.length,
-                    itemBuilder: (context, index) {
-                      final talle = modelo.curva[index];
-                      return ListTile(
-                        title: Text('Talle: ${talle.nombre}'),
-                      );
-                    },
-                  ),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: modelo.curva.length,
+                  itemBuilder: (context, index) {
+                    final talle = modelo.curva[index];
+                    return ListTile(
+                      title: Text('Talle: ${talle.nombre}'),
+                    );
+                  },
                 ),
               )
             else

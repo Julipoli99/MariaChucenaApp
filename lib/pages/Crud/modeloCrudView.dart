@@ -110,11 +110,17 @@ class _ModelCrudViewState extends State<ModelCrudView> {
                         ),
                         IconButton(
                           onPressed: () {
-                            Navigator.of(context).pushReplacement(
-                                MaterialPageRoute(
-                                    builder: (context) => EditModelScreen(
-                                        modelo: model,
-                                        onModeloModified: (updatedModelo) {})));
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return EditModelDialog(
+                                  modelo: model,
+                                  onModeloModified: (updatedModelo) {
+                                    // Actualizar el modelo en tu interfaz
+                                  },
+                                );
+                              },
+                            );
                           },
 
                           /*     onPressed: () {

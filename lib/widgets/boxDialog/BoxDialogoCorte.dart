@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import 'package:gestion_indumentaria/models/Corte.dart'; // Asegúrate de que la ruta sea correcta
-import 'package:gestion_indumentaria/models/talle.dart'; // Asegúrate de que la ruta sea correcta
+import 'package:gestion_indumentaria/models/Corte.dart';
+import 'package:gestion_indumentaria/models/talle.dart';
+import 'package:gestion_indumentaria/models/talleRepetecion.dart';
 
 class BoxDialogCorte extends StatefulWidget {
   const BoxDialogCorte({
@@ -61,6 +62,7 @@ class _BoxDialogCorteState extends State<BoxDialogCorte> {
                 itemBuilder: (context, index) {
                   final modeloCorte = widget.corte.modelos[index];
                   return Card(
+                    margin: const EdgeInsets.symmetric(vertical: 8.0),
                     child: ListTile(
                       title: Text(
                         modeloCorte.modelo.nombre,
@@ -73,13 +75,18 @@ class _BoxDialogCorteState extends State<BoxDialogCorte> {
                           ...modeloCorte.observacion!.map((obs) {
                             return Text(' - ${obs.titulo}: ${obs.descripcion}');
                           }),
-                          /*     const Text('Curva:'),
+                          const Text('Curva:'),
                           ...modeloCorte.curvas.map((curva) {
                             return Text(
-                                '${curva.talle.nombre.toString()} - repetición: ${curva.repeticion}');
+                                '${curva.talleId} - repetición: ${curva.repeticion}');
                           }),
-                          */
                         ],
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () {
+                          // Aquí podrías implementar la función de modificación.
+                        },
                       ),
                     ),
                   );
@@ -96,16 +103,25 @@ class _BoxDialogCorteState extends State<BoxDialogCorte> {
                 itemCount: widget.corte.rollos.length,
                 itemBuilder: (context, index) {
                   final rolloCorte = widget.corte.rollos[index];
-                  return ListTile(
-                    title: Text('${rolloCorte.rollo?.descripcion}'),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                            'Categoría: ${rolloCorte.categoria.name.toString()}'),
-                        Text(
-                            'Cantidad Utilizada: ${rolloCorte.cantidadUtilizada}')
-                      ],
+                  return Card(
+                    margin: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: ListTile(
+                      title: Text('${rolloCorte.rollo?.descripcion}'),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                              'Categoría: ${rolloCorte.categoria.name.toString()}'),
+                          Text(
+                              'Cantidad Utilizada: ${rolloCorte.cantidadUtilizada}')
+                        ],
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () {
+                          // Aquí podrías implementar la función de modificación.
+                        },
+                      ),
                     ),
                   );
                 },
