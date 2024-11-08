@@ -1,5 +1,5 @@
 import 'ModeloCorte.dart';
-import 'RolloCorte.dart';
+import 'rolloCorte.dart';
 
 class Corte {
   final int id;

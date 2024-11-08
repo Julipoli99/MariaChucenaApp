@@ -1,9 +1,12 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Corte.dart';
 import 'package:gestion_indumentaria/models/ModeloCorte.dart';
 import 'package:gestion_indumentaria/models/rolloCorte.dart';
 import 'package:gestion_indumentaria/models/talleRepetecion.dart';
+import 'package:gestion_indumentaria/pages/Modelos/orden%20de%20corte/controlDeCorte.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
 import 'package:gestion_indumentaria/widgets/TalleRepeticionSelector.dart';
@@ -18,8 +21,9 @@ class CreacionTizadasPage extends StatefulWidget {
 
 class _CreacionTizadasPageState extends State<CreacionTizadasPage> {
   List<TalleRepeticion> selectedTalle = [];
-  List<dynamic> modelosACortar = [];
-  Map<String, dynamic>? modeloSeleccionadoCompleto;
+
+  List<dynamic> modelosCorte = [];
+  ModeloCorte? modeloSeleccionadoCompleto;
   String? selectedModelo;
 
   double? consumo;
@@ -29,8 +33,8 @@ class _CreacionTizadasPageState extends State<CreacionTizadasPage> {
 
   late Corte corte;
 
-  List<dynamic> rollosDeTela = [];
-  Map<String, dynamic>? selectedRolloCompleto;
+  List<dynamic> rollosCorte = [];
+  RolloCorte? rolloSeleccionadoCompleto;
   String? selectedRollo;
 
   @override
@@ -50,10 +54,10 @@ class _CreacionTizadasPageState extends State<CreacionTizadasPage> {
       setState(() {
         corte = Corte.fromJson(data);
 
-        modelosACortar = (data['modelos'] as List)
+        modelosCorte = (data['modelos'] as List)
             .map((modeloJson) => ModeloCorte.fromJson(modeloJson))
             .toList();
-        rollosDeTela = (data['rollos'] as List)
+        rollosCorte = (data['rollos'] as List)
             .map((rolloJson) => RolloCorte.fromJson(rolloJson))
             .toList();
       });
@@ -63,6 +67,83 @@ class _CreacionTizadasPageState extends State<CreacionTizadasPage> {
           content: Text('Error al cargar el corte: ${response.body}'),
         ),
       );
+    }
+  }
+
+  Future<void> createTizada() async {
+    if (modeloSeleccionadoCompleto == null ||
+        rolloSeleccionadoCompleto == null ||
+        consumo == null ||
+        capas == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content:
+                Text('Por favor, completa todos los campos obligatorios.')),
+      );
+      return;
+    }
+
+    final talleRepeticionList = selectedTalle.map((talleRepeticion) {
+      return {
+        'talleId': talleRepeticion.talleId,
+        'repeticion': talleRepeticion.repeticion,
+      };
+    }).toList();
+
+    final orderData = {
+      'ancho': ancho,
+      'largo': largo,
+      'corteId': widget.idCorte,
+      'modelos': [
+        {
+          'modeloCorteId': modeloSeleccionadoCompleto?.id,
+          'consumo': consumo,
+          'curva': talleRepeticionList,
+        },
+      ],
+      'rollosUtilizados': [
+        {
+          'rolloCorteId': rolloSeleccionadoCompleto?.id,
+          'capas': capas,
+        },
+      ],
+    };
+
+    print(orderData);
+
+    try {
+      final response = await http.post(
+        Uri.parse('https://maria-chucena-api-production.up.railway.app/tizada'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(orderData),
+      );
+
+      if (response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Tizada creada exitosamente.')),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const ordenDeCorteregistradospage(),
+          ),
+        );
+      } else {
+        final responseBody = json.decode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Error al crear la tizada: ${responseBody['message'] ?? 'Error desconocido'}',
+            ),
+          ),
+        );
+        print('Error al crear la tizada: ${response.body}');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error de conexión: $e')),
+      );
+      print('Error de conexión: $e');
     }
   }
 
@@ -128,63 +209,67 @@ class _CreacionTizadasPageState extends State<CreacionTizadasPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const SizedBox(height: 20),
+                        const Text(
+                          'Datos de la tizada:',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 10),
 
                         // Campo de Ancho de la tizada
-                        const TextField(
-                          decoration: InputDecoration(
-                            labelText: 'Ancho de la tizada',
-                            hintText: 'Ancho',
-                          ),
-                        ),
+                        buildTextField('Ancho de la tizada', (value) {
+                          setState(() {
+                            if (value != null && value.isNotEmpty) {
+                              ancho = double.tryParse(
+                                  value); // Safely parse the string to a double
+                            } else {
+                              ancho = null; // Set to null if the input is empty
+                            }
+                          });
+                        }),
 
                         const SizedBox(height: 20),
 
                         // Campo de Largo de la tizada
-                        const TextField(
-                          decoration: InputDecoration(
-                            labelText: 'Largo de la tizada',
-                            hintText: 'Largo',
-                          ),
-                        ),
+                        buildTextField('Largo de la tizada', (value) {
+                          setState(() {
+                            // Convert the input string to a double
+                            if (value != null && value.isNotEmpty) {
+                              largo = double.tryParse(
+                                  value); // Safely parse the string to a double
+                            } else {
+                              largo = null; // Set to null if the input is empty
+                            }
+                          });
+                        }),
 
-                        const SizedBox(height: 20),
-
-                        // Dropdown para Nombre del Modelo
+                        const SizedBox(height: 30),
                         const Text(
-                          'Modelo',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                        DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                            labelText: 'Modelo',
-                            border: OutlineInputBorder(),
-                          ),
-                          items: modelosACortar.map((modelo) {
-                            return DropdownMenuItem<String>(
-                              value: modelo.modelo.nombre,
-                              child: Text(modelo.modelo.nombre),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              selectedModelo = value;
-                              modeloSeleccionadoCompleto =
-                                  modelosACortar.firstWhere((modelo) =>
-                                      modelo.modelo.nombre == selectedModelo);
-                            });
-                          },
+                          'Modelo de la tizada:',
+                          style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 20),
 
+                        buildDropdownModeloCorte(),
+
                         const SizedBox(height: 20),
+
+                        // Campo de Consumo de tela
+                        buildTextField('Consumo', (value) {
+                          setState(() {
+                            // Convert the input string to a double
+                            if (value != null && value.isNotEmpty) {
+                              consumo = double.tryParse(
+                                  value); // Safely parse the string to a double
+                            } else {
+                              consumo =
+                                  null; // Set to null if the input is empty
+                            }
+                          });
+                        }),
 
                         // Tabla de repetición
-                        const Text(
-                          'Repetición utilizadas',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                        const SizedBox(height: 10),
+
+                        const SizedBox(height: 20),
                         TalleRepeticionSelector(
                           selectedTalleRepeticion: selectedTalle,
                           onTalleRepeticionSelected: (updatedTalleRepeticion) {
@@ -194,71 +279,36 @@ class _CreacionTizadasPageState extends State<CreacionTizadasPage> {
                           },
                         ),
 
-                        const SizedBox(height: 20),
-
-                        // Campo de Consumo de tela
-                        const TextField(
-                          decoration: InputDecoration(
-                            labelText: 'Consumo',
-                            hintText: 'Seleccione el consumo',
-                          ),
-                        ),
-
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 30),
 
                         const Text(
-                          'Rollo',
-                          style: TextStyle(fontSize: 16),
+                          'Rollo de la tizada:',
+                          style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                            labelText: 'Rollo',
-                            border: OutlineInputBorder(),
-                          ),
-                          items: rollosDeTela.map((rollo) {
-                            return DropdownMenuItem<String>(
-                              value: rollo.rollo?.descripcion,
-                              child: Text(rollo.rollo!.descripcion),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              selectedRollo = value;
-                              selectedRolloCompleto = rollosDeTela.firstWhere(
-                                  (rollo) =>
-                                      rollo.rollo?.descripcion ==
-                                      selectedRollo);
-                            });
-                          },
-                        ),
+                        const SizedBox(height: 10),
+
+                        buildDropdownRolloCorte(),
                         const SizedBox(height: 20),
 
                         // Campo de Capas del rollo
-                        const TextField(
-                          decoration: InputDecoration(
-                            labelText: 'Capas del rollo',
-                            hintText: 'Capas',
-                          ),
-                        ),
+                        buildTextField('Capas', (value) {
+                          setState(() {
+                            // Convert the input string to a double
+                            if (value != null && value.isNotEmpty) {
+                              capas = double.tryParse(
+                                  value); // Safely parse the string to a double
+                            } else {
+                              capas = null; // Set to null if the input is empty
+                            }
+                          });
+                        }),
 
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 30),
 
                         // Botón de guardar
                         ElevatedButton(
-                          onPressed: () {
-                            print('Tizadas guardadas');
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.black,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 50,
-                              vertical: 20,
-                            ),
-                          ),
-                          child: const Text(
-                            'Guardar todas las tizadas',
-                            style: TextStyle(color: Colors.white),
-                          ),
+                          onPressed: createTizada,
+                          child: const Text('Crear tizada'),
                         ),
                       ],
                     ),
@@ -289,6 +339,83 @@ class _CreacionTizadasPageState extends State<CreacionTizadasPage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget buildDropdownModeloCorte() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20.0),
+      child: DropdownButtonFormField<ModeloCorte>(
+        decoration: const InputDecoration(
+          labelText: 'Seleccionar modelo',
+          border: OutlineInputBorder(),
+        ),
+        items: modelosCorte.isNotEmpty
+            ? modelosCorte.map((modeloCorte) {
+                return DropdownMenuItem<ModeloCorte>(
+                  value: modeloCorte, // Aquí pasamos el objeto completo
+                  child:
+                      Text(modeloCorte.modelo.nombre), // Visualizamos el nombre
+                );
+              }).toList()
+            : [],
+        onChanged: (selectedModeloCorte) {
+          setState(() {
+            modeloSeleccionadoCompleto = selectedModeloCorte;
+            selectedModelo = selectedModeloCorte?.modelo.nombre;
+            print(
+                'Modelo seleccionado: ${modeloSeleccionadoCompleto?.modelo.nombre}');
+            print(
+                'ID del modelo seleccionado: ${modeloSeleccionadoCompleto?.id}');
+          });
+        },
+        value:
+            modeloSeleccionadoCompleto, // Asociamos el objeto completo como valor
+      ),
+    );
+  }
+
+  Widget buildTextField(String label, ValueChanged<String?> onChanged) {
+    return TextField(
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+      ),
+      onChanged: onChanged,
+    );
+  }
+
+  Widget buildDropdownRolloCorte() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20.0),
+      child: DropdownButtonFormField<RolloCorte>(
+        decoration: const InputDecoration(
+          labelText: 'Seleccionar rollo',
+          border: OutlineInputBorder(),
+        ),
+        items: rollosCorte.isNotEmpty
+            ? rollosCorte.map((rolloCorte) {
+                return DropdownMenuItem<RolloCorte>(
+                  // Cambié el tipo aquí
+                  value: rolloCorte, // Aquí pasamos el objeto completo
+                  child: Text(
+                      rolloCorte.rollo.descripcion), // Visualizamos el nombre
+                );
+              }).toList()
+            : [],
+        onChanged: (selectedRolloCorte) {
+          setState(() {
+            rolloSeleccionadoCompleto = selectedRolloCorte;
+            selectedRollo = selectedRolloCorte!.rollo?.descripcion;
+            print(
+                'ROLLO seleccionado: ${rolloSeleccionadoCompleto!.rollo!.descripcion}');
+            print(
+                'ID del modelo seleccionado: ${rolloSeleccionadoCompleto?.id}');
+          });
+        },
+        value:
+            rolloSeleccionadoCompleto, // Asociamos el objeto completo como valor
       ),
     );
   }

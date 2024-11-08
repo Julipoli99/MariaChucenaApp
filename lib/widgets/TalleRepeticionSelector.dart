@@ -105,6 +105,7 @@ class _TalleRepeticionSelectorState extends State<TalleRepeticionSelector> {
         const SizedBox(height: 5),
         Wrap(
           spacing: 10,
+          runSpacing: 10,
           children: [
             ..._talles.map((talle) {
               final isSelected = widget.selectedTalleRepeticion
