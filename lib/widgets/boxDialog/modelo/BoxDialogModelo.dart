@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:gestion_indumentaria/models/AviosModelo.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
 import 'package:gestion_indumentaria/models/observacion.dart';
 import 'package:gestion_indumentaria/widgets/boxDialog/modelo/BoxDialogEditarObservacion.dart';
 import 'package:gestion_indumentaria/widgets/boxDialog/modelo/boxDialogoEditarAvio.dart';
+import 'package:http/http.dart' as http;
 
 class BoxDialogModelo extends StatefulWidget {
   const BoxDialogModelo({
@@ -28,6 +30,54 @@ class _BoxDialogModeloState extends State<BoxDialogModelo> {
     super.initState();
     modelo = widget.modelo; // Inicializamos el modelo en el estado
   }
+
+  // Función para eliminar un avío
+  Future<void> deleteAvio(AvioModelo avioModelo) async {
+    final url = Uri.parse(
+      'https://maria-chucena-api-production.up.railway.app/modelo/avio-modelo/${widget.modelo.id}/${avioModelo.id}',
+    );
+
+    final response = await http.delete(url);
+
+    if (response.statusCode == 200) {
+      // Eliminar el avío localmente
+      setState(() {
+        modelo.avios?.removeWhere((a) => a.id == avioModelo.id);
+      });
+      // Actualizar los modelos
+      widget.fetchModels();
+    } else {
+      print('Failed to delete AvioModelo');
+    }
+  }
+
+  /*// Función para agregar un nuevo avío
+  Future<void> addAvio() async {
+    final result = await showDialog<AvioModelo>(
+      context: context,
+      builder: (context) {
+        return EditAvioDialog(
+          modeloId: modelo.id,
+          avioModelo: AvioModelo(), // Avío vacío para agregar
+          onSave: (newAvioModelo) {
+            // Agregar el nuevo avío
+            setState(() {
+              modelo.avios?.add(newAvioModelo);
+            });
+            // Actualizar los modelos
+            widget.fetchModels();
+          },
+        );
+      },
+    );
+
+    if (result != null) {
+      // El nuevo avío se guardó correctamente
+      setState(() {
+        modelo.avios?.add(result); // Agregar el nuevo avío al modelo
+      });
+    }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -159,42 +209,85 @@ class _BoxDialogModeloState extends State<BoxDialogModelo> {
                             ),
                         ],
                       ),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              return EditAvioDialog(
-                                modeloId: modelo.id,
-                                avioModelo: avioModelo!,
-                                onSave: (updatedAvioModelo) {
-                                  setState(() {
-                                    // Aseguramos que estamos modificando el modelo original y no una copia
-                                    final index = modelo.avios?.indexWhere(
-                                        (a) => a.id == updatedAvioModelo.id);
-                                    if (index != null && index >= 0) {
-                                      modelo.avios?[index] = updatedAvioModelo;
-                                    } else {
-                                      // Si no lo encontramos, agregamos el nuevo avío al modelo
-                                      modelo.avios?.add(updatedAvioModelo);
-                                    }
-                                  });
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit),
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return EditAvioDialog(
+                                    modeloId: modelo.id,
+                                    avioModelo: avioModelo!,
+                                    onSave: (updatedAvioModelo) {
+                                      setState(() {
+                                        // Aseguramos que estamos modificando el modelo original y no una copia
+                                        final index = modelo.avios?.indexWhere(
+                                            (a) =>
+                                                a.id == updatedAvioModelo.id);
+                                        if (index != null && index >= 0) {
+                                          modelo.avios?[index] =
+                                              updatedAvioModelo;
+                                        } else {
+                                          // Si no lo encontramos, agregamos el nuevo avío al modelo
+                                          modelo.avios?.add(updatedAvioModelo);
+                                        }
+                                      });
 
-                                  // Actualizamos en la API si es necesario
-                                  widget.fetchModels();
+                                      // Actualizamos en la API si es necesario
+                                      widget.fetchModels();
+                                    },
+                                  );
                                 },
                               );
                             },
-                          );
-                        },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete),
+                            onPressed: () {
+                              // Confirmar eliminación del avío
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: const Text('Eliminar Avío'),
+                                    content: const Text(
+                                        '¿Estás seguro de que deseas eliminar este avío?'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text('Cancelar'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () async {
+                                          await deleteAvio(avioModelo!);
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text('Eliminar'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                          ),
+                        ],
                       ),
                     ),
                   );
                 },
               ),
             ),
-
+            const SizedBox(height: 10),
+            // Botón para agregar un nuevo avío
+            /*ElevatedButton(
+              onPressed: addAvio,
+              child: const Text('Agregar Nuevo Avío'),
+            ),*/
             const SizedBox(height: 10),
             // Curvas
             Text(
@@ -207,22 +300,29 @@ class _BoxDialogModeloState extends State<BoxDialogModelo> {
                   shrinkWrap: true,
                   itemCount: modelo.curva.length,
                   itemBuilder: (context, index) {
-                    final talle = modelo.curva[index];
-                    return ListTile(
-                      title: Text('Talle: ${talle.nombre}'),
+                    return Card(
+                      margin: const EdgeInsets.symmetric(vertical: 4),
+                      child: ListTile(
+                        title: Text(modelo.curva[index].nombre),
+                      ),
                     );
                   },
                 ),
-              )
-            else
-              const Text('No hay talles disponibles'),
+              ),
           ],
         ),
       ),
       actions: [
         TextButton(
           onPressed: widget.onCancel,
-          child: const Text('Cerrar'),
+          child: const Text('Cancelar'),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+            // Llamar a alguna función de guardado si es necesario
+          },
+          child: const Text('Guardar Cambios'),
         ),
       ],
     );
