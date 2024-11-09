@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/TipoProducto.dart';
 import 'package:gestion_indumentaria/pages/Crud/TallesCrudView.dart';
 import 'package:gestion_indumentaria/pages/Login/usuariosRegistrados.dart';
+
 import 'package:gestion_indumentaria/pages/Talles/tallesVista.dart';
 import 'package:gestion_indumentaria/pages/TipoProducto/registroTipoProducto.dart';
 import 'package:gestion_indumentaria/pages/Tizadas/CreacionTizadasPage.dart';

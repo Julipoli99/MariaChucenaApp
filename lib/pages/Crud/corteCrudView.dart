@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Corte.dart';
 import 'package:gestion_indumentaria/pages/Modelos/orden%20de%20corte/editarOrdenDeCorte.dart';
 import 'package:gestion_indumentaria/pages/Modelos/orden%20de%20corte/ordenDeCorte.dart';
-import 'package:gestion_indumentaria/widgets/boxDialog/BoxDialogoCorte.dart';
+import 'package:gestion_indumentaria/widgets/boxDialog/corte/BoxDialogoCorte.dart';
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
 import 'package:http/http.dart' as http;
 

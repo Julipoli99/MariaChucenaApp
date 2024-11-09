@@ -1,20 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
+import 'package:gestion_indumentaria/models/observacion.dart';
+import 'package:gestion_indumentaria/widgets/boxDialog/modelo/BoxDialogEditarObservacion.dart';
+import 'package:gestion_indumentaria/widgets/boxDialog/modelo/boxDialogoEditarAvio.dart';
 
-class BoxDialogModelo extends StatelessWidget {
+class BoxDialogModelo extends StatefulWidget {
   const BoxDialogModelo({
     super.key,
     required this.modelo,
     required this.onCancel,
+    required this.fetchModels,
   });
 
   final Modelo modelo;
   final VoidCallback onCancel;
+  final Function fetchModels;
+
+  @override
+  _BoxDialogModeloState createState() => _BoxDialogModeloState();
+}
+
+class _BoxDialogModeloState extends State<BoxDialogModelo> {
+  late Modelo modelo;
+
+  @override
+  void initState() {
+    super.initState();
+    modelo = widget.modelo; // Inicializamos el modelo en el estado
+  }
 
   @override
   Widget build(BuildContext context) {
-    print('Contenido completo del modelo: ${modelo.toJson()}');
-
     return AlertDialog(
       backgroundColor: Colors.grey[200],
       title: Text('Detalles del Modelo: ${modelo.nombre}'),
@@ -24,7 +40,7 @@ class BoxDialogModelo extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Observaciones - con Card para destacar cada una
+            // Observaciones
             Text(
               'Observaciones:',
               style: const TextStyle(fontWeight: FontWeight.bold),
@@ -44,8 +60,38 @@ class BoxDialogModelo extends StatelessWidget {
                           'Descripción: ${observacion?.descripcion ?? 'Sin descripción'}'),
                       trailing: IconButton(
                         icon: const Icon(Icons.edit),
-                        onPressed: () {
-                          // Implementar funcionalidad para editar la observación
+                        onPressed: () async {
+                          if (observacion != null) {
+                            final result = await showDialog<ObservacionModel>(
+                              context: context,
+                              builder: (context) {
+                                return ModificadorObservacionDialog(
+                                  observacion: observacion,
+                                  idModelo: modelo.id,
+                                );
+                              },
+                            );
+
+                            if (result != null) {
+                              // Actualizamos el modelo con la observación modificada
+                              setState(() {
+                                final index = modelo.observaciones
+                                    ?.indexWhere((o) => o.id == result.id);
+                                if (index != null && index >= 0) {
+                                  modelo.observaciones?[index] =
+                                      result; // Actualizamos la observación
+                                }
+                              });
+
+                              // Actualizamos en la API si es necesario
+                              widget.fetchModels();
+                            }
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('Observación no encontrada')),
+                            );
+                          }
                         },
                       ),
                     ),
@@ -54,7 +100,7 @@ class BoxDialogModelo extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            // Información de telas - sin Card
+            // Información de telas
             Text(
               'Telas:',
               style: const TextStyle(fontWeight: FontWeight.bold),
@@ -72,7 +118,7 @@ class BoxDialogModelo extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            // Avios - con Card para cada uno
+            // Avios
             Text(
               'Avios (${modelo.avios?.length ?? 0}):',
               style: const TextStyle(fontWeight: FontWeight.bold),
@@ -103,7 +149,7 @@ class BoxDialogModelo extends StatelessWidget {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text('Talles:',
+                                const Text('Talles: ',
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold)),
                                 ...avioModelo.talles!.map((talle) {
@@ -116,7 +162,31 @@ class BoxDialogModelo extends StatelessWidget {
                       trailing: IconButton(
                         icon: const Icon(Icons.edit),
                         onPressed: () {
-                          // Implementar funcionalidad para editar el avio
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return EditAvioDialog(
+                                modeloId: modelo.id,
+                                avioModelo: avioModelo!,
+                                onSave: (updatedAvioModelo) {
+                                  setState(() {
+                                    // Aseguramos que estamos modificando el modelo original y no una copia
+                                    final index = modelo.avios?.indexWhere(
+                                        (a) => a.id == updatedAvioModelo.id);
+                                    if (index != null && index >= 0) {
+                                      modelo.avios?[index] = updatedAvioModelo;
+                                    } else {
+                                      // Si no lo encontramos, agregamos el nuevo avío al modelo
+                                      modelo.avios?.add(updatedAvioModelo);
+                                    }
+                                  });
+
+                                  // Actualizamos en la API si es necesario
+                                  widget.fetchModels();
+                                },
+                              );
+                            },
+                          );
                         },
                       ),
                     ),
@@ -124,8 +194,9 @@ class BoxDialogModelo extends StatelessWidget {
                 },
               ),
             ),
+
             const SizedBox(height: 10),
-            // Curvas - sin Card
+            // Curvas
             Text(
               'Curva (${modelo.curva.length}):',
               style: const TextStyle(fontWeight: FontWeight.bold),
@@ -150,7 +221,7 @@ class BoxDialogModelo extends StatelessWidget {
       ),
       actions: [
         TextButton(
-          onPressed: onCancel,
+          onPressed: widget.onCancel,
           child: const Text('Cerrar'),
         ),
       ],

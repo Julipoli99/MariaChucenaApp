@@ -8,8 +8,8 @@ import 'package:gestion_indumentaria/models/talle.dart';
 import 'package:gestion_indumentaria/models/tipoPrenda.dart';
 import 'package:gestion_indumentaria/pages/Modelos/NuevoModelo.dart';
 
-import 'package:gestion_indumentaria/pages/Provedores/editarModelos.dart';
-import 'package:gestion_indumentaria/widgets/boxDialog/BoxDialogModelo.dart';
+import 'package:gestion_indumentaria/widgets/boxDialog/modelo/editarModelos.dart';
+import 'package:gestion_indumentaria/widgets/boxDialog/modelo/BoxDialogModelo.dart';
 
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
 import 'package:http/http.dart' as http;
@@ -39,6 +39,7 @@ class _ModelCrudViewState extends State<ModelCrudView> {
         return BoxDialogModelo(
           modelo: modelo,
           onCancel: onCancel,
+          fetchModels: fetchModels,
         );
       },
     );
@@ -104,43 +105,29 @@ class _ModelCrudViewState extends State<ModelCrudView> {
                       children: [
                         IconButton(
                           onPressed: () {
-                            showBox(model);
+                            showBox(
+                                model); // Llamada correcta a la función showBox
                           },
                           icon: const Icon(Icons.remove_red_eye_outlined),
                         ),
                         IconButton(
-                          onPressed: () {
-                            showDialog(
+                          onPressed: () async {
+                            final result = await showDialog<bool>(
                               context: context,
                               builder: (context) {
                                 return EditModelDialog(
                                   modelo: model,
                                   onModeloModified: (updatedModelo) {
-                                    // Actualizar el modelo en tu interfaz
+                                    // Lógica para actualizar el modelo en tu interfaz (si es necesario)
                                   },
                                 );
                               },
                             );
-                          },
 
-                          /*     onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (context) => ModificadorModeloDialog(
-                                modelo: model,
-                                onModeloModified: (Modelo updatedModelo) {
-                                  setState(() {
-                                    // Actualizar la prenda en la lista
-                                    final index = models.indexWhere(
-                                        (m) => m.id == updatedModelo.id);
-                                    if (index != -1) {
-                                      models[index] = updatedModelo;
-                                    }
-                                  });
-                                },
-                              ),
-                            );
-                          },*/
+                            if (result == true) {
+                              fetchModels(); // Refresca la lista si se actualizó el modelo
+                            }
+                          },
                           icon: const Icon(Icons.edit),
                         ),
                         IconButton(

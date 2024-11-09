@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/talle.dart';
-import 'package:gestion_indumentaria/widgets/boxDialog/boxdialogoTalle.dart';
+import 'package:gestion_indumentaria/widgets/boxDialog/talle/boxdialogoTalle.dart';
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
 import 'package:http/http.dart' as http;
 

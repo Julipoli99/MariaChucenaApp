@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Avio.dart';
 import 'package:gestion_indumentaria/pages/Avios/modificadorAvios.dart';
 import 'package:gestion_indumentaria/pages/Avios/nuevoAvios.dart';
-import 'package:gestion_indumentaria/widgets/boxDialog/BoxDialogoAviosDetalles.dart';
+import 'package:gestion_indumentaria/widgets/boxDialog/avios/BoxDialogoAviosDetalles.dart';
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
 import 'package:http/http.dart' as http;
 

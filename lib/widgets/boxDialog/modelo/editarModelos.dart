@@ -26,9 +26,6 @@ class _EditModelDialogState extends State<EditModelDialog> {
   bool _isSaving = false;
 
   List<Talle> selectedTallesForm = [];
-  bool esPorTalle = false; // Variable para indicar si es por talle
-  bool esPorColor = false; // Variable para indicar si es por color
-  List<Talle>? selectedTallesDialog; // Almacena los talles seleccionados
 
   @override
   void initState() {
@@ -36,7 +33,7 @@ class _EditModelDialogState extends State<EditModelDialog> {
     _nombreController.text = widget.modelo.nombre;
     _tieneTelaSecundaria = widget.modelo.tieneTelaSecundaria;
     _tieneTelaAuxiliar = widget.modelo.tieneTelaAuxiliar;
-    selectedTallesDialog = widget.modelo.curva.cast<Talle>();
+    selectedTallesForm = List<Talle>.from(widget.modelo.curva);
   }
 
   Future<void> _updateModeloInApi() async {
@@ -53,6 +50,7 @@ class _EditModelDialogState extends State<EditModelDialog> {
           'nombre': _nombreController.text.trim(),
           'tieneTelaSecundaria': _tieneTelaSecundaria,
           'tieneTelaAuxiliar': _tieneTelaAuxiliar,
+          'curva': selectedTallesForm.map((talle) => talle.toJson()).toList(),
         }),
       );
 
@@ -60,9 +58,7 @@ class _EditModelDialogState extends State<EditModelDialog> {
         final responseData = jsonDecode(response.body);
         final updatedModelo = Modelo.fromJson(responseData);
         widget.onModeloModified(updatedModelo);
-
-        Navigator.of(context)
-            .pop(); // Cierra el diálogo después de la actualización
+        Navigator.of(context).pop(true);
       } else {
         _showError('Error al actualizar el modelo en la API. ${response.body}');
       }
@@ -127,15 +123,11 @@ class _EditModelDialogState extends State<EditModelDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: _isSaving
-              ? null
-              : () =>
-                  Navigator.of(context).pop(), // Cierra el diálogo sin guardar
+          onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
           child: const Text('Cancelar'),
         ),
         TextButton(
-          onPressed:
-              _isSaving ? null : _updateModeloInApi, // Guarda los cambios
+          onPressed: _isSaving ? null : _updateModeloInApi,
           child: const Text('Guardar'),
         ),
       ],

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:gestion_indumentaria/models/talle.dart';
-import 'package:gestion_indumentaria/widgets/boxDialog/boxdialogoTalle.dart';
+import 'package:gestion_indumentaria/widgets/boxDialog/talle/boxdialogoTalle.dart';
 
 class TalleSelector extends StatefulWidget {
   final List<Talle> selectedTalles;
@@ -55,20 +55,6 @@ class _TalleSelectorState extends State<TalleSelector> {
     );
   }
 
-  void _showAddTalleDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AddTalleDialog(
-        onTalleAdded: (nuevoTalle) {
-          setState(() {
-            _talles.add(nuevoTalle as Talle);
-          });
-          _toggleTalleSelection(nuevoTalle as Talle);
-        },
-      ),
-    );
-  }
-
   void _toggleTalleSelection(Talle talle) {
     setState(() {
       if (widget.selectedTalles.contains(talle)) {
@@ -86,6 +72,11 @@ class _TalleSelectorState extends State<TalleSelector> {
       return const Center(child: CircularProgressIndicator());
     }
 
+    // Filtrar los talles para excluir los que ya vienen seleccionados
+    final List<Talle> tallesDisponibles = _talles
+        .where((talle) => !widget.selectedTalles.contains(talle))
+        .toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -94,10 +85,38 @@ class _TalleSelectorState extends State<TalleSelector> {
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 5),
+
+        // Mostrar mensaje y lista de talles seleccionados
+        if (widget.selectedTalles.isNotEmpty) ...[
+          const Text(
+            'Talles registrados:',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 5),
+          Wrap(
+            spacing: 10,
+            children: widget.selectedTalles.map((talle) {
+              return ChoiceChip(
+                label: Text(talle.nombre),
+                selected: true,
+                onSelected: (_) => _toggleTalleSelection(talle),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 10),
+        ],
+
+        // Mostrar lista de talles disponibles (sin los seleccionados)
+        const Text(
+          'Todos los talles disponibles:',
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 5),
         Wrap(
-          spacing: 10,
+          spacing: 15,
+          runSpacing: 12,
           children: [
-            ..._talles.map((talle) {
+            ...tallesDisponibles.map((talle) {
               return ChoiceChip(
                 label: Text(talle.nombre),
                 selected: widget.selectedTalles.contains(talle),
@@ -113,6 +132,20 @@ class _TalleSelectorState extends State<TalleSelector> {
           ],
         ),
       ],
+    );
+  }
+
+  void _showAddTalleDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AddTalleDialog(
+        onTalleAdded: (nuevoTalle) {
+          setState(() {
+            _talles.add(nuevoTalle as Talle);
+          });
+          _toggleTalleSelection(nuevoTalle as Talle);
+        },
+      ),
     );
   }
 }

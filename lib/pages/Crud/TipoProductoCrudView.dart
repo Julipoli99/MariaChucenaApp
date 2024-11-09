@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/TipoProducto.dart';
 import 'package:gestion_indumentaria/pages/TipoProducto/nuevoRegistro.dart';
-import 'package:gestion_indumentaria/widgets/boxDialog/BoxDialogTipoProductoModificar.dart';
+import 'package:gestion_indumentaria/widgets/boxDialog/tipoProducto/BoxDialogTipoProductoModificar.dart';
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
 import 'package:http/http.dart' as http;
 
