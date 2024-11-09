@@ -12,8 +12,8 @@ import 'package:gestion_indumentaria/pages/Modelos/ModelosRegistradosPage.dart';
 import 'package:gestion_indumentaria/pages/principal.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
-import 'package:gestion_indumentaria/widgets/TalleSelectorWidget.dart';
-import 'package:gestion_indumentaria/widgets/prendaSelectorWidget.dart';
+import 'package:gestion_indumentaria/widgets/boxDialog/talle/TalleSelectorWidget.dart';
+import 'package:gestion_indumentaria/widgets/boxDialog/prenda/prendaSelectorWidget.dart';
 
 import 'package:http/http.dart' as http;
 

@@ -1,9 +1,10 @@
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:gestion_indumentaria/models/Proveedor.dart';
+import 'package:gestion_indumentaria/models/Modelo.dart';
 import 'package:gestion_indumentaria/models/RolloCorte.dart';
 import 'package:gestion_indumentaria/models/TipoProducto.dart';
-import 'package:gestion_indumentaria/models/talle.dart';
 import 'package:gestion_indumentaria/models/Tela.dart';
 import 'package:gestion_indumentaria/models/observacion.dart';
 import 'package:gestion_indumentaria/models/talleRepetecion.dart';
@@ -12,6 +13,8 @@ import 'package:gestion_indumentaria/pages/principal.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/TalleRepeticionSelector.dart';
+import 'package:gestion_indumentaria/widgets/boxDialog/modelo/modeloPorGeneroYPrendaSelector.dart';
+import 'package:gestion_indumentaria/widgets/boxDialog/prenda/prendaSelectorWidget.dart';
 import 'package:http/http.dart' as http;
 
 class OrdenDeCorteScreen extends StatefulWidget {
@@ -22,24 +25,33 @@ class OrdenDeCorteScreen extends StatefulWidget {
 }
 
 class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
-  List<Tela> tiposDeTela = [];
-  List<dynamic> modelosACortar = [];
-  Map<String, dynamic>? modeloSeleccionadoCompleto;
-  List<String> avios = [];
-  List<TalleRepeticion> selectedTalle = [];
-  Tela? selectedTipoDeTela;
-  String? selectedModelo;
-  String? selectedAvio;
-  CategoriaTela? selectedCategoriaTela;
-  List<Tela> telas = [];
-  List<Proveedor> proveedores = [];
-  double? cantidadUtilizada;
-  List<ObservacionModel>? observaciones;
+  //Tipo de tela
+  List<TipoProducto> tipoProductos = [];
   int? selectedTipoProductoId;
-  int? selectedprovedorId;
+
+  //Rollo
+  List<dynamic> tiposDeTela = [];
+  CategoriaTela? selectedCategoriaTela;
+  Tela? selectedTipoDeTela;
+  int? selectedTelaId;
+  double? cantidadUtilizada;
+
+  //Modelo
+  List<dynamic> modelosACortar = [];
+  int? selectedPrendaId;
+  String? selectedGenero;
+  final List<String> generos = ['MASCULINO', 'FEMENINO', 'UNISEX'];
+
+  Modelo? modeloSeleccionadoCompleto;
+  int? selectedModeloId;
+
+  //Curva
+  List<TalleRepeticion> selectedTalle = [];
+
+  //Observacion
+  List<ObservacionModel>? observaciones;
   String tituloObservacion = "Sin titulo";
   String descripcionObservacion = "Sin descripción";
-  List<TipoProducto> tipoProductos = [];
 
   @override
   void initState() {
@@ -47,10 +59,7 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
     fetchModelo();
     fetchTiposDeTela();
     fetchTipoProductos();
-    fetchProveedores();
   }
-
-//api
 
   Future<void> fetchModelo() async {
     final response = await http.get(Uri.parse(
@@ -60,6 +69,7 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
       setState(() {
         modelosACortar = data;
       });
+      print(modelosACortar);
     } else {
       print('Error al cargar los modelos');
     }
@@ -84,89 +94,65 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
     }
   }
 
-  Future<void> fetchProveedores() async {
-    const url = 'https://maria-chucena-api-production.up.railway.app/proveedor';
-    final uri = Uri.parse(url);
-
+  Tela? getTelaCompleto(int id) {
     try {
-      final response = await http.get(uri);
-
-      if (response.statusCode == 200) {
-        final List<dynamic> jsonData = jsonDecode(response.body);
-        print(response.body);
-        setState(() {
-          proveedores =
-              jsonData.map((json) => Proveedor.fromJson(json)).toList();
-        });
-      } else {
-        print("Error: Código de estado ${response.statusCode}");
-      }
-    } catch (e) {
-      print("Error al cargar los proveedores: $e");
-    }
-  }
-
-  String? getNombreProveedor(int proveedorId) {
-    try {
-      final proveedor = proveedores.firstWhere(
-        (proveedor) => proveedor.id == proveedorId,
+      final selectedTipoDeTela = tiposDeTela.firstWhere(
+        (tela) => tela.id == id,
       );
-      return proveedor.nombre;
+      return selectedTipoDeTela;
     } catch (e) {
-      print('Tipo de provedor no encontrado: $proveedorId');
-      return null; // Retorna null si no se encuentra
+      print('Tipo de tela no encontrado: $selectedTipoDeTela');
+      return null;
     }
   }
 
-  String? getNombreProducto(int tipoProductoId) {
+  Modelo? getModeloCompleto(int id) {
+    print('MODELO ID SELECCIONADO DENTRO DE GET MODELO: $selectedModeloId');
     try {
-      final tipoProducto = tipoProductos.firstWhere(
-        (tipoProducto) => tipoProducto.id == tipoProductoId,
+      final modeloSeleccionadoCompleto = modelosACortar.firstWhere(
+        (modelo) => modelo.id == id,
       );
-      return tipoProducto
-          .nombre; // Retorna el nombre del tipo de producto encontrado
+      return modeloSeleccionadoCompleto;
     } catch (e) {
-      print('Tipo de producto no encontrado: $tipoProductoId');
-      return null; // Retorna null si no se encuentra
+      print('Tipo de modelo no encontrado: $modeloSeleccionadoCompleto');
+      return null;
     }
   }
-  // Lista para almacenar tipos de productos
 
   Future<void> fetchTipoProductos() async {
     const url =
-        'https://maria-chucena-api-production.up.railway.app/tipo-Producto'; // Asegúrate de que esta URL sea correcta
-    final uri = Uri.parse(url);
+        'https://maria-chucena-api-production.up.railway.app/tipo-producto';
+    final response = await http.get(Uri.parse(url));
 
-    try {
-      final response = await http.get(uri);
-
-      if (response.statusCode == 200) {
-        final List<dynamic> jsonData = jsonDecode(response.body);
-
-        setState(() {
-          tipoProductos =
-              jsonData.map((json) => TipoProducto.fromJson(json)).toList();
-        });
-      } else {
-        print("Error: Código de estado ${response.statusCode}");
-      }
-    } catch (e) {
-      print("Error al cargar los tipos de productos: $e");
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      setState(() {
+        tipoProductos = data
+            .map((item) => TipoProducto.fromJson(item))
+            .where((tipo) => tipo.tipo == TipoEnum.TELA)
+            .toList();
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content:
+                Text('Error al cargar tipos de productos: ${response.body}')),
+      );
     }
   }
 
   Future<void> createOrdenDeCorte() async {
-    if (selectedTipoDeTela == null ||
-        selectedModelo == null ||
+    print(
+        'DENTRO DE CREAR ORDEN: telaID: $selectedTelaId   - MODELO $selectedModeloId   -  TALLES $selectedTalle');
+
+    if ((selectedTelaId) == null ||
+        (selectedModeloId) == null ||
         selectedTalle.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Por favor, complete todos los campos.')),
       );
       return;
     }
-
-    final modeloSeleccionado = modelosACortar
-        .firstWhere((modelo) => modelo['nombre'] == selectedModelo);
 
     // Mapear los talles seleccionados (selectedTalle) a la estructura de corte
     final talleRepeticionList = selectedTalle.map((talleRepeticion) {
@@ -181,7 +167,7 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
     final orderData = {
       'modelos': [
         {
-          'modeloId': modeloSeleccionadoCompleto?['id'],
+          'modeloId': selectedModeloId,
           'totalPrendas': 1,
           'esParaEstampar': false,
           'usaTelaSecundaria': false,
@@ -197,7 +183,7 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
       ],
       'rollos': [
         {
-          'rolloId': selectedTipoDeTela?.id,
+          'rolloId': selectedTelaId,
           'categoria': selectedCategoriaTela.toString().split('.').last,
           'cantidadUtilizada': cantidadUtilizada,
         },
@@ -238,11 +224,6 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
     }
   }
 
-  // Lista para almacenar tipos de productos
-
-//final de api
-
-//pantalla
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -306,7 +287,6 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
       ),
     );
   }
-//final pantalla principal
 
 //contenedor principal
   Widget _buildMainContent(BuildContext context) {
@@ -318,59 +298,12 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              //tipo producto falta completar funcionalidad
-              // Sección: Tipo de Tela (Rollo)
               _buildSectionTitle('Rollo'),
-              DropdownButtonFormField<int>(
-                decoration: InputDecoration(labelText: 'Tipo de Producto'),
-                value: selectedTipoProductoId,
-                items: tiposDeTela.map((tipoProducto) {
-                  return DropdownMenuItem<int>(
-                    value: tipoProducto.id,
-                    child: Text({getNombreProducto(tipoProducto.tipoProductoId)}
-                        .toString()),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedTipoProductoId = value;
-                  });
-                },
-              ),
+              buildDropdownTipoProducto(),
+
               const SizedBox(height: 10),
-              //provedor falta hacer funcionalidad
-              DropdownButtonFormField<int>(
-                decoration: InputDecoration(labelText: 'Tipo de Provedor'),
-                value: selectedprovedorId,
-                items: tiposDeTela.map((tipoProvedor) {
-                  return DropdownMenuItem<int>(
-                    value: tipoProvedor.id,
-                    child: Text(tipoProvedor.proveedorId.toString()),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedprovedorId = value;
-                  });
-                },
-              ),
-              const SizedBox(height: 10),
-              //rollo falta hacer funcionalidad
-              DropdownButtonFormField<int>(
-                decoration: InputDecoration(labelText: 'Tipo de rollo'),
-                value: selectedprovedorId,
-                items: tiposDeTela.map((tipoProvedor) {
-                  return DropdownMenuItem<int>(
-                    value: tipoProvedor.id,
-                    child: Text(tipoProvedor.proveedorId.toString()),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedprovedorId = value;
-                  });
-                },
-              ),
+              buildDropdownRollo(),
+
               const SizedBox(height: 10),
               //cantidad
               buildTextField('Cantidad Utilizada', (value) {
@@ -383,60 +316,33 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
                   }
                 });
               }),
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
               // Sección: Modelo a Cortar
-              //falta modificar tipo prenda funcionalidad
-              _buildSectionTitle('Modelo a Cortar'),
-              DropdownButtonFormField<int>(
-                decoration: InputDecoration(labelText: 'Tipo de prenda'),
-                value: selectedprovedorId,
-                items: tiposDeTela.map((tipoProvedor) {
-                  return DropdownMenuItem<int>(
-                    value: tipoProvedor.id,
-                    child: Text(tipoProvedor.proveedorId.toString()),
-                  );
-                }).toList(),
-                onChanged: (value) {
+              _buildSectionTitle('Modelo'),
+
+              const SizedBox(height: 10),
+
+              //         buildDropdownModelo(),
+              PrendaSelectorWidget(
+                selectedPrendaId: selectedPrendaId,
+                onPrendaSelected: (id) {
                   setState(() {
-                    selectedprovedorId = value;
-                  });
-                },
-              ),
-              //falta funcionalidad y cambios en genero
-              DropdownButtonFormField<int>(
-                decoration: InputDecoration(labelText: 'Tipo de Genero'),
-                value: selectedprovedorId,
-                items: tiposDeTela.map((tipoProvedor) {
-                  return DropdownMenuItem<int>(
-                    value: tipoProvedor.id,
-                    child: Text(tipoProvedor.proveedorId.toString()),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedprovedorId = value;
+                    selectedPrendaId = id; // Guarda el id seleccionado
                   });
                 },
               ),
               const SizedBox(height: 10),
-              //modelos falta funcionalidad coinicidan con la busqueda. En nombre debe ser CÓDIGO+NOMBRE
 
-              DropdownButtonFormField<String>(
-                decoration: const InputDecoration(
-                  labelText: 'Modelo',
-                  border: OutlineInputBorder(),
-                ),
-                items: modelosACortar.map((modelo) {
-                  return DropdownMenuItem<String>(
-                    value: modelo['nombre'],
-                    child: Text(modelo['nombre']),
-                  );
-                }).toList(),
-                onChanged: (value) {
+              buildDropdownGenero(),
+              const SizedBox(height: 10),
+
+              ModeloPorGeneroYPrendaSelectorWidget(
+                selectedModeloId: selectedModeloId,
+                genero: selectedGenero,
+                categoriaPrenda: selectedPrendaId,
+                onModeloSelected: (id) {
                   setState(() {
-                    selectedModelo = value;
-                    modeloSeleccionadoCompleto = modelosACortar.firstWhere(
-                        (modelo) => modelo['nombre'] == selectedModelo);
+                    selectedModeloId = id; // Guarda el id seleccionado
                   });
                 },
               ),
@@ -546,15 +452,15 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
           children: auxOptions.map((aux) {
             return ChoiceChip(
               label: Text(aux),
-              selected: selectedAux == aux, // Compara con la opción actual
+              selected: selectedAux == aux,
               onSelected: (selected) {
                 setState(() {
                   if (selected) {
-                    selectedAux = aux; // Asigna la opción seleccionada
-                    selectedAuxForm = true; // Marca como seleccionada
+                    selectedAux = aux;
+                    selectedAuxForm = true;
                   } else {
-                    selectedAux = null; // Deselect all
-                    selectedAuxForm = false; // Desmarca
+                    selectedAux = null;
+                    selectedAuxForm = false;
                   }
                 });
               },
@@ -571,7 +477,7 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Text(
         title,
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.bold,
           color: Colors.blueGrey,
@@ -592,10 +498,10 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
               ),
             );
           },
-          child: const Text('Cancelar'),
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.grey,
           ),
+          child: const Text('Cancelar'),
         ),
         const SizedBox(width: 10),
         ElevatedButton(
@@ -648,6 +554,89 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
     );
   }
 
+  Widget buildDropdownTipoProducto() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20.0),
+      child: DropdownButtonFormField<int>(
+        decoration: InputDecoration(
+          labelText: 'Tipo de Tela',
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        items: tipoProductos.map((tipoProducto) {
+          return DropdownMenuItem<int>(
+            value: tipoProducto.id,
+            child: Text(tipoProducto.nombre),
+          );
+        }).toList(),
+        onChanged: (value) {
+          setState(() {
+            selectedTipoProductoId = value;
+          });
+        },
+      ),
+    );
+  }
+
+  Widget buildDropdownRollo() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20.0),
+      child: DropdownButtonFormField<int>(
+        decoration: InputDecoration(
+          labelText: 'Rollo de Tela',
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        items: tiposDeTela
+            .where((tela) =>
+                tela.tipoProductoId ==
+                selectedTipoProductoId) // Filtrar por tipoProductoId
+            .map((tela) {
+          return DropdownMenuItem<int>(
+            value: tela.id,
+            child: Text(tela.descripcion ?? 'Sin descripción'),
+          );
+        }).toList(),
+        onChanged: (value) {
+          setState(() {
+            selectedTelaId = value;
+          });
+        },
+        value: selectedTelaId,
+      ),
+    );
+  }
+
+  Widget buildDropdownGenero() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20.0),
+      child: DropdownButtonFormField<String>(
+        decoration: InputDecoration(
+          labelText: 'Género',
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        // Los ítems en el Dropdown
+        items: generos.map((genero) {
+          return DropdownMenuItem<String>(
+            value: genero,
+            child: Text(genero),
+          );
+        }).toList(),
+        // Cuando se selecciona un valor
+        onChanged: (value) {
+          setState(() {
+            selectedGenero = value;
+          });
+        },
+        value: selectedGenero,
+      ),
+    );
+  }
+
   Widget _buildSummaryCard() {
     return Card(
       elevation: 2,
@@ -661,11 +650,11 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             const Divider(),
-            selectedModelo != null
+            selectedModeloId != null
                 ? Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Modelo seleccionado: $selectedModelo'),
+                      Text('Modelo seleccionado: $selectedModeloId'),
                       Text(
                           'Tipo de tela: ${selectedTipoDeTela?.descripcion ?? 'Ninguno'}'),
                       Text(
@@ -685,13 +674,13 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       Text(
-                          'ID: ${modeloSeleccionadoCompleto?['id'] ?? 'No disponible'}'),
+                          'Código: ${modeloSeleccionadoCompleto?.codigo ?? 'No disponible'}'),
                       Text(
-                          'Nombre: ${modeloSeleccionadoCompleto?['nombre'] ?? 'No disponible'}'),
+                          'Nombre: ${modeloSeleccionadoCompleto?.nombre ?? 'No disponible'}'),
                       Text(
-                          'Categoría: ${modeloSeleccionadoCompleto?['categoria'] ?? 'No disponible'}'),
+                          'Categoría: ${modeloSeleccionadoCompleto?.categoriaTipo ?? 'No disponible'}'),
                       Text(
-                          'Género: ${modeloSeleccionadoCompleto?['genero'] ?? 'No disponible'}'),
+                          'Género: ${modeloSeleccionadoCompleto?.genero ?? 'No disponible'}'),
                       const SizedBox(height: 10),
                       const Text(
                         'Talles seleccionados:',

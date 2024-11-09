@@ -175,7 +175,7 @@ class _NuevasTelasDialogState extends State<NuevasTelasDialog> {
       padding: const EdgeInsets.only(bottom: 20.0),
       child: DropdownButtonFormField<int>(
         decoration: InputDecoration(
-          labelText: 'Tipo de Producto (Tela)',
+          labelText: 'Tipo de Tela',
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
           ),
