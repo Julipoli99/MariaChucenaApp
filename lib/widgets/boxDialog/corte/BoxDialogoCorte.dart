@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gestion_indumentaria/models/ModeloCorte.dart';
+import 'package:gestion_indumentaria/widgets/boxDialog/corte/AlertDialogModificarModeloCorte.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -40,6 +42,23 @@ class _BoxDialogCorteState extends State<BoxDialogCorte> {
     } else {
       throw Exception('Error al cargar los talles');
     }
+  }
+
+  void _showEditTotalPrendasDialog(BuildContext context, ModeloCorte modelo) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialogModificarModeloCorte(
+          modelo: modelo,
+          onUpdated: () {
+            // Aquí actualizas la vista para reflejar el cambio
+            // Cuando el modelo se modifica, usamos setState para actualizar la vista
+            (context as Element)
+                .markNeedsBuild(); // Forzamos una actualización en el widget
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -85,7 +104,7 @@ class _BoxDialogCorteState extends State<BoxDialogCorte> {
                       trailing: IconButton(
                         icon: const Icon(Icons.edit),
                         onPressed: () {
-                          // Aquí podrías implementar la función de modificación.
+                          _showEditTotalPrendasDialog(context, modeloCorte);
                         },
                       ),
                     ),
