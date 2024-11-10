@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Corte.dart';
-import 'package:gestion_indumentaria/pages/Modelos/orden%20de%20corte/editarOrdenDeCorte.dart';
 import 'package:gestion_indumentaria/pages/Modelos/orden%20de%20corte/ordenDeCorte.dart';
+import 'package:gestion_indumentaria/pages/Tizadas/CreacionTizadasPage.dart';
 import 'package:gestion_indumentaria/widgets/boxDialog/corte/BoxDialogoCorte.dart';
 import 'package:gestion_indumentaria/widgets/tablaCrud/TablaCrud.dart';
 import 'package:http/http.dart' as http;
@@ -83,13 +83,19 @@ class _CorteCrudViewState extends State<Cortecrudview> {
                           },
                           icon: const Icon(Icons.remove_red_eye_outlined),
                         ),
-                        /*IconButton(
+                        IconButton(
                           onPressed: () {
-                            _editCorte(context, corte);
-                            print('Editando corte: ${corte.id}');
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CreacionTizadasPage(
+                                  idCorte: corte.id,
+                                ),
+                              ),
+                            );
                           },
-                          icon: const Icon(Icons.edit),
-                        ),*/
+                          icon: const Icon(Icons.cut),
+                        ),
                         IconButton(
                           onPressed: () {
                             _confirmDelete(context, corte.id);
@@ -115,8 +121,6 @@ class _CorteCrudViewState extends State<Cortecrudview> {
       print("Intentando cargar datos desde la API...");
       final response = await http.get(uri);
 
-      print("Respuesta de la API: ${response.body}");
-
       if (response.statusCode == 200) {
         final body = response.body;
 
@@ -131,8 +135,6 @@ class _CorteCrudViewState extends State<Cortecrudview> {
           print("Error: La respuesta es nula. Verifica el formato de la API.");
           return;
         }
-
-        print("Número de elementos en jsonData: ${jsonData.length}");
 
         setState(() {
           cortes = jsonData
