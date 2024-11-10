@@ -155,12 +155,11 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
     }
 
     // Mapear los talles seleccionados (selectedTalle) a la estructura de corte
+    // Mapear los talles seleccionados
     final talleRepeticionList = selectedTalle.map((talleRepeticion) {
       return {
-        'talleId': talleRepeticion
-            .talleId, // Asumiendo que TalleRepeticion tiene un talleId
-        'repeticion': talleRepeticion
-            .repeticion, // Asumiendo que TalleRepeticion tiene un campo de repetición
+        'talleId': talleRepeticion.talleId,
+        'repeticion': talleRepeticion.repeticion,
       };
     }).toList();
 
