@@ -223,7 +223,6 @@ class _BoxDialogModeloState extends State<BoxDialogModelo> {
                                     avioModelo: avioModelo!,
                                     onSave: (updatedAvioModelo) {
                                       setState(() {
-                                        // Aseguramos que estamos modificando el modelo original y no una copia
                                         final index = modelo.avios?.indexWhere(
                                             (a) =>
                                                 a.id == updatedAvioModelo.id);
@@ -231,12 +230,9 @@ class _BoxDialogModeloState extends State<BoxDialogModelo> {
                                           modelo.avios?[index] =
                                               updatedAvioModelo;
                                         } else {
-                                          // Si no lo encontramos, agregamos el nuevo avío al modelo
                                           modelo.avios?.add(updatedAvioModelo);
                                         }
                                       });
-
-                                      // Actualizamos en la API si es necesario
                                       widget.fetchModels();
                                     },
                                   );

@@ -5,11 +5,11 @@ class AvioModelo {
   final int? id;
   final int? modeloId;
   final int avioId;
-  final bool esPorTalle;
-  final bool esPorColor;
-  final int cantidadRequerida;
+  late final bool esPorTalle;
+  late final bool esPorColor;
+  late final int cantidadRequerida;
   final Avio? avio;
-  final List<Talle>? talles;
+  late final List<Talle>? talles;
 
   AvioModelo({
     this.id,

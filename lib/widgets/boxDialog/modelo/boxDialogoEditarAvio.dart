@@ -6,12 +6,16 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class EditAvioDialog extends StatefulWidget {
-  final AvioModelo avioModelo; // El avío que se va a editar
+  final AvioModelo avioModelo; // Avío a modificar
   final int modeloId; // ID del modelo al que pertenece el avío
-  final Function(AvioModelo) onSave; // Callback para guardar los cambios
+  final Function(AvioModelo) onSave; // Callback para actualizar el CRUD
 
-  EditAvioDialog(
-      {required this.avioModelo, required this.modeloId, required this.onSave});
+  const EditAvioDialog({
+    Key? key,
+    required this.avioModelo,
+    required this.modeloId,
+    required this.onSave,
+  }) : super(key: key);
 
   @override
   _EditAvioDialogState createState() => _EditAvioDialogState();
@@ -25,6 +29,8 @@ class _EditAvioDialogState extends State<EditAvioDialog> {
   List<Talle>? selectedTalles = [];
   List<Avio> avios = [];
   bool isLoading = true;
+  bool _isSaving = false;
+  int? avioId; // Variable para almacenar el ID del avío seleccionado
 
   @override
   void initState() {
@@ -34,12 +40,14 @@ class _EditAvioDialogState extends State<EditAvioDialog> {
     esPorTalle = widget.avioModelo.esPorTalle;
     esPorColor = widget.avioModelo.esPorColor;
     selectedTalles = List.from(widget.avioModelo.talles ?? []);
+    avioId = widget.avioModelo.avio?.id; // Inicializamos el avioId
     fetchAvios();
   }
 
   Future<void> fetchAvios() async {
     final response = await http.get(
-        Uri.parse('https://maria-chucena-api-production.up.railway.app/avio'));
+      Uri.parse('https://maria-chucena-api-production.up.railway.app/avio'),
+    );
 
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body);
@@ -51,11 +59,16 @@ class _EditAvioDialogState extends State<EditAvioDialog> {
       setState(() {
         isLoading = false;
       });
-      print('Failed to load avios');
+      print('Error al cargar avíos');
     }
   }
 
-  Future<void> updateAvioModelo() async {
+  Future<void> _updateAvioModelo() async {
+    if (avioId == null) {
+      _showError('Por favor, seleccione un avío válido.');
+      return;
+    }
+
     final url = Uri.parse(
       'https://maria-chucena-api-production.up.railway.app/modelo/avio-modelo/${widget.modeloId}/${widget.avioModelo.id}',
     );
@@ -65,20 +78,45 @@ class _EditAvioDialogState extends State<EditAvioDialog> {
       "esPorTalle": esPorTalle,
       "esPorColor": esPorColor,
       "talles": selectedTalles?.map((talle) => talle.toJson()).toList(),
-      "avioId": avios.firstWhere((av) => av.nombre == selectedTipoAvio).id,
+      "avioId": avioId, // Enviamos el ID del avío seleccionado
     };
 
-    final response = await http.patch(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: json.encode(updatedAvioModelo),
-    );
+    try {
+      setState(() => _isSaving = true);
+      final response = await http.patch(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: json.encode(updatedAvioModelo),
+      );
 
-    if (response.statusCode == 200) {
-      print('AvioModelo updated successfully');
-    } else {
-      print('Failed to update AvioModelo');
+      if (response.statusCode == 200) {
+        print('AvioModelo actualizado correctamente');
+        widget.onSave(AvioModelo(
+          id: widget.avioModelo.id,
+          cantidadRequerida: int.parse(_cantidadController.text),
+          esPorTalle: esPorTalle,
+          esPorColor: esPorColor,
+          avioId: avioId!, // Actualizamos el avío con el ID correcto
+        ));
+      } else {
+        _showError('Error al actualizar el AvioModelo. ${response.body}');
+      }
+    } catch (e) {
+      _showError('Ocurrió un error: $e');
+    } finally {
+      setState(() => _isSaving = false);
     }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(10),
+      ),
+    );
   }
 
   @override
@@ -92,7 +130,7 @@ class _EditAvioDialogState extends State<EditAvioDialog> {
             isLoading
                 ? const CircularProgressIndicator()
                 : DropdownButton<String>(
-                    hint: const Text('Seleccione el avio'),
+                    hint: const Text('Seleccione el avío'),
                     value: selectedTipoAvio,
                     items: avios.map((av) {
                       return DropdownMenuItem<String>(
@@ -103,6 +141,19 @@ class _EditAvioDialogState extends State<EditAvioDialog> {
                     onChanged: (value) {
                       setState(() {
                         selectedTipoAvio = value;
+
+                        // Verifica si el nombre del avío no es nulo ni vacío
+                        if (selectedTipoAvio != null &&
+                            selectedTipoAvio!.isNotEmpty) {
+                          // Asigna el ID correctamente fuera de setState
+                          avioId = avios
+                              .firstWhere((av) => av.nombre == selectedTipoAvio)
+                              .id;
+                        } else {
+                          avioId = null; // Asegura que el ID no sea nulo
+                        }
+                        // Actualiza el modelo
+                        _updateAvioModelo(); // Actualización del modelo con el ID seleccionado
                       });
                     },
                   ),
@@ -113,6 +164,7 @@ class _EditAvioDialogState extends State<EditAvioDialog> {
               onChanged: (bool? value) {
                 setState(() {
                   esPorTalle = value ?? false;
+                  _updateAvioModelo(); // Actualización instantánea
                 });
               },
             ),
@@ -122,6 +174,7 @@ class _EditAvioDialogState extends State<EditAvioDialog> {
               onChanged: (bool? value) {
                 setState(() {
                   esPorColor = value ?? false;
+                  _updateAvioModelo(); // Actualización instantánea
                 });
               },
             ),
@@ -131,6 +184,8 @@ class _EditAvioDialogState extends State<EditAvioDialog> {
                 labelText: 'Cantidad Requerida',
               ),
               keyboardType: TextInputType.number,
+              onChanged: (value) =>
+                  _updateAvioModelo(), // Actualización al cambiar cantidad
             ),
             const SizedBox(height: 10),
           ],
@@ -138,20 +193,16 @@ class _EditAvioDialogState extends State<EditAvioDialog> {
       ),
       actions: [
         ElevatedButton(
-          onPressed: () async {
-            await updateAvioModelo();
-            widget.onSave(widget.avioModelo);
-            Navigator.of(context).pop();
-          },
-          child: const Text('Guardar Cambios'),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: const Text('Cancelar'),
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cerrar'),
         ),
       ],
     );
+  }
+
+  @override
+  void dispose() {
+    _cantidadController.dispose();
+    super.dispose();
   }
 }
