@@ -51,19 +51,8 @@ class LoginScreen extends StatelessWidget {
                             ),
                             obscureText: true,
                           ),
-                          const SizedBox(height: 10.0),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const RecuperacionScreen()),
-                              );
-                            },
-                            child: const Text('¿Has olvidado tu contraseña?'),
-                          ),
                           const SizedBox(height: 20.0),
+
                           ElevatedButton(
                             onPressed: () {
                               Navigator.push(

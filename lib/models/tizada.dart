@@ -2,6 +2,8 @@ import 'modeloTizada.dart';
 import 'rolloTizada.dart';
 
 class Tizada {
+  // ignore: non_constant_identifier_names
+  int? id;
   double ancho;
   double largo;
   int corteId;
@@ -9,6 +11,7 @@ class Tizada {
   List<RolloTizada> rollosUtilizados;
 
   Tizada({
+    this.id,
     required this.ancho,
     required this.largo,
     required this.corteId,
@@ -18,6 +21,7 @@ class Tizada {
 
   factory Tizada.fromJson(Map<String, dynamic> json) {
     return Tizada(
+      id: json['id'] ?? 0,
       ancho: json['ancho'] ?? 'Sin ancho definido',
       largo: json['largo'] ?? 'Sin largo definido',
       corteId: json['corteId'] ?? 'Sin corte definido',
@@ -31,6 +35,7 @@ class Tizada {
   }
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'ancho': ancho,
       'largo': largo,
       'corteId': corteId,

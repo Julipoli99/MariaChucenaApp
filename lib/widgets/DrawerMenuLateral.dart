@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/TipoProducto.dart';
 import 'package:gestion_indumentaria/pages/Crud/TallesCrudView.dart';
-import 'package:gestion_indumentaria/pages/Login/usuariosRegistrados.dart';
-
 import 'package:gestion_indumentaria/pages/Talles/tallesVista.dart';
 import 'package:gestion_indumentaria/pages/TipoProducto/registroTipoProducto.dart';
 import 'package:gestion_indumentaria/pages/Tizadas/CreacionTizadasPage.dart';
@@ -111,26 +109,6 @@ class DrawerMenuLateral extends StatelessWidget {
                               const TipoProductoregistradospage()),
                     );
                     print('Presionado boton Productos');
-                  },
-                ),
-              ),
-
-              // Icono de Usuarios
-              Padding(
-                padding: const EdgeInsets.only(left: 25.0),
-                child: ListTile(
-                  leading: const Icon(
-                      color: Colors.white, Icons.account_circle_outlined),
-                  title: const Text(
-                    'Usuarios',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const Usuariosregistrados()),
-                    );
                   },
                 ),
               ),
