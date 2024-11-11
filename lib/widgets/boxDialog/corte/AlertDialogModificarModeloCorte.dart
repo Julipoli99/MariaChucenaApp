@@ -44,8 +44,12 @@ class _AlertDialogModificarModeloCorteState
     );
 
     if (response.statusCode == 200) {
-      // Si la actualización es exitosa, llamamos al callback para que la vista se actualice
-      widget.onUpdated(); // Esto notificará que la vista debe actualizarse
+      // Si la actualización es exitosa, actualizamos el modelo en la UI
+      setState(() {
+        widget.modelo.totalPrendas = int.parse(
+            _totalPrendasController.text); // Actualizamos el modelo local
+      });
+      widget.onUpdated(); // Llamamos al callback para actualizar la vista
       Navigator.of(context).pop(); // Cierra el diálogo
     } else {
       // Si hubo un error en la actualización

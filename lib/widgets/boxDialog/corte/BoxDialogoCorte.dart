@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/ModeloCorte.dart';
+import 'package:gestion_indumentaria/models/rolloCorte.dart';
 import 'package:gestion_indumentaria/models/tizada.dart';
 import 'package:gestion_indumentaria/widgets/boxDialog/corte/AlertDialogModificarModeloCorte.dart';
+import 'package:gestion_indumentaria/widgets/boxDialog/corte/alertDialogoRolloEdit.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -52,7 +54,6 @@ class _BoxDialogCorteState extends State<BoxDialogCorte> {
     }
   }
 
-  // Ahora la función de fetchTizadas no devuelve un Future directamente.
   void fetchTizadas(int corteId) async {
     try {
       final response = await http.get(Uri.parse(
@@ -65,7 +66,6 @@ class _BoxDialogCorteState extends State<BoxDialogCorte> {
         // Mapeamos solo a los valores de ancho y largo que necesitamos
         setState(() {
           _tizadas = json.map((e) {
-            // Creamos una nueva instancia de Tizada, pero puedes dejar la clase como está
             return Tizada(
               id: e['id'],
               ancho: e['ancho']?.toDouble() ?? 0.0,
@@ -81,7 +81,6 @@ class _BoxDialogCorteState extends State<BoxDialogCorte> {
       }
     } catch (e) {
       print('Error al obtener las tizadas: $e');
-      // Aquí puedes manejar el error, por ejemplo, mostrando un mensaje al usuario
     }
   }
 
@@ -92,8 +91,33 @@ class _BoxDialogCorteState extends State<BoxDialogCorte> {
         return AlertDialogModificarModeloCorte(
           modelo: modelo,
           onUpdated: () {
+            setState(() {
+              // Recargamos las tizadas o talles si es necesario
+              fetchTizadas(
+                  widget.corte.id); // Recargamos las tizadas al actualizar
+            });
             (context as Element)
-                .markNeedsBuild(); // Forzamos una actualización en el widget
+                .markNeedsBuild(); // Forzamos la reconstrucción del widget
+          },
+        );
+      },
+    );
+  }
+
+  void _showEditTotalcortesDialog(BuildContext context, RolloCorte rollo) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialogRolloCorte(
+          rolloCorte: rollo,
+          onUpdated: () {
+            setState(() {
+              // Recargamos los datos de los rollos si es necesario
+              fetchTizadas(
+                  widget.corte.id); // Recargamos las tizadas al actualizar
+            });
+            (context as Element)
+                .markNeedsBuild(); // Forzamos la reconstrucción del widget
           },
         );
       },
@@ -175,7 +199,8 @@ class _BoxDialogCorteState extends State<BoxDialogCorte> {
                       trailing: IconButton(
                         icon: const Icon(Icons.edit),
                         onPressed: () {
-                          // Aquí podrías implementar la función de modificación.
+                          _showEditTotalcortesDialog(context,
+                              rolloCorte); // Aquí podrías implementar la función de modificación.
                         },
                       ),
                     ),
@@ -202,7 +227,6 @@ class _BoxDialogCorteState extends State<BoxDialogCorte> {
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Asegúrate de mostrar 0 si los valores son nulos o no se recibieron
                                 Text(
                                     'Ancho: ${tizada.ancho != 0.0 ? tizada.ancho : 'N/A'} cm'),
                                 Text(
@@ -213,7 +237,7 @@ class _BoxDialogCorteState extends State<BoxDialogCorte> {
                         );
                       },
                     ),
-                  )
+                  ),
           ],
         ),
       ),
