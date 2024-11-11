@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/TipoProducto.dart';
 import 'package:gestion_indumentaria/pages/TipoProducto/nuevoRegistro.dart';
@@ -39,7 +38,11 @@ class _TipoCrudViewState extends State<TipoProductocrudview> {
                         context: context,
                         builder: (BuildContext context) =>
                             NuevoTipoDeProductoDialog(
-                              onProductoAgregado: fetchModels,
+                              onProductoAgregado: () {
+                                fetchModels();
+                                _showSnackBar('Producto agregado con éxito',
+                                    Colors.green);
+                              },
                             ));
                   },
                   style: TextButton.styleFrom(
@@ -88,6 +91,8 @@ class _TipoCrudViewState extends State<TipoProductocrudview> {
                                       productos[index] = updatedTipoProducto;
                                     }
                                   });
+                                  _showSnackBar('Producto modificado con éxito',
+                                      Colors.green);
                                 },
                               ),
                             );
@@ -116,20 +121,25 @@ class _TipoCrudViewState extends State<TipoProductocrudview> {
     final uri = Uri.parse(url);
     final response = await http.get(uri);
 
-    final List<dynamic> jsonData = jsonDecode(response.body);
-
-    setState(() {
-      productos = jsonData.map((json) {
-        return TipoProducto(
-          id: json['id'] ?? 0,
-          nombre: json['nombre'] ?? 'Sin nombre',
-          tipo: TipoEnum.values
-              .firstWhere((e) => e.toString().split('.').last == json['tipo']),
-          unidadMetrica: UnidadMetricaEnum.values.firstWhere(
-              (e) => e.toString().split('.').last == json['unidadMetrica']),
-        );
-      }).toList();
-    });
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonData = jsonDecode(response.body);
+      setState(() {
+        productos = jsonData.map((json) {
+          return TipoProducto(
+            id: json['id'] ?? 0,
+            nombre: json['nombre'] ?? 'Sin nombre',
+            tipo: TipoEnum.values.firstWhere(
+                (e) => e.toString().split('.').last == json['tipo']),
+            unidadMetrica: UnidadMetricaEnum.values.firstWhere(
+                (e) => e.toString().split('.').last == json['unidadMetrica']),
+          );
+        }).toList();
+      });
+      _showSnackBar(
+          'Productos cargados correctamente', Colors.green); // Mensaje de éxito
+    } else {
+      _showSnackBar('Error al cargar productos', Colors.red);
+    }
   }
 
   Future<void> deleteprenda(int id) async {
@@ -144,12 +154,14 @@ class _TipoCrudViewState extends State<TipoProductocrudview> {
         setState(() {
           productos.removeWhere((tela) => tela.id == id);
         });
+        _showSnackBar('Producto eliminado con éxito', Colors.green);
       } else {
-        print(
-            'Error: No se pudo eliminar el producto. Código de estado ${response.statusCode}');
+        _showSnackBar(
+            'Error: No se pudo eliminar el producto. Código de estado ${response.statusCode}',
+            Colors.red);
       }
     } catch (e) {
-      print('Error al eliminar el producto: $e');
+      _showSnackBar('Error al eliminar el producto', Colors.red);
     }
   }
 
@@ -176,6 +188,15 @@ class _TipoCrudViewState extends State<TipoProductocrudview> {
           ],
         );
       },
+    );
+  }
+
+  void _showSnackBar(String message, Color backgroundColor) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: backgroundColor, // Color de fondo personalizado
+      ),
     );
   }
 }

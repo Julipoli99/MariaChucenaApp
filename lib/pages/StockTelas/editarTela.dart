@@ -169,12 +169,18 @@ class _EditarTelasDialogState extends State<EditarTelasDialog> {
 
     if (response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Tela editada exitosamente')),
+        const SnackBar(
+          content: Text('Tela editada exitosamente'),
+          backgroundColor: Colors.green,
+        ),
       );
       Navigator.of(context).pop(true); // Cierra el diálogo al guardar
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al editar la tela: ${response.body}')),
+        SnackBar(
+          content: Text('Error al editar la tela: ${response.body}'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }

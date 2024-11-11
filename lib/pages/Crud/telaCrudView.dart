@@ -225,6 +225,13 @@ class _telaCrudViewState extends State<Telacrudview> {
         );
       }).toList();
     });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Telas cargadas correctamente."),
+        backgroundColor: Colors.green,
+      ),
+    );
   }
 
   Future<void> deleteTela(int id) async {
@@ -238,6 +245,13 @@ class _telaCrudViewState extends State<Telacrudview> {
         setState(() {
           telas.removeWhere((tela) => tela.id == id);
         });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Tela eliminada correctamente."),
+            backgroundColor: Colors.green,
+          ),
+        );
       } else {
         print(
             'Error: No se pudo eliminar el rollo. Código de estado ${response.statusCode}');

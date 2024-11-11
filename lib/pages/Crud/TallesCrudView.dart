@@ -36,13 +36,32 @@ class _TallesCrudViewState extends State<Tallescrudview> {
                     await showDialog(
                       context: context,
                       builder: (context) => AddTalleDialog(
+                        existingTalles:
+                            talles, // Pasamos la lista de talles existentes
                         onTalleAdded: (nuevoTalle) {
-                          talles.add(nuevoTalle as Talle);
-                          Navigator.of(context).pop(); // Cerrar diálogo
+                          // Convertimos el nombre a mayúsculas
+                          String nombreMayuscula =
+                              nuevoTalle.nombre.toUpperCase();
+
+                          // Verificamos si el talle ya existe
+                          if (_talleExists(nombreMayuscula)) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Este talle ya existe."),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          } else {
+                            setState(() {
+                              talles.add(Talle(
+                                  id: nuevoTalle.id, nombre: nombreMayuscula));
+                            });
+                            Navigator.of(context).pop(); // Cerramos el diálogo
+                            fetchModels(); // Refrescar lista de talles
+                          }
                         },
                       ),
                     );
-                    fetchModels(); // Refrescar la lista después de cerrar el diálogo
                   },
                   style: TextButton.styleFrom(
                     backgroundColor: Colors.blue[300],
@@ -78,6 +97,11 @@ class _TallesCrudViewState extends State<Tallescrudview> {
     );
   }
 
+  bool _talleExists(String nombre) {
+    // Validación insensible a mayúsculas/minúsculas
+    return talles.any((talle) => talle.nombre.toUpperCase() == nombre);
+  }
+
   Future<void> fetchModels() async {
     const url = "https://maria-chucena-api-production.up.railway.app/talle";
     final uri = Uri.parse(url);
@@ -91,18 +115,16 @@ class _TallesCrudViewState extends State<Tallescrudview> {
           final List<dynamic> jsonData = jsonDecode(body);
           setState(() {
             talles = jsonData.map((json) => Talle.fromJson(json)).toList();
-            print(talles);
-            print(jsonData);
           });
-          print(jsonData);
-
-          print(talles);
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Talles cargados correctamente.")),
+            const SnackBar(
+              content: Text("Talles cargados correctamente."),
+              backgroundColor: Colors.green,
+            ),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Error: La respuesta está vacía.")),
+            const SnackBar(content: Text("Error: La respuesta está vacía.")),
           );
         }
       } else {
@@ -123,16 +145,25 @@ class _TallesCrudViewState extends State<Tallescrudview> {
       if (response.statusCode == 200) {
         setState(() => talles.removeWhere((talle) => talle.id == id));
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Talle eliminado correctamente.')),
+          const SnackBar(
+            content: Text('Talle eliminado correctamente.'),
+            backgroundColor: Colors.green,
+          ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: No se pudo eliminar el talle.')),
+          const SnackBar(
+            content: Text('Error: No se pudo eliminar el talle.'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al eliminar el talle: $e')),
+        SnackBar(
+          content: Text('Error al eliminar el talle: $e'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }

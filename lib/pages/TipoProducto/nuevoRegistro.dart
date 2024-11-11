@@ -156,7 +156,10 @@ class _NuevoTipoDeProductoDialogState extends State<NuevoTipoDeProductoDialog> {
         tipoProductoSeleccionado == null ||
         tipounidadSeleccionado == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor completa todos los campos')),
+        const SnackBar(
+          content: Text('Por favor completa todos los campos'),
+          backgroundColor: Colors.orange,
+        ),
       );
       return;
     }
@@ -177,18 +180,25 @@ class _NuevoTipoDeProductoDialogState extends State<NuevoTipoDeProductoDialog> {
       if (response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text('Tipo de producto guardado exitosamente')),
+            content: Text('Tipo de producto guardado exitosamente'),
+            backgroundColor: Colors.green,
+          ),
         );
         widget.onProductoAgregado(); // Llama al callback
         Navigator.pop(context); // Cierra el diálogo después de guardar
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${response.body}')),
+          SnackBar(
+            content: Text('Error: ${response.body}'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error de conexión: $error')),
+        SnackBar(
+            content: Text('Error de conexión: $error'),
+            backgroundColor: Colors.red),
       );
     }
   }

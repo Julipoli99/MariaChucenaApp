@@ -66,6 +66,7 @@ class _CreacionTizadasPageState extends State<CreacionTizadasPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error al cargar el corte: ${response.body}'),
+          backgroundColor: Colors.red,
         ),
       );
     }
@@ -77,9 +78,10 @@ class _CreacionTizadasPageState extends State<CreacionTizadasPage> {
         consumo == null ||
         capas == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content:
-                Text('Por favor, completa todos los campos obligatorios.')),
+        const SnackBar(
+          content: Text('Por favor, completa todos los campos obligatorios.'),
+          backgroundColor: Colors.orange,
+        ),
       );
       return;
     }
@@ -121,7 +123,9 @@ class _CreacionTizadasPageState extends State<CreacionTizadasPage> {
 
       if (response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Tizada creada exitosamente.')),
+          const SnackBar(
+              content: Text('Tizada creada exitosamente.'),
+              backgroundColor: Colors.green),
         );
         Navigator.pushReplacement(
           context,
@@ -136,13 +140,17 @@ class _CreacionTizadasPageState extends State<CreacionTizadasPage> {
             content: Text(
               'Error al crear la tizada: ${responseBody['message'] ?? 'Error desconocido'}',
             ),
+            backgroundColor: Colors.red,
           ),
         );
         print('Error al crear la tizada: ${response.body}');
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error de conexión: $e')),
+        SnackBar(
+          content: Text('Error de conexión: $e'),
+          backgroundColor: Colors.red,
+        ),
       );
       print('Error de conexión: $e');
     }

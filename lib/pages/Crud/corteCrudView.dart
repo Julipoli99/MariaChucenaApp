@@ -150,8 +150,12 @@ class _CorteCrudViewState extends State<Cortecrudview> {
               .cast<Corte>()
               .toList();
         });
-
-        print("Cortes cargados correctamente.");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("cortes cargados correctamente."),
+            backgroundColor: Colors.green,
+          ),
+        );
       } else {
         print("Error: Código de estado ${response.statusCode}");
       }

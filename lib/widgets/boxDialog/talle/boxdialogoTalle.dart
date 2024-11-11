@@ -4,9 +4,14 @@ import 'package:gestion_indumentaria/models/talle.dart';
 
 class AddTalleDialog extends StatefulWidget {
   final ValueChanged<Talle> onTalleAdded;
+  final List<Talle>
+      existingTalles; // Lista de talles existentes para verificar duplicados
 
-  const AddTalleDialog({Key? key, required this.onTalleAdded})
-      : super(key: key);
+  const AddTalleDialog({
+    Key? key,
+    required this.onTalleAdded,
+    required this.existingTalles, // Añadir lista de talles existentes como parámetro
+  }) : super(key: key);
 
   @override
   _AddTalleDialogState createState() => _AddTalleDialogState();
@@ -20,16 +25,25 @@ class _AddTalleDialogState extends State<AddTalleDialog> {
     const String apiUrl =
         'https://maria-chucena-api-production.up.railway.app/talle';
 
+    // Convertir el nombre del talle a mayúsculas
+    final String normalizedTalle = talleNombre.toUpperCase();
+
+    // Verificar si el talle ya existe
+    if (widget.existingTalles.any((talle) => talle.nombre == normalizedTalle)) {
+      _showError('Este talle ya existe.');
+      return;
+    }
+
     try {
       setState(() => _isSaving = true);
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {'Content-Type': 'application/json'},
-        body: '{"talle": "$talleNombre"}',
+        body: '{"talle": "$normalizedTalle"}', // Guardar en mayúsculas
       );
 
       if (response.statusCode == 201) {
-        final nuevoTalle = Talle(id: 0, nombre: talleNombre);
+        final nuevoTalle = Talle(id: 0, nombre: normalizedTalle);
         widget.onTalleAdded(nuevoTalle);
       } else {
         _showError('Error al guardar el talle en la API.');

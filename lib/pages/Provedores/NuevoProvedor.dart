@@ -16,11 +16,59 @@ class _NuevoProveedorDialogState extends State<NuevoProveedorDialog> {
   bool _isSaving = false;
 
   Future<void> _guardarProveedor() async {
+    final String telefono = _telefonoController.text.trim();
+
+    // Verifica si algún campo está vacío
+    if (_nombreController.text.trim().isEmpty || telefono.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor, complete todos los campos.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // Verifica si el teléfono tiene menos de 10 caracteres
+    if (telefono.length < 10) {
+      int faltantes = 10 - telefono.length;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Teléfono incorrecto, faltan $faltantes caracteres.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // Verifica si el teléfono tiene más de 10 caracteres
+    if (telefono.length > 10) {
+      int sobrantes = telefono.length - 10;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Teléfono incorrecto, sobran $sobrantes caracteres.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // Verifica si el teléfono comienza con "11"
+    if (!telefono.startsWith('11')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('El teléfono debe comenzar con "11".'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     const String apiUrl =
         'https://maria-chucena-api-production.up.railway.app/proveedor';
     final Map<String, dynamic> proveedorData = {
       'nombre': _nombreController.text.trim(),
-      'telefono': _telefonoController.text.trim(),
+      'telefono': telefono,
     };
 
     try {
@@ -33,7 +81,10 @@ class _NuevoProveedorDialogState extends State<NuevoProveedorDialog> {
 
       if (response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Proveedor guardado con éxito.')),
+          const SnackBar(
+            content: Text('Proveedor guardado con éxito.'),
+            backgroundColor: Colors.green,
+          ),
         );
         widget.onProveedorAgregado();
 
@@ -42,12 +93,18 @@ class _NuevoProveedorDialogState extends State<NuevoProveedorDialog> {
         _telefonoController.clear();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${response.body}')),
+          const SnackBar(
+            content: Text('Error al guardar el proveedor.'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Ocurrió un error: $e')),
+        SnackBar(
+          content: Text('Ocurrió un error: $e'),
+          backgroundColor: Colors.red,
+        ),
       );
     } finally {
       setState(() => _isSaving = false);
@@ -67,7 +124,9 @@ class _NuevoProveedorDialogState extends State<NuevoProveedorDialog> {
                 'Proveedor', 'nombre de proveedor', _nombreController),
             const SizedBox(height: 20),
             _buildTextField(
-                'Teléfono', 'número de teléfono', _telefonoController),
+                'Teléfono',
+                'número de teléfono (10 dígitos, comienza con 11)',
+                _telefonoController),
           ],
         ),
       ),
@@ -104,6 +163,8 @@ class _NuevoProveedorDialogState extends State<NuevoProveedorDialog> {
           borderRadius: BorderRadius.circular(8),
         ),
       ),
+      keyboardType:
+          label == 'Teléfono' ? TextInputType.phone : TextInputType.text,
     );
   }
 

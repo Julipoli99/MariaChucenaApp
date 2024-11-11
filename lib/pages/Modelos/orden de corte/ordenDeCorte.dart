@@ -139,8 +139,9 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content:
-                Text('Error al cargar tipos de productos: ${response.body}')),
+          content: Text('Error al cargar tipos de productos: ${response.body}'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -168,7 +169,10 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
         (selectedModeloId) == null ||
         selectedTalle.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor, complete todos los campos.')),
+        const SnackBar(
+          content: Text('Por favor, complete todos los campos.'),
+          backgroundColor: Colors.orange,
+        ),
       );
       return;
     }
@@ -187,7 +191,7 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
         {
           'modeloId': selectedModeloId,
           'totalPrendas': 1,
-          'esParaEstampar': false,
+          'esParaEstampar': selectedAuxForm,
           'usaTelaSecundaria': false,
           'usaTelaAuxiliar': false,
           'observaciones': [
@@ -218,7 +222,10 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
 
       if (response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Orden de corte creada exitosamente.')),
+          const SnackBar(
+            content: Text('Orden de corte creada exitosamente.'),
+            backgroundColor: Colors.green,
+          ),
         );
         Navigator.pushReplacement(
           context,
@@ -228,15 +235,20 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
         final responseBody = json.decode(response.body);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(
-                  'Error al crear la orden de corte: ${responseBody['message'] ?? 'Error desconocido'}')),
+            content: Text(
+                'Error al crear la orden de corte: ${responseBody['message'] ?? 'Error desconocido'}'),
+            backgroundColor: Colors.red,
+          ),
         );
         print(
             'Error al crear la orden de corte: ${responseBody['message'] + response.statusCode ?? 'Error desconocido'}');
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error de conexión: $e')),
+        SnackBar(
+          content: Text('Error de conexión: $e'),
+          backgroundColor: Colors.red,
+        ),
       );
       print('Error de conexión: $e');
     }
