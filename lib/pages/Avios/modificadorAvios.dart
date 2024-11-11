@@ -83,7 +83,10 @@ class _ModificadoraviosDialogState extends State<ModificadoraviosDialog> {
           Navigator.of(context)
               .pop(true); // Retorna true solo si se guarda exitosamente
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Stock actualizado correctamente')),
+            const SnackBar(
+              content: Text('Stock actualizado correctamente'),
+              backgroundColor: Colors.green,
+            ),
           );
         } else {
           throw Exception('Error al actualizar el stock: ${response.body}');
