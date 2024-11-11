@@ -31,7 +31,6 @@ class AvioModelo {
     Avio? avio = json['avio'] != null ? Avio.fromJson(json['avio']) : null;
 
     // Imprimir el JSON recibido para verificar su estructura
-    print('JSON de AvioModelo: $json');
 
     return AvioModelo(
       id: json['id'],

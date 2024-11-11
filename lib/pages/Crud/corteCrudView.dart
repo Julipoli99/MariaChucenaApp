@@ -68,7 +68,7 @@ class _CorteCrudViewState extends State<Cortecrudview> {
               dataMapper: [
                 (corte) => Text(corte.id.toString()),
                 (corte) => Text(corte.modelos
-                    .map((modelo) => modelo.modelo.nombre.toString())
+                    .map((modelo) => modelo.modelo?.nombre.toString())
                     .join(', ')),
                 (corte) => Text(corte.rollos
                     .map((rollo) => rollo.rollo?.descripcion ?? 'Sin nombre')

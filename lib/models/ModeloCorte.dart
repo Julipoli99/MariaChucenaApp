@@ -8,8 +8,9 @@ class ModeloCorte {
   final bool esParaEstampar;
   final bool usaTelaSecundaria;
   final bool usaTelaAuxiliar;
-  final int totalPrendas;
-  final Modelo modelo;
+  int? totalPrendas;
+  Modelo? modelo;
+  final int modeloId;
   final List<ObservacionModel>? observacion;
   final List<TalleRepeticion> curvas;
 
@@ -18,8 +19,9 @@ class ModeloCorte {
     required this.esParaEstampar,
     required this.usaTelaSecundaria,
     required this.usaTelaAuxiliar,
-    required this.totalPrendas,
-    required this.modelo,
+    this.totalPrendas,
+    required this.modeloId,
+    this.modelo,
     this.observacion,
     required this.curvas,
   });
@@ -31,27 +33,33 @@ class ModeloCorte {
       usaTelaSecundaria: json['usaTelaSecundaria'],
       usaTelaAuxiliar: json['usaTelaAuxiliar'],
       totalPrendas: json['totalPrendas'],
+      modeloId: json['modeloId'],
+
       modelo: Modelo.fromJson(
           json['modelo']), // Asumiendo que Modelo tiene un fromJson
-      observacion: (json['observaciones'] as List)
-          .map((obs) => ObservacionModel.fromJson(obs))
-          .toList(),
-      curvas: (json['curva'] as List)
-          .map((curva) => TalleRepeticion.fromJson(curva))
-          .toList(),
+      observacion: json['observaciones'] != null
+          ? (json['observaciones'] as List)
+              .map((obs) => ObservacionModel.fromJson(obs))
+              .toList()
+          : null,
+      curvas: json['curva'] != null
+          ? (json['curva'] as List)
+              .map((curva) => TalleRepeticion.fromJson(curva))
+              .toList()
+          : [],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'modeloId': modeloId,
       'esParaEstampar': esParaEstampar,
       'usaTelaSecundaria': usaTelaSecundaria,
       'usaTelaAuxiliar': usaTelaAuxiliar,
-      'totalPrendas': totalPrendas,
-      'modelo': modelo.toJson(), // Asumiendo que Modelo tiene un toJson
+      //  'modelo': modelo?.toJson(), // Asumiendo que Modelo tiene un toJson
       'observacion': observacion?.map((obs) => obs.toJson()).toList(),
-      'curvas': curvas.map((curva) => curva.toJson()).toList(),
+      'curva': curvas.map((curva) => curva.toJson()).toList(),
     };
   }
 }

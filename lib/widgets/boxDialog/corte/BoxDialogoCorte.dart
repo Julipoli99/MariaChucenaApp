@@ -98,7 +98,9 @@ class _BoxDialogCorteState extends State<BoxDialogCorte> {
                   return Card(
                     margin: const EdgeInsets.symmetric(vertical: 8.0),
                     child: ListTile(
-                      title: Text(modeloCorte.modelo.nombre),
+                      title: Text(
+                        modeloCorte.modelo.nombre,
+                      ),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [

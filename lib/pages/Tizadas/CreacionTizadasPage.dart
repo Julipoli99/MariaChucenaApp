@@ -363,9 +363,9 @@ class _CreacionTizadasPageState extends State<CreacionTizadasPage> {
         onChanged: (selectedModeloCorte) {
           setState(() {
             modeloSeleccionadoCompleto = selectedModeloCorte;
-            selectedModelo = selectedModeloCorte?.modelo.nombre;
+            selectedModelo = selectedModeloCorte!.modelo!.nombre;
             print(
-                'Modelo seleccionado: ${modeloSeleccionadoCompleto?.modelo.nombre}');
+                'Modelo seleccionado: ${modeloSeleccionadoCompleto?.modelo?.nombre}');
             print(
                 'ID del modelo seleccionado: ${modeloSeleccionadoCompleto?.id}');
           });

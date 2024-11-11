@@ -26,7 +26,7 @@ class Avio {
       codigoProveedor: json['codigoProveedor'] ?? '',
       proveedorId: json['proveedorId'] ?? 0,
       tipoProductoId: json['tipoProductoId'] ?? 0,
-      nombre: json['nombre'] ?? 'Sin nombre',
+      nombre: json['nombre'],
       stock: json['stock'] ?? 0,
       proveedor: Proveedor.fromJson(json['proveedor'] ?? {}),
     );
