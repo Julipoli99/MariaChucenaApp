@@ -9,10 +9,10 @@ class TalleSelector extends StatefulWidget {
   final ValueChanged<List<Talle>> onTalleSelected;
 
   const TalleSelector({
-    Key? key,
+    super.key,
     required this.selectedTalles,
     required this.onTalleSelected,
-  }) : super(key: key);
+  });
 
   @override
   _TalleSelectorState createState() => _TalleSelectorState();
@@ -72,7 +72,7 @@ class _TalleSelectorState extends State<TalleSelector> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    // Filtrar los talles para excluir los que ya vienen seleccionados
+    // Filtrar los talles disponibles para que no aparezcan los que ya están seleccionados
     final List<Talle> tallesDisponibles = _talles
         .where((talle) => !widget.selectedTalles.contains(talle))
         .toList();
@@ -96,10 +96,14 @@ class _TalleSelectorState extends State<TalleSelector> {
           Wrap(
             spacing: 10,
             children: widget.selectedTalles.map((talle) {
-              return ChoiceChip(
+              return Chip(
                 label: Text(talle.nombre),
-                selected: true,
-                onSelected: (_) => _toggleTalleSelection(talle),
+                deleteIcon: const Icon(Icons.delete),
+                onDeleted: () {
+                  _toggleTalleSelection(
+                      talle); // Eliminar el talle de los seleccionados
+                },
+                backgroundColor: Colors.blue.shade100,
               );
             }).toList(),
           ),
@@ -121,31 +125,15 @@ class _TalleSelectorState extends State<TalleSelector> {
                 label: Text(talle.nombre),
                 selected: widget.selectedTalles.contains(talle),
                 onSelected: (selected) {
-                  _toggleTalleSelection(talle);
+                  if (!widget.selectedTalles.contains(talle)) {
+                    _toggleTalleSelection(talle);
+                  }
                 },
               );
             }).toList(),
-            ActionChip(
-              label: const Icon(Icons.add),
-              onPressed: () => _showAddTalleDialog(context),
-            ),
           ],
         ),
       ],
-    );
-  }
-
-  void _showAddTalleDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AddTalleDialog(
-        onTalleAdded: (nuevoTalle) {
-          setState(() {
-            _talles.add(nuevoTalle as Talle);
-          });
-          _toggleTalleSelection(nuevoTalle as Talle);
-        },
-      ),
     );
   }
 }

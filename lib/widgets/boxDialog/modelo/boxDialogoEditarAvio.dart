@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Avio.dart';
 import 'package:gestion_indumentaria/models/AviosModelo.dart';
 import 'package:gestion_indumentaria/models/Talle.dart';
+import 'package:gestion_indumentaria/pages/Modelos/ModelosRegistradosPage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -30,17 +31,20 @@ class _EditAvioDialogState extends State<EditAvioDialog> {
   List<Avio> avios = [];
   bool isLoading = true;
   bool _isSaving = false;
-  int? avioId; // Variable para almacenar el ID del avío seleccionado
+  bool isUpdating =
+      false; // Estado para indicar que el avío se está actualizando
+  int? avioId;
 
   @override
   void initState() {
     super.initState();
-    selectedTipoAvio = widget.avioModelo.avio?.nombre;
+    selectedTipoAvio =
+        widget.avioModelo.avio?.nombre ?? "Avíos sin nombre"; // Nombre inicial
     _cantidadController.text = widget.avioModelo.cantidadRequerida.toString();
     esPorTalle = widget.avioModelo.esPorTalle;
     esPorColor = widget.avioModelo.esPorColor;
     selectedTalles = List.from(widget.avioModelo.talles ?? []);
-    avioId = widget.avioModelo.avio?.id; // Inicializamos el avioId
+    avioId = widget.avioModelo.avio?.id;
     fetchAvios();
   }
 
@@ -78,11 +82,15 @@ class _EditAvioDialogState extends State<EditAvioDialog> {
       "esPorTalle": esPorTalle,
       "esPorColor": esPorColor,
       "talles": selectedTalles?.map((talle) => talle.toJson()).toList(),
-      "avioId": avioId, // Enviamos el ID del avío seleccionado
+      "avioId": avioId!,
     };
 
     try {
-      setState(() => _isSaving = true);
+      setState(() {
+        _isSaving = true;
+        isUpdating = true; // Activa el estado de actualización
+      });
+
       final response = await http.patch(
         url,
         headers: {"Content-Type": "application/json"},
@@ -90,14 +98,27 @@ class _EditAvioDialogState extends State<EditAvioDialog> {
       );
 
       if (response.statusCode == 200) {
-        print('AvioModelo actualizado correctamente');
+        setState(() {
+          selectedTipoAvio = selectedTipoAvio ?? "Avíos actualizado";
+          isUpdating = false; // Desactiva el estado de actualización
+        });
+
+        // Callback para actualizar el CRUD
         widget.onSave(AvioModelo(
           id: widget.avioModelo.id,
           cantidadRequerida: int.parse(_cantidadController.text),
           esPorTalle: esPorTalle,
           esPorColor: esPorColor,
-          avioId: avioId!, // Actualizamos el avío con el ID correcto
+          avioId: avioId!,
         ));
+
+        // Regresa a una página específica después de cerrar el diálogo
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) =>
+                const Modelosregistradospage(), // Aquí reemplaza 'TuPaginaCrud' por la página que deseas redirigir
+          ),
+        );
       } else {
         _showError('Error al actualizar el AvioModelo. ${response.body}');
       }
@@ -140,20 +161,10 @@ class _EditAvioDialogState extends State<EditAvioDialog> {
                     }).toList(),
                     onChanged: (value) {
                       setState(() {
-                        selectedTipoAvio = value;
-
-                        // Verifica si el nombre del avío no es nulo ni vacío
-                        if (selectedTipoAvio != null &&
-                            selectedTipoAvio!.isNotEmpty) {
-                          // Asigna el ID correctamente fuera de setState
-                          avioId = avios
-                              .firstWhere((av) => av.nombre == selectedTipoAvio)
-                              .id;
-                        } else {
-                          avioId = null; // Asegura que el ID no sea nulo
-                        }
-                        // Actualiza el modelo
-                        _updateAvioModelo(); // Actualización del modelo con el ID seleccionado
+                        selectedTipoAvio = value ?? "Avíos actualizado";
+                        avioId = avios
+                            .firstWhere((av) => av.nombre == selectedTipoAvio)
+                            .id;
                       });
                     },
                   ),
@@ -164,7 +175,6 @@ class _EditAvioDialogState extends State<EditAvioDialog> {
               onChanged: (bool? value) {
                 setState(() {
                   esPorTalle = value ?? false;
-                  _updateAvioModelo(); // Actualización instantánea
                 });
               },
             ),
@@ -174,7 +184,6 @@ class _EditAvioDialogState extends State<EditAvioDialog> {
               onChanged: (bool? value) {
                 setState(() {
                   esPorColor = value ?? false;
-                  _updateAvioModelo(); // Actualización instantánea
                 });
               },
             ),
@@ -184,17 +193,28 @@ class _EditAvioDialogState extends State<EditAvioDialog> {
                 labelText: 'Cantidad Requerida',
               ),
               keyboardType: TextInputType.number,
-              onChanged: (value) =>
-                  _updateAvioModelo(), // Actualización al cambiar cantidad
             ),
             const SizedBox(height: 10),
+            isUpdating
+                ? const Text("Avíos actualizado")
+                : const SizedBox.shrink(), // Muestra mensaje temporal
           ],
         ),
       ),
       actions: [
         ElevatedButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cerrar'),
+          onPressed: () {
+            Navigator.of(context).pop(); // Cierra el diálogo sin guardar
+          },
+          child: const Text('Cancelar'),
+        ),
+        ElevatedButton(
+          onPressed: () async {
+            await _updateAvioModelo();
+          },
+          child: _isSaving
+              ? const CircularProgressIndicator()
+              : const Text('Guardar'),
         ),
       ],
     );
