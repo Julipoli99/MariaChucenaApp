@@ -3,6 +3,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
+import 'package:gestion_indumentaria/models/ModeloCorte.dart';
 import 'package:gestion_indumentaria/models/RolloCorte.dart';
 import 'package:gestion_indumentaria/models/TipoProducto.dart';
 import 'package:gestion_indumentaria/models/Tela.dart';
@@ -52,6 +53,7 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
   List<ObservacionModel>? observaciones;
   String tituloObservacion = "Sin titulo";
   String descripcionObservacion = "Sin descripción";
+  List<ModeloCorte> modelosCorteListado = [];
 
   @override
   void initState() {
@@ -67,7 +69,7 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       setState(() {
-        modelosACortar = data;
+        modelosACortar = data.map((json) => Modelo.fromJson(json)).toList();
       });
       print(modelosACortar);
     } else {
@@ -106,16 +108,16 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
     }
   }
 
-  Modelo? getModeloCompleto(int id) {
+  Modelo getModeloCompleto(int id) {
     print('MODELO ID SELECCIONADO DENTRO DE GET MODELO: $selectedModeloId');
     try {
       final modeloSeleccionadoCompleto = modelosACortar.firstWhere(
-        (modelo) => modelo.id == id,
+        (m) => m.id == id,
       );
       return modeloSeleccionadoCompleto;
     } catch (e) {
       print('Tipo de modelo no encontrado: $modeloSeleccionadoCompleto');
-      return null;
+      throw ('Modelo no encontrado');
     }
   }
 
@@ -143,50 +145,34 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
 
   Future<void> createOrdenDeCorte() async {
     print(
-        'DENTRO DE CREAR ORDEN: telaID: $selectedTelaId   - MODELO $selectedModeloId   -  TALLES $selectedTalle');
+        'DENTRO DE CREAR ORDEN: telaID: $selectedTelaId   - MODELO $selectedModeloId   -  CATEGORIA: $selectedCategoriaTela   -  listado: ${modelosCorteListado.toString()}');
 
-    if ((selectedTelaId) == null ||
-        (selectedModeloId) == null ||
-        selectedTalle.isEmpty) {
+    if (modelosCorteListado.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Por favor, complete todos los campos.')),
       );
       return;
     }
 
-    // Mapear los talles seleccionados (selectedTalle) a la estructura de corte
-    // Mapear los talles seleccionados
-    final talleRepeticionList = selectedTalle.map((talleRepeticion) {
-      return {
-        'talleId': talleRepeticion.talleId,
-        'repeticion': talleRepeticion.repeticion,
-      };
-    }).toList();
+    print('LISTADO DE MODELOS CORTE EN CREATE ORDEN: ');
+    for (int i = 0; i < modelosCorteListado.length; i++) {
+      print(modelosCorteListado[i]);
+    }
+
+    final modelosCorteListadoJson =
+        (modelosCorteListado as List).map((modelo) => modelo.toJson()).toList();
+
+    print('JSON: $modelosCorteListadoJson');
 
     final orderData = {
-      'modelos': [
-        {
-          'modeloId': selectedModeloId,
-          'totalPrendas': 1,
-          'esParaEstampar': false,
-          'usaTelaSecundaria': false,
-          'usaTelaAuxiliar': false,
-          'observaciones': [
-            {
-              'titulo': tituloObservacion,
-              'descripcion': descripcionObservacion,
-            }
-          ],
-          'curva': talleRepeticionList, // Aquí insertamos la lista de talles
-        },
-      ],
+      'modelos': modelosCorteListadoJson,
       'rollos': [
         {
           'rolloId': selectedTelaId,
-          'categoria': selectedCategoriaTela.toString().split('.').last,
           'cantidadUtilizada': cantidadUtilizada,
-        },
-      ],
+          'categoria': selectedCategoriaTela.toString().split('.').last,
+        }
+      ]
     };
     print(' PREVIO AL TRYCATCH $orderData');
     try {
@@ -208,18 +194,18 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
       } else {
         final responseBody = json.decode(response.body);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(
-                  'Error al crear la orden de corte: ${responseBody['message'] ?? 'Error desconocido'}')),
+          const SnackBar(content: Text('Error al crear la orden de corte.')),
         );
         print(
-            'Error al crear la orden de corte: ${responseBody['message'] + response.statusCode ?? 'Error desconocido'}');
+            'Error al crear la orden de corte: ${responseBody['message']} ${response.statusCode.toString()}');
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error de conexión: $e')),
+        const SnackBar(
+            content: Text('Error de conexión interno del servidor.')),
       );
       print('Error de conexión: $e');
+      print("StackTrace: $stackTrace");
     }
   }
 
@@ -501,6 +487,56 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
             backgroundColor: Colors.grey,
           ),
           child: const Text('Cancelar'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            print(
+                'BOTON AGREGAR MODELO - modelo: $selectedModeloId, genero: $selectedGenero, talles:  $selectedTalle, observacion: $tituloObservacion  -  $descripcionObservacion}}');
+            if (selectedModeloId != null) {
+              final Modelo modeloCompleto =
+                  getModeloCompleto(selectedModeloId!);
+              print('pMODELO COMPLETO : $modeloCompleto');
+
+              ObservacionModel observacionCreada = ObservacionModel(
+                  id: 0,
+                  titulo: tituloObservacion,
+                  descripcion: descripcionObservacion);
+              List<ObservacionModel> obLista = [];
+              obLista.add(observacionCreada);
+
+              // ignore: unnecessary_null_comparison
+              if (modeloCompleto != null) {
+                setState(() {
+                  modelosCorteListado.add(ModeloCorte(
+                    id: 0,
+                    esParaEstampar: false,
+                    usaTelaSecundaria: false,
+                    usaTelaAuxiliar: false,
+                    modeloId: modeloCompleto.id,
+                    curvas: selectedTalle
+                        .map((talle) => TalleRepeticion(
+                              talleId: talle.talleId,
+                              repeticion: talle.repeticion,
+                              id: 0,
+                            ))
+                        .toList(),
+                    observacion: obLista,
+                  ));
+                });
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content: Text('Por favor, complete todos los campos.')),
+                );
+              }
+              // Resto del código
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Seleccione un modelo válido.')),
+              );
+            }
+          },
+          child: const Text('Agregar Modelo'),
         ),
         const SizedBox(width: 10),
         ElevatedButton(
