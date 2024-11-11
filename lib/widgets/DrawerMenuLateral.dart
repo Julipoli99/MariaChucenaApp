@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/TipoProducto.dart';
 import 'package:gestion_indumentaria/pages/Crud/TallesCrudView.dart';
+import 'package:gestion_indumentaria/pages/Login/inicio.dart';
+import 'package:gestion_indumentaria/pages/Login/registro.dart';
 import 'package:gestion_indumentaria/pages/Talles/tallesVista.dart';
 import 'package:gestion_indumentaria/pages/TipoProducto/registroTipoProducto.dart';
 import 'package:gestion_indumentaria/pages/Tizadas/CreacionTizadasPage.dart';
@@ -112,6 +114,26 @@ class DrawerMenuLateral extends StatelessWidget {
                   },
                 ),
               ),
+              // Icono de usuario
+              Padding(
+                padding: const EdgeInsets.only(left: 25.0),
+                child: ListTile(
+                  leading: const Icon(
+                      color: Colors.white, Icons.account_circle_outlined),
+                  title: const Text(
+                    'nuevo Usuario',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const RegistroScreen()),
+                    );
+                    print('Presionado boton de talles');
+                  },
+                ),
+              ),
             ],
           ),
 
@@ -128,6 +150,10 @@ class DrawerMenuLateral extends StatelessWidget {
                 style: TextStyle(color: Colors.white),
               ),
               onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                );
                 print('Presionado boton Cerrar Sesion');
               },
             ),

@@ -1,7 +1,68 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:gestion_indumentaria/pages/principal.dart';
+import 'package:http/http.dart' as http;
 
-class registroScreen extends StatelessWidget {
-  const registroScreen({super.key});
+enum TipoUsuario { USUARIO, ADMINISTRADOR, MODERADOR }
+
+class RegistroScreen extends StatefulWidget {
+  const RegistroScreen({super.key});
+
+  @override
+  _RegistroScreenState createState() => _RegistroScreenState();
+}
+
+class _RegistroScreenState extends State<RegistroScreen> {
+  final _nombreController = TextEditingController();
+  final _apellidoController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _contrasenaController = TextEditingController();
+  TipoUsuario? _tipoUsuario =
+      TipoUsuario.USUARIO; // Valor inicial del tipo de usuario
+
+  // Función para registrar un nuevo usuario
+  Future<void> crearUsuario() async {
+    final url =
+        'https://maria-chucena-api-production.up.railway.app/auth/register'; // Reemplaza con la URL de tu API
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        'nombre': _nombreController.text,
+        'apellido': _apellidoController.text,
+        'email': _emailController.text,
+        'password': _contrasenaController.text,
+        'tipoUsuario': _tipoUsuario
+            .toString()
+            .split('.')
+            .last, // Convertir a string (USUARIO, ADMINISTRADOR, MODERADOR)
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      // Si la respuesta es exitosa, mostramos un mensaje de éxito
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Usuario creado exitosamente.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      // Redirigir a la pantalla principal
+      Navigator.pushReplacement(
+        // ignore: use_build_context_synchronously
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+      );
+    } else {
+      // Si la respuesta no es exitosa, mostramos un mensaje de error
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Error al crear el usuario.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +83,6 @@ class registroScreen extends StatelessWidget {
                       constraints: BoxConstraints(maxWidth: 300),
                       child: Column(
                         children: [
-                          // Limitar el ancho máximo
                           const Text(
                             'Bienvenido A Maria Chucena',
                             style: TextStyle(
@@ -32,54 +92,66 @@ class registroScreen extends StatelessWidget {
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 20.0),
-                          const TextField(
-                            decoration: InputDecoration(
+                          TextField(
+                            controller: _nombreController,
+                            decoration: const InputDecoration(
                               labelText: 'Nombre',
                               hintText: 'nombre completo',
                               border: OutlineInputBorder(),
                             ),
                           ),
                           const SizedBox(height: 20.0),
-                          const TextField(
-                            decoration: InputDecoration(
+                          TextField(
+                            controller: _apellidoController,
+                            decoration: const InputDecoration(
+                              labelText: 'Apellido',
+                              hintText: 'apellido completo',
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                          const SizedBox(height: 20.0),
+                          TextField(
+                            controller: _emailController,
+                            decoration: const InputDecoration(
                               labelText: 'Email',
-                              hintText: 'Example@email.com',
+                              hintText: 'example@email.com',
                               border: OutlineInputBorder(),
                             ),
                           ),
                           const SizedBox(height: 20.0),
-                          const TextField(
-                            decoration: InputDecoration(
-                              labelText: 'Repetir el Email',
-                              hintText: 'Example@email.com',
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                          const SizedBox(height: 20.0),
-                          const TextField(
-                            decoration: InputDecoration(
+                          TextField(
+                            controller: _contrasenaController,
+                            decoration: const InputDecoration(
                               labelText: 'Contraseña',
-                              hintText: 'Mínimo 8',
+                              hintText: 'Mínimo 8 caracteres',
                               border: OutlineInputBorder(),
                             ),
                             obscureText: true,
                           ),
                           const SizedBox(height: 20.0),
-                          const TextField(
-                            decoration: InputDecoration(
-                              labelText: 'Repetir la Contraseña',
-                              hintText: 'Mínimo 8',
+                          // Dropdown para seleccionar el tipo de usuario
+                          DropdownButtonFormField<TipoUsuario>(
+                            value: _tipoUsuario,
+                            decoration: const InputDecoration(
+                              labelText: 'Tipo de Usuario',
                               border: OutlineInputBorder(),
                             ),
-                            obscureText: true,
+                            items: TipoUsuario.values.map((TipoUsuario tipo) {
+                              return DropdownMenuItem<TipoUsuario>(
+                                value: tipo,
+                                child: Text(tipo.toString().split('.').last),
+                              );
+                            }).toList(),
+                            onChanged: (TipoUsuario? nuevoTipo) {
+                              setState(() {
+                                _tipoUsuario = nuevoTipo;
+                              });
+                            },
                           ),
-
                           const SizedBox(height: 20.0),
                           ElevatedButton(
-                            onPressed: () {
-                              // Acción para iniciar sesión
-                            },
-                            child: const Text('Ingresar'),
+                            onPressed: crearUsuario,
+                            child: const Text('Crear Cuenta'),
                             style: ElevatedButton.styleFrom(
                               minimumSize: const Size(double.infinity, 50),
                             ),
@@ -96,8 +168,7 @@ class registroScreen extends StatelessWidget {
                 child: Container(
                   decoration: const BoxDecoration(
                     image: DecorationImage(
-                      image: AssetImage(
-                          'imagen/im.jpg'), // Imagen de fondo desde la carpeta 'imagenes'
+                      image: AssetImage('imagen/im.jpg'), // Imagen de fondo
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -106,7 +177,7 @@ class registroScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Image.asset(
-                          'imagen/logo.png', // Logo desde la carpeta 'imagenes'
+                          'imagen/logo.png', // Logo
                           height: 500,
                           width: 500,
                         ),
