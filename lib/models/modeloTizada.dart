@@ -3,14 +3,14 @@ import 'package:gestion_indumentaria/models/talleRepetecion.dart';
 
 class ModeloTizada {
   double consumo;
-  int modeloCorteId;
+  int? modeloCorteId;
   List<TalleRepeticion> curva;
   ModeloCorte? modelo;
   int? totalPrendas;
 
   ModeloTizada({
     required this.consumo,
-    required this.modeloCorteId,
+    this.modeloCorteId,
     required this.curva,
     this.modelo,
     this.totalPrendas,

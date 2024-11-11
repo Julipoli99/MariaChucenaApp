@@ -7,7 +7,6 @@ import 'dart:convert';
 
 import 'package:gestion_indumentaria/models/Corte.dart';
 import 'package:gestion_indumentaria/models/talle.dart';
-import 'package:gestion_indumentaria/models/talleRepetecion.dart';
 
 class BoxDialogCorte extends StatefulWidget {
   const BoxDialogCorte({
@@ -25,39 +24,64 @@ class BoxDialogCorte extends StatefulWidget {
 
 class _BoxDialogCorteState extends State<BoxDialogCorte> {
   late Future<List<Talle>> _tallesFuture;
-  late Future<List<Tizada>> _tizadasFuture;
+  List<dynamic> _tizadas =
+      []; // Aquí guardamos las tizadas que recibimos de la API
 
   @override
   void initState() {
     super.initState();
     _tallesFuture = fetchTalles(); // Llamada a la API para talles
-    _tizadasFuture = fetchTizadas(
-        widget.corte.id); // Llamada a la API para tizadas de este corte
+    fetchTizadas(widget.corte.id); // Llamada a la API para tizadas
   }
 
   Future<List<Talle>> fetchTalles() async {
-    final response = await http.get(
-        Uri.parse('https://maria-chucena-api-production.up.railway.app/talle'));
+    try {
+      final response = await http.get(Uri.parse(
+          'https://maria-chucena-api-production.up.railway.app/talle'));
 
-    if (response.statusCode == 200) {
-      List<dynamic> json = jsonDecode(response.body);
-      return json.map((e) => Talle.fromJson(e)).toList();
-    } else {
-      throw Exception('Error al cargar los talles');
+      if (response.statusCode == 200) {
+        List<dynamic> json = jsonDecode(response.body);
+        print('Talles cargados: $json'); // Print de los datos recibidos
+        return json.map((e) => Talle.fromJson(e)).toList();
+      } else {
+        throw Exception('Error al cargar los talles: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error al cargar los talles: $e');
+      rethrow; // Vuelve a lanzar el error para manejarlo en el lugar de la llamada
     }
   }
 
-  Future<List<Tizada>> fetchTizadas(int corteId) async {
-    final response = await http.get(Uri.parse(
-        'https://maria-chucena-api-production.up.railway.app/tizada/$corteId'));
+  // Ahora la función de fetchTizadas no devuelve un Future directamente.
+  void fetchTizadas(int corteId) async {
+    try {
+      final response = await http.get(Uri.parse(
+          'https://maria-chucena-api-production.up.railway.app/tizada/$corteId'));
 
-    if (response.statusCode == 200) {
-      List<dynamic> json = jsonDecode(response.body);
-      return json.isNotEmpty
-          ? json.map((e) => Tizada.fromJson(e)).toList()
-          : [];
-    } else {
-      throw Exception('Error al cargar las tizadas');
+      if (response.statusCode == 200) {
+        List<dynamic> json = jsonDecode(response.body);
+        print('Tizadas cargadas: $json'); // Imprime las tizadas recibidas
+
+        // Mapeamos solo a los valores de ancho y largo que necesitamos
+        setState(() {
+          _tizadas = json.map((e) {
+            // Creamos una nueva instancia de Tizada, pero puedes dejar la clase como está
+            return Tizada(
+              id: e['id'],
+              ancho: e['ancho']?.toDouble() ?? 0.0,
+              largo: e['largo']?.toDouble() ?? 0.0,
+              corteId: corteId,
+              modelos: [],
+              rollosUtilizados: [],
+            );
+          }).toList();
+        });
+      } else {
+        throw Exception('Error al cargar las tizadas');
+      }
+    } catch (e) {
+      print('Error al obtener las tizadas: $e');
+      // Aquí puedes manejar el error, por ejemplo, mostrando un mensaje al usuario
     }
   }
 
@@ -98,9 +122,7 @@ class _BoxDialogCorteState extends State<BoxDialogCorte> {
                   return Card(
                     margin: const EdgeInsets.symmetric(vertical: 8.0),
                     child: ListTile(
-                      title: Text(
-                        modeloCorte.modelo.nombre,
-                      ),
+                      title: Text(modeloCorte.modelo!.nombre),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -147,7 +169,7 @@ class _BoxDialogCorteState extends State<BoxDialogCorte> {
                           Text(
                               'Categoría: ${rolloCorte.categoria.name.toString()}'),
                           Text(
-                              'Cantidad Utilizada: ${rolloCorte.cantidadUtilizada}')
+                              'Cantidad Utilizada: ${rolloCorte.cantidadUtilizada}'),
                         ],
                       ),
                       trailing: IconButton(
@@ -166,23 +188,13 @@ class _BoxDialogCorteState extends State<BoxDialogCorte> {
               'Tizadas:',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            FutureBuilder<List<Tizada>>(
-              future:
-                  _tizadasFuture, // Mostramos las tizadas asociadas al corte
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Text('No hay tizadas disponibles.');
-                } else {
-                  final tizadas = snapshot.data!;
-                  return Flexible(
+            _tizadas.isEmpty
+                ? const Text('No hay tizadas disponibles.')
+                : Flexible(
                     child: ListView.builder(
-                      itemCount: tizadas.length,
+                      itemCount: _tizadas.length,
                       itemBuilder: (context, index) {
-                        final tizada = tizadas[index];
+                        final tizada = _tizadas[index];
                         return Card(
                           margin: const EdgeInsets.symmetric(vertical: 8.0),
                           child: ListTile(
@@ -190,27 +202,18 @@ class _BoxDialogCorteState extends State<BoxDialogCorte> {
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Ancho: ${tizada.ancho} cm'),
-                                Text('Largo: ${tizada.largo} cm'),
-                                const Text('Rollos:'),
-                                ...tizada.rollosUtilizados.map((rollo) {
-                                  return Text(' - ${rollo.capas} ');
-                                }).toList(),
-                                const Text('Modelos:'),
-                                ...tizada.modelos.map((modelo) {
-                                  return Text(
-                                      ' - ${modelo.consumo} (curva : ${modelo.curva})');
-                                }).toList(),
+                                // Asegúrate de mostrar 0 si los valores son nulos o no se recibieron
+                                Text(
+                                    'Ancho: ${tizada.ancho != 0.0 ? tizada.ancho : 'N/A'} cm'),
+                                Text(
+                                    'Largo: ${tizada.largo != 0.0 ? tizada.largo : 'N/A'} cm'),
                               ],
                             ),
                           ),
                         );
                       },
                     ),
-                  );
-                }
-              },
-            ),
+                  )
           ],
         ),
       ),
