@@ -51,34 +51,6 @@ class _BoxDialogModeloState extends State<BoxDialogModelo> {
     }
   }
 
-  /*// Función para agregar un nuevo avío
-  Future<void> addAvio() async {
-    final result = await showDialog<AvioModelo>(
-      context: context,
-      builder: (context) {
-        return EditAvioDialog(
-          modeloId: modelo.id,
-          avioModelo: AvioModelo(), // Avío vacío para agregar
-          onSave: (newAvioModelo) {
-            // Agregar el nuevo avío
-            setState(() {
-              modelo.avios?.add(newAvioModelo);
-            });
-            // Actualizar los modelos
-            widget.fetchModels();
-          },
-        );
-      },
-    );
-
-    if (result != null) {
-      // El nuevo avío se guardó correctamente
-      setState(() {
-        modelo.avios?.add(result); // Agregar el nuevo avío al modelo
-      });
-    }
-  }*/
-
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -128,8 +100,7 @@ class _BoxDialogModeloState extends State<BoxDialogModelo> {
                                 final index = modelo.observaciones
                                     ?.indexWhere((o) => o.id == result.id);
                                 if (index != null && index >= 0) {
-                                  modelo.observaciones?[index] =
-                                      result; // Actualizamos la observación
+                                  modelo.observaciones?[index] = result;
                                 }
                               });
 
@@ -183,7 +154,8 @@ class _BoxDialogModeloState extends State<BoxDialogModelo> {
                     margin: const EdgeInsets.symmetric(vertical: 4),
                     child: ListTile(
                       title: Text(
-                          'Avio: ${avioModelo?.avio?.nombre ?? 'Sin nombre'}'),
+                        'Avio: ${avioModelo?.avio?.nombre ?? 'Avío sin nombre'}',
+                      ),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -279,12 +251,6 @@ class _BoxDialogModeloState extends State<BoxDialogModelo> {
               ),
             ),
             const SizedBox(height: 10),
-            // Botón para agregar un nuevo avío
-            /*ElevatedButton(
-              onPressed: addAvio,
-              child: const Text('Agregar Nuevo Avío'),
-            ),*/
-            const SizedBox(height: 10),
             // Curvas
             Text(
               'Curva (${modelo.curva.length}):',
@@ -316,7 +282,6 @@ class _BoxDialogModeloState extends State<BoxDialogModelo> {
         TextButton(
           onPressed: () {
             Navigator.pop(context);
-            // Llamar a alguna función de guardado si es necesario
           },
           child: const Text('Guardar Cambios'),
         ),
