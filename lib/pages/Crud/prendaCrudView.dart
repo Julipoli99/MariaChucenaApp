@@ -37,9 +37,10 @@ class _PrendaCrudViewState extends State<Prendacrudview> {
                     showDialog(
                       context: context,
                       builder: (context) => AddPrendaDialog(
+                        prendasExistentes: prendas, // Pasar prendas existentes
                         onPrendaAdded: (Prenda nuevaPrenda) {
                           setState(() {
-                            prendas.add(nuevaPrenda); // Agrega el objeto Prenda
+                            prendas.add(nuevaPrenda);
                           });
                         },
                       ),
@@ -143,7 +144,12 @@ class _PrendaCrudViewState extends State<Prendacrudview> {
         setState(() {
           prendas.removeWhere((prenda) => prenda.id == id);
         });
-        print('prenda eliminado correctamente.');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Prenda eliminada correctamente'),
+            backgroundColor: Colors.green, // Fondo naranja
+          ),
+        );
       } else {
         print(
             'Error: No se pudo eliminar el prenda. Código de estado ${response.statusCode}');

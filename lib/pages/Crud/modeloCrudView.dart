@@ -211,7 +211,7 @@ class _ModelCrudViewState extends State<ModelCrudView> {
         return AlertDialog(
           title: const Text('Confirmar eliminación'),
           content:
-              const Text('¿Estás seguro de que deseas eliminar esta prenda?'),
+              const Text('¿Estás seguro de que deseas eliminar este modelo?'),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -219,8 +219,9 @@ class _ModelCrudViewState extends State<ModelCrudView> {
             ),
             ElevatedButton(
               onPressed: () {
-                deleteModel(id); // Llama a la función para eliminar el avio
-                Navigator.of(context).pop(); // Cierra el diálogo
+                deleteModel(id); // Elimina el modelo
+                Navigator.of(context)
+                    .pop(); // Cierra el diálogo después de eliminar
               },
               child: const Text('Eliminar'),
             ),
@@ -237,10 +238,24 @@ class _ModelCrudViewState extends State<ModelCrudView> {
 
     if (response.statusCode == 200) {
       setState(() {
+        // Elimina el modelo de la lista localmente
         models.removeWhere((model) => model.id == id);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Modelo eliminado correctamente'),
+            backgroundColor: Colors.green, // Fondo naranja
+          ),
+        );
       });
       print("Modelo eliminado");
     } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              'Error al eliminar el modelo: modelo vinculado con un corte.'),
+          backgroundColor: Colors.red, // Fondo naranja
+        ),
+      );
       print("Error al eliminar modelo: ${response.statusCode}");
     }
   }

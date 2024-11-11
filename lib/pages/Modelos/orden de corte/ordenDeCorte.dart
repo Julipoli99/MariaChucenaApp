@@ -176,7 +176,6 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
       );
       return;
     }
-
     // Mapear los talles seleccionados (selectedTalle) a la estructura de corte
     // Mapear los talles seleccionados
     final talleRepeticionList = selectedTalle.map((talleRepeticion) {

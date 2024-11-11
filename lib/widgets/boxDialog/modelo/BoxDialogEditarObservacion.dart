@@ -55,7 +55,7 @@ class _ModificadorObservacionDialogState
           descripcion: _descripcionController.text.trim(),
         ));
       } else {
-        _showError('Error al actualizar la observación. ${response.body}');
+        _showError('Complete todos los campos');
       }
     } catch (e) {
       _showError('Ocurrió un error: $e');

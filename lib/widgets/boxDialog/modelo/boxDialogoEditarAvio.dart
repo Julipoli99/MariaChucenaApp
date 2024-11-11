@@ -73,12 +73,20 @@ class _EditAvioDialogState extends State<EditAvioDialog> {
       return;
     }
 
+    final cantidad = _cantidadController.text.trim();
+    if (cantidad.isEmpty ||
+        int.tryParse(cantidad) == null ||
+        int.parse(cantidad) <= 0) {
+      _showError('Ingresa un valor válido.');
+      return;
+    }
+
     final url = Uri.parse(
       'https://maria-chucena-api-production.up.railway.app/modelo/avio-modelo/${widget.modeloId}/${widget.avioModelo.id}',
     );
 
     final updatedAvioModelo = {
-      "cantidadRequerida": int.parse(_cantidadController.text),
+      "cantidadRequerida": int.parse(cantidad),
       "esPorTalle": esPorTalle,
       "esPorColor": esPorColor,
       "talles": selectedTalles?.map((talle) => talle.toJson()).toList(),
@@ -100,19 +108,17 @@ class _EditAvioDialogState extends State<EditAvioDialog> {
       if (response.statusCode == 200) {
         setState(() {
           selectedTipoAvio = selectedTipoAvio ?? "Avíos actualizado";
-          isUpdating = false; // Desactiva el estado de actualización
+          isUpdating = false;
         });
 
-        // Callback para actualizar el CRUD
         widget.onSave(AvioModelo(
           id: widget.avioModelo.id,
-          cantidadRequerida: int.parse(_cantidadController.text),
+          cantidadRequerida: int.parse(cantidad),
           esPorTalle: esPorTalle,
           esPorColor: esPorColor,
           avioId: avioId!,
         ));
 
-        // Regresa a una página específica después de cerrar el diálogo
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (context) =>
@@ -120,7 +126,7 @@ class _EditAvioDialogState extends State<EditAvioDialog> {
           ),
         );
       } else {
-        _showError('Error al actualizar el AvioModelo. ${response.body}');
+        _showError('Error al actualizar el AvioModelo.');
       }
     } catch (e) {
       _showError('Ocurrió un error: $e');

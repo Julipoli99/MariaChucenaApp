@@ -70,8 +70,15 @@ class _NuevomodeloState extends State<Nuevomodelo> {
         selectedPrimForm == null ||
         selectedAuxForm == null ||
         selectedGenero == null ||
-        selectedPrenda == null) {
-      print("Por favor, complete todos los campos obligatorios.");
+        selectedPrenda == null ||
+        selectedAvios == null ||
+        selectedTallesForm.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor, complete todos los campos.'),
+          backgroundColor: Colors.orange, // Fondo naranja
+        ),
+      );
       return;
     }
 
@@ -119,6 +126,12 @@ class _NuevomodeloState extends State<Nuevomodelo> {
       // Verificar el estado de la respuesta
       if (response.statusCode == 201) {
         print("Modelo creado con éxito: ${response.body}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Modelo creado con éxito.'),
+            backgroundColor: Colors.green, // Fondo naranja
+          ),
+        );
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
