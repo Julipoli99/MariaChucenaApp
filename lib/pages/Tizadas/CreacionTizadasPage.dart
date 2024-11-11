@@ -164,7 +164,7 @@ class _CreacionTizadasPageState extends State<CreacionTizadasPage> {
         title: const Text('Maria Chucena ERP System'),
         toolbarHeight: 80,
         actions: [
-          buildLoggedInUser('assets/imagen/logo.png', 'Supervisor'),
+          buildLoggedInUser('assets/imagen/logo.png', ''),
         ],
       ),
       drawer: const DrawerMenuLateral(),

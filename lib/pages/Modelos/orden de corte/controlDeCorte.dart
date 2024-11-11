@@ -16,7 +16,7 @@ class ordenDeCorteregistradospage extends StatelessWidget {
         toolbarHeight: 80,
         actions: [
           buildLoggedInUser('assets/imagen/logo.png',
-              'Supervisor'), //el tipo de rango lo tendria que traer de la base de datos
+              ''), //el tipo de rango lo tendria que traer de la base de datos
         ],
       ),
       drawer: const DrawerMenuLateral(),
