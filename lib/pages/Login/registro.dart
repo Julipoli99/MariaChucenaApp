@@ -156,6 +156,23 @@ class _RegistroScreenState extends State<RegistroScreen> {
                               minimumSize: const Size(double.infinity, 50),
                             ),
                           ),
+                          const SizedBox(height: 20.0),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const HomePage(),
+                                ),
+                              );
+                              // Acción para CANCELAR
+                            },
+                            style: ElevatedButton.styleFrom(
+                              minimumSize: const Size(
+                                  double.infinity, 50), // Ajusta el tamaño
+                            ),
+                            child: const Text('Cancelar'),
+                          ),
                         ],
                       ),
                     ),

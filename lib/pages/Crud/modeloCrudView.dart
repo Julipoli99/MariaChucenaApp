@@ -195,7 +195,12 @@ class _ModelCrudViewState extends State<ModelCrudView> {
             );
           }).toList();
         });
-        print("Modelos cargados: ${models.length}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("cortes cargados correctamente."),
+            backgroundColor: Colors.green,
+          ),
+        );
       } else {
         print("Error al cargar modelos: ${response.statusCode}");
       }

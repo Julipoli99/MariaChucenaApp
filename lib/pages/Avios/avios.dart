@@ -17,7 +17,7 @@ class Avios extends StatelessWidget {
         toolbarHeight: 80,
         actions: [
           // Usuario logueado en la esquina superior derecha
-          buildLoggedInUser('assets/imagen/logo.png', 'Supervisor'),
+          buildLoggedInUser('assets/imagen/logo.png', ''),
         ],
       ),
       drawer: const DrawerMenuLateral(),
