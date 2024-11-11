@@ -4,6 +4,7 @@ import 'package:gestion_indumentaria/models/rolloCorte.dart';
 import 'package:gestion_indumentaria/models/tizada.dart';
 import 'package:gestion_indumentaria/widgets/boxDialog/corte/AlertDialogModificarModeloCorte.dart';
 import 'package:gestion_indumentaria/widgets/boxDialog/corte/alertDialogoRolloEdit.dart';
+import 'package:gestion_indumentaria/widgets/boxDialog/corte/tizadaDialogoEdit.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -110,6 +111,26 @@ class _BoxDialogCorteState extends State<BoxDialogCorte> {
       builder: (BuildContext context) {
         return AlertDialogRolloCorte(
           rolloCorte: rollo,
+          onUpdated: () {
+            setState(() {
+              // Recargamos los datos de los rollos si es necesario
+              fetchTizadas(
+                  widget.corte.id); // Recargamos las tizadas al actualizar
+            });
+            (context as Element)
+                .markNeedsBuild(); // Forzamos la reconstrucción del widget
+          },
+        );
+      },
+    );
+  }
+
+  void _showEditTotalTizadaDialog(BuildContext context, Tizada tizada) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialogTizadaCorte(
+          tizada: tizada,
           onUpdated: () {
             setState(() {
               // Recargamos los datos de los rollos si es necesario
@@ -232,6 +253,12 @@ class _BoxDialogCorteState extends State<BoxDialogCorte> {
                                 Text(
                                     'Largo: ${tizada.largo != 0.0 ? tizada.largo : 'N/A'} cm'),
                               ],
+                            ),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.edit),
+                              onPressed: () {
+                                _showEditTotalTizadaDialog(context, tizada);
+                              },
                             ),
                           ),
                         );
