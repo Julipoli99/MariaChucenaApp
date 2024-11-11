@@ -1,10 +1,85 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:gestion_indumentaria/pages/Login/recuperarContrase%C3%B1a.dart';
-import 'package:gestion_indumentaria/pages/Login/registro.dart';
 import 'package:gestion_indumentaria/pages/principal.dart';
+import 'package:http/http.dart' as http;
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _isLoading = false;
+  String _errorMessage = '';
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _login() async {
+    final email = _emailController.text;
+    final password = _passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
+      setState(() {
+        _errorMessage = 'Por favor ingrese ambos campos.';
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = '';
+    });
+
+    // Realizar la llamada a la API
+    const url =
+        'https://maria-chucena-api-production.up.railway.app/auth/login'; // Cambiar por la URL de tu API de login
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'email': email,
+        'pass': password,
+      }),
+    );
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (response.statusCode == 200) {
+      final responseData = jsonDecode(response.body);
+
+      // Para ver la estructura completa de la respuesta
+
+      // Verifica si la API devuelve un token o información relevante
+      final token = responseData['token'];
+      if (token != null) {
+        // Guardar token o manejar la autenticación
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        );
+      } else {
+        setState(() {
+          _errorMessage = 'Correo electrónico o contraseña incorrectos.';
+        });
+      }
+    } else {
+      print(response.body);
+      setState(() {
+        _errorMessage = 'Error al iniciar sesión. Intente de nuevo.';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,16 +110,18 @@ class LoginScreen extends StatelessWidget {
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 20.0),
-                          const TextField(
-                            decoration: InputDecoration(
+                          TextField(
+                            controller: _emailController,
+                            decoration: const InputDecoration(
                               labelText: 'Email',
                               hintText: 'Example@email.com',
                               border: OutlineInputBorder(),
                             ),
                           ),
                           const SizedBox(height: 20.0),
-                          const TextField(
-                            decoration: InputDecoration(
+                          TextField(
+                            controller: _passwordController,
+                            decoration: const InputDecoration(
                               labelText: 'Contraseña',
                               hintText: 'Mínimo 8',
                               border: OutlineInputBorder(),
@@ -52,21 +129,22 @@ class LoginScreen extends StatelessWidget {
                             obscureText: true,
                           ),
                           const SizedBox(height: 20.0),
-
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const HomePage()),
-                              );
-                            },
-                            child: const Text('Ingresar'),
-                            style: ElevatedButton.styleFrom(
-                              minimumSize: const Size(double.infinity, 50),
-                            ),
-                          ),
+                          _isLoading
+                              ? const CircularProgressIndicator() // Mostrar indicador de carga
+                              : ElevatedButton(
+                                  onPressed: _login,
+                                  child: const Text('Ingresar'),
+                                  style: ElevatedButton.styleFrom(
+                                    minimumSize:
+                                        const Size(double.infinity, 50),
+                                  ),
+                                ),
                           const SizedBox(height: 20.0),
+                          if (_errorMessage.isNotEmpty)
+                            Text(
+                              _errorMessage,
+                              style: const TextStyle(color: Colors.red),
+                            ),
                         ],
                       ),
                     ),

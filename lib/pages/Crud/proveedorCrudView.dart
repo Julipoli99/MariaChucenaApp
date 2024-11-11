@@ -87,7 +87,7 @@ class _ProvedorCrudViewState extends State<Provedorcrudview> {
                                 },
                               ),
                             );
-                            print('editar  proveedor: ${proveedor.nombre}');
+                            print('editar proveedor: ${proveedor.nombre}');
                           },
                           icon: const Icon(Icons.create_sharp),
                         ),
@@ -111,30 +111,57 @@ class _ProvedorCrudViewState extends State<Provedorcrudview> {
   void fetchModels() async {
     const url = "https://maria-chucena-api-production.up.railway.app/proveedor";
     final uri = Uri.parse(url);
-    final response = await http.get(uri);
+    try {
+      final response = await http.get(uri);
 
-    // Imprimir la respuesta de la API para depuración
-    print(response.body);
+      // Verificar la respuesta de la API
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonData = jsonDecode(response.body);
 
-    final List<dynamic> jsonData = jsonDecode(response.body);
+        setState(() {
+          provedores = jsonData.map((json) {
+            return Proveedor(
+              id: json['id'] ?? 0, // Asignar un valor por defecto si es null
+              nombre: json['nombre'] ??
+                  'Sin nombre', // Asignar un valor por defecto
+              telefono: json['telefono'] ?? 'Sin telefono',
+            );
+          }).toList();
+        });
 
-    setState(() {
-      provedores = jsonData.map((json) {
-        return Proveedor(
-          id: json['id'] ?? 0, // Asignar un valor por defecto si es null
-          nombre:
-              json['nombre'] ?? 'Sin nombre', // Asignar un valor por defecto
-          telefono: json['telefono'] ?? 'Sin telefono',
+        // Mostrar SnackBar de éxito
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Proveedores cargados correctamente.'),
+            backgroundColor: Colors.green, // Color verde para éxito
+          ),
         );
-      }).toList();
-    });
 
-    print("proveedores cargados");
+        print("proveedores cargados");
+      } else {
+        print(
+            'Error: No se pudieron cargar los proveedores. Código de estado ${response.statusCode}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Error al cargar los proveedores.'),
+            backgroundColor: Colors.red, // Color rojo para error
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error al cargar los proveedores: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Error al cargar los proveedores.'),
+          backgroundColor: Colors.red, // Color rojo para error
+        ),
+      );
+    }
   }
 
   Future<void> deleteProvedor(int id) async {
     final url =
-        'https://maria-chucena-api-production.up.railway.app/proveedor/$id'; // Endpoint para eliminar un avio
+        'https://maria-chucena-api-production.up.railway.app/proveedor/$id'; // Endpoint para eliminar un proveedor
     final uri = Uri.parse(url);
 
     try {
@@ -142,16 +169,35 @@ class _ProvedorCrudViewState extends State<Provedorcrudview> {
 
       if (response.statusCode == 200 || response.statusCode == 204) {
         setState(() {
-          provedores.removeWhere(
-              (prenda) => prenda.id == id); // Remover avio localmente
+          provedores.removeWhere((proveedor) =>
+              proveedor.id == id); // Remover proveedor localmente
         });
+        // Mostrar SnackBar de éxito
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Proveedor eliminado correctamente.'),
+            backgroundColor: Colors.green, // Color verde para éxito
+          ),
+        );
         print('proveedor eliminado correctamente.');
       } else {
         print(
             'Error: No se pudo eliminar el proveedor. Código de estado ${response.statusCode}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Error al eliminar el proveedor.'),
+            backgroundColor: Colors.red, // Color rojo para error
+          ),
+        );
       }
     } catch (e) {
-      print('Error al eliminar la proveedor: $e');
+      print('Error al eliminar el proveedor: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Error al eliminar el proveedor.'),
+          backgroundColor: Colors.red, // Color rojo para error
+        ),
+      );
     }
   }
 
@@ -161,8 +207,8 @@ class _ProvedorCrudViewState extends State<Provedorcrudview> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Confirmar eliminación'),
-          content:
-              const Text('¿Estás seguro de que deseas eliminar este provedor?'),
+          content: const Text(
+              '¿Estás seguro de que deseas eliminar este proveedor?'),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -170,10 +216,15 @@ class _ProvedorCrudViewState extends State<Provedorcrudview> {
             ),
             ElevatedButton(
               onPressed: () {
-                deleteProvedor(id); // Llama a la función para eliminar el avio
+                deleteProvedor(
+                    id); // Llama a la función para eliminar el proveedor
                 Navigator.of(context).pop(); // Cierra el diálogo
               },
               child: const Text('Eliminar'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor:
+                    Colors.red, // Color rojo para el botón de eliminar
+              ),
             ),
           ],
         );
