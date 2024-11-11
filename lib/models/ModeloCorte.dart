@@ -51,7 +51,7 @@ class ModeloCorte {
       'totalPrendas': totalPrendas,
       'modelo': modelo.toJson(), // Asumiendo que Modelo tiene un toJson
       'observacion': observacion?.map((obs) => obs.toJson()).toList(),
-      'curvas': curvas.map((curva) => curva.toJson()).toList(),
+      'curva': curvas.map((curva) => curva.toJson()).toList(),
     };
   }
 }
