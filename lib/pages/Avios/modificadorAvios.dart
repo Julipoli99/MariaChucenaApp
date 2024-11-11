@@ -16,7 +16,7 @@ class ModificadoraviosDialog extends StatefulWidget {
 class _ModificadoraviosDialogState extends State<ModificadoraviosDialog> {
   Avio? avioData;
   int cantidadInicial = 0;
-  int cantidadActual = 0;
+  int cantidadActual = -1; // Valor inicial inválido
   List<String> proveedores = [];
   String? selectedProveedor;
 
@@ -69,23 +69,32 @@ class _ModificadoraviosDialogState extends State<ModificadoraviosDialog> {
   }
 
   Future<void> updateStock() async {
-    if (avioData != null) {
-      final nuevaCantidad = cantidadActual;
-      final response = await http.patch(
-        Uri.parse(
-            'https://maria-chucena-api-production.up.railway.app/avio/${avioData!.id}'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({'stock': nuevaCantidad}),
-      );
-
-      if (response.statusCode == 200) {
-        Navigator.of(context).pop(true);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Stock actualizado correctamente')),
+    if (cantidadActual > 0) {
+      if (avioData != null) {
+        final nuevaCantidad = cantidadActual;
+        final response = await http.patch(
+          Uri.parse(
+              'https://maria-chucena-api-production.up.railway.app/avio/${avioData!.id}'),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode({'stock': nuevaCantidad}),
         );
-      } else {
-        throw Exception('Error al actualizar el stock: ${response.body}');
+
+        if (response.statusCode == 200) {
+          Navigator.of(context)
+              .pop(true); // Retorna true solo si se guarda exitosamente
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Stock actualizado correctamente')),
+          );
+        } else {
+          throw Exception('Error al actualizar el stock: ${response.body}');
+        }
       }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Agregar una nueva cantidad para actualizar stock'),
+        ),
+      );
     }
   }
 
@@ -112,7 +121,8 @@ class _ModificadoraviosDialogState extends State<ModificadoraviosDialog> {
             decoration: const InputDecoration(labelText: 'Cantidad Actual'),
             onChanged: (value) {
               setState(() {
-                cantidadActual = int.tryParse(value) ?? cantidadInicial;
+                cantidadActual = int.tryParse(value) ??
+                    -1; // Si no es número, valor inválido
               });
             },
           ),

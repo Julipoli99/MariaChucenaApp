@@ -36,7 +36,34 @@ class _EditModelDialogState extends State<EditModelDialog> {
     selectedTallesForm = List<Talle>.from(widget.modelo.curva);
   }
 
+  // Método para mostrar un mensaje de error o advertencia con diferentes colores
+  void _showSnackbar(String message, Color backgroundColor) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: backgroundColor,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(10),
+      ),
+    );
+  }
+
   Future<void> _updateModeloInApi() async {
+    final String nombre = _nombreController.text.trim();
+
+    // Validaciones
+    if (nombre.isEmpty) {
+      _showSnackbar('El nombre del modelo no puede estar vacío',
+          Colors.orange); // Snackbar naranja
+      return;
+    }
+
+    if (RegExp(r'^[0-9]+$').hasMatch(nombre)) {
+      _showSnackbar(
+          'El nombre no puede ser numérico', Colors.red); // Snackbar rojo
+      return;
+    }
+
     final String apiUrl =
         'https://maria-chucena-api-production.up.railway.app/modelo/${widget.modelo.id}';
 
@@ -47,7 +74,7 @@ class _EditModelDialogState extends State<EditModelDialog> {
         Uri.parse(apiUrl),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'nombre': _nombreController.text.trim(),
+          'nombre': nombre,
           'tieneTelaSecundaria': _tieneTelaSecundaria,
           'tieneTelaAuxiliar': _tieneTelaAuxiliar,
           'curva': selectedTallesForm.map((talle) => talle.toJson()).toList(),
@@ -59,20 +86,17 @@ class _EditModelDialogState extends State<EditModelDialog> {
         final updatedModelo = Modelo.fromJson(responseData);
         widget.onModeloModified(updatedModelo);
         Navigator.of(context).pop(true);
+        _showSnackbar('Modelo actualizado', Colors.green);
       } else {
-        _showError('Error al actualizar el modelo en la API. ${response.body}');
+        _showSnackbar(
+            'Error al actualizar el modelo en la API. ${response.body}',
+            Colors.red);
       }
     } catch (e) {
-      _showError('Ocurrió un error: $e');
+      _showSnackbar('Ocurrió un error: $e', Colors.red);
     } finally {
       setState(() => _isSaving = false);
     }
-  }
-
-  void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
   }
 
   @override

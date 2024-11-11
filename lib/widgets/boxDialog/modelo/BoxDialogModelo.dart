@@ -43,6 +43,12 @@ class _BoxDialogModeloState extends State<BoxDialogModelo> {
       // Eliminar el avío localmente
       setState(() {
         modelo.avios?.removeWhere((a) => a.id == avioModelo.id);
+          ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Avio del modelo eliminado correctamente'),
+            backgroundColor: Colors.green, // Fondo naranja
+          ),
+        );
       });
       // Actualizar los modelos
       widget.fetchModels();
@@ -215,7 +221,6 @@ class _BoxDialogModeloState extends State<BoxDialogModelo> {
                           IconButton(
                             icon: const Icon(Icons.delete),
                             onPressed: () {
-                              // Confirmar eliminación del avío
                               showDialog(
                                 context: context,
                                 builder: (context) {
@@ -234,6 +239,7 @@ class _BoxDialogModeloState extends State<BoxDialogModelo> {
                                         onPressed: () async {
                                           await deleteAvio(avioModelo!);
                                           Navigator.of(context).pop();
+                                          
                                         },
                                         child: const Text('Eliminar'),
                                       ),
@@ -277,13 +283,7 @@ class _BoxDialogModeloState extends State<BoxDialogModelo> {
       actions: [
         TextButton(
           onPressed: widget.onCancel,
-          child: const Text('Cancelar'),
-        ),
-        TextButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: const Text('Guardar Cambios'),
+          child: const Text('Cerrar'),
         ),
       ],
     );

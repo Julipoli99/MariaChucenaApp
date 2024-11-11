@@ -5,10 +5,14 @@ import 'package:gestion_indumentaria/models/tipoPrenda.dart';
 import 'package:http/http.dart' as http;
 
 class AddPrendaDialog extends StatefulWidget {
-  final ValueChanged<Prenda> onPrendaAdded; // Cambiado a Prenda
+  final ValueChanged<Prenda> onPrendaAdded;
+  final List<Prenda> prendasExistentes; // Lista de prendas existentes
 
-  const AddPrendaDialog({Key? key, required this.onPrendaAdded})
-      : super(key: key);
+  const AddPrendaDialog({
+    Key? key,
+    required this.onPrendaAdded,
+    required this.prendasExistentes,
+  }) : super(key: key);
 
   @override
   _AddPrendaDialogState createState() => _AddPrendaDialogState();
@@ -16,7 +20,7 @@ class AddPrendaDialog extends StatefulWidget {
 
 class _AddPrendaDialogState extends State<AddPrendaDialog> {
   final TextEditingController _prendaController = TextEditingController();
-  bool _isSaving = false; // Para mostrar un loader mientras se guarda.
+  bool _isSaving = false;
 
   Future<void> _savePrendaToApi(String prenda) async {
     const String apiUrl =
@@ -35,7 +39,7 @@ class _AddPrendaDialogState extends State<AddPrendaDialog> {
           id: responseData['id'],
           nombre: responseData['tipo'],
         );
-        widget.onPrendaAdded(newPrenda); // Envía el objeto Prenda al callback
+        widget.onPrendaAdded(newPrenda);
       } else {
         _showError('Error al guardar la prenda en la API. ${response.body}');
       }
@@ -49,8 +53,26 @@ class _AddPrendaDialogState extends State<AddPrendaDialog> {
 
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.orange, // Fondo rojo para el error
+      ),
     );
+  }
+
+  void _validateAndSavePrenda() {
+    final nuevaPrenda = _prendaController.text.trim().toUpperCase();
+
+    // Verificar si el nombre de la prenda ya existe en la lista de prendas
+    final prendaExiste = widget.prendasExistentes.any(
+      (prenda) => prenda.nombre.toUpperCase() == nuevaPrenda,
+    );
+
+    if (prendaExiste) {
+      _showError('Ya existe una prenda con este nombre.');
+    } else if (nuevaPrenda.isNotEmpty) {
+      _savePrendaToApi(nuevaPrenda);
+    }
   }
 
   @override
@@ -69,21 +91,21 @@ class _AddPrendaDialogState extends State<AddPrendaDialog> {
           child: const Text('Cancelar'),
         ),
         ElevatedButton(
-          onPressed: _isSaving
-              ? null
-              : () {
-                  final nuevaPrenda = _prendaController.text.trim();
-                  if (nuevaPrenda.isNotEmpty) {
-                    _savePrendaToApi(nuevaPrenda);
-                  }
-                },
+          onPressed: () {
+            final nuevaPrenda = _prendaController.text.trim();
+            if (nuevaPrenda.isEmpty) {
+              _showError('Por favor, complete el campo de la prenda.');
+            } else {
+              _validateAndSavePrenda();
+            }
+          },
           child: _isSaving
               ? const SizedBox(
                   width: 20,
                   height: 20,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('Agregar'),
+              : const Text('Agregar'), // Siempre muestra "Agregar"
         ),
       ],
     );

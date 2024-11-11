@@ -42,7 +42,6 @@ class _AvioCrudViewState extends State<Avioscrudview> {
     );
 
     if (result == true) {
-      // Si se modifica el avío, actualizar la lista
       _fetchAvios();
     }
   }
@@ -83,8 +82,8 @@ class _AvioCrudViewState extends State<Avioscrudview> {
               encabezados: const [
                 "ID",
                 "NOMBRE",
-                "PROVEEDORES",
-                "Stock",
+                "PROVEEDOR",
+                "STOCK",
                 "OPCIONES",
               ],
               items: avios,

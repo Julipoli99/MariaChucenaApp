@@ -142,25 +142,36 @@ class _NuevoaviosDialogState extends State<NuevoaviosDialog> {
               children: [
                 ElevatedButton(
                   onPressed: () {
-                    if (_tipoController.text.isNotEmpty &&
-                        selectedProveedorId != null &&
-                        _codigoProveedorController.text.isNotEmpty &&
-                        _cantidadController.text.isNotEmpty) {
-                      _guardarAvios(
-                        _tipoController.text,
-                        _codigoProveedorController.text,
-                        selectedProveedorId,
-                        _cantidadController.text,
-                      );
-                    } else {
+                    // Verificar si la cantidad ingresada es un número
+                    if (int.tryParse(_cantidadController.text) == null) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                             content:
-                                Text('Por favor completa todos los campos.')),
+                                Text('Cantidad inválida, ingrese un número')),
                       );
+                    } else {
+                      // Verificar si todos los campos están completos
+                      if (_tipoController.text.isNotEmpty &&
+                          selectedProveedorId != null &&
+                          _codigoProveedorController.text.isNotEmpty &&
+                          _cantidadController.text.isNotEmpty) {
+                        // Guardar el avío si todos los datos son válidos
+                        _guardarAvios(
+                          _tipoController.text,
+                          _codigoProveedorController.text,
+                          selectedProveedorId,
+                          _cantidadController.text,
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content:
+                                  Text('Por favor completa todos los campos.')),
+                        );
+                      }
                     }
                   },
-                  child: const Text('Guardar avíos'),
+                  child: const Text('Guardar avío'),
                 ),
                 const SizedBox(width: 10),
                 TextButton(

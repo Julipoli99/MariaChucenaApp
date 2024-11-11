@@ -32,7 +32,6 @@ class RolloCorte {
     return {
       'id': id,
       'cantidadUtilizada': cantidadUtilizada,
-      'rollo': rollo?.toJson(), // Usa ?. para evitar null pointer exception
       'categoria': categoria.toString().split('.').last,
       'rolloId': rolloId,
     };
