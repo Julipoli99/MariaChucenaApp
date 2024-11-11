@@ -7,6 +7,7 @@ import 'package:gestion_indumentaria/models/ModeloCorte.dart';
 import 'package:gestion_indumentaria/models/rolloCorte.dart';
 import 'package:gestion_indumentaria/models/talleRepetecion.dart';
 import 'package:gestion_indumentaria/pages/Modelos/orden%20de%20corte/controlDeCorte.dart';
+import 'package:gestion_indumentaria/pages/Modelos/orden%20de%20corte/ordenDeCorte.dart';
 import 'package:gestion_indumentaria/widgets/DrawerMenuLateral.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
 import 'package:gestion_indumentaria/widgets/TalleRepeticionSelector.dart';
@@ -305,10 +306,29 @@ class _CreacionTizadasPageState extends State<CreacionTizadasPage> {
 
                         const SizedBox(height: 30),
 
-                        // Botón de guardar
-                        ElevatedButton(
-                          onPressed: createTizada,
-                          child: const Text('Crear tizada'),
+                        Row(
+                          mainAxisAlignment:
+                              MainAxisAlignment.start, // Centra los botones
+                          children: [
+                            ElevatedButton(
+                              onPressed: createTizada,
+                              child: const Text('Crear tizada'),
+                            ),
+                            const SizedBox(
+                                width: 16), // Espacio entre los botones
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const ordenDeCorteregistradospage(),
+                                  ),
+                                );
+                              },
+                              child: const Text('cancelar'),
+                            ),
+                          ],
                         ),
                       ],
                     ),

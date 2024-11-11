@@ -3,12 +3,12 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:gestion_indumentaria/models/Modelo.dart';
-import 'package:gestion_indumentaria/models/ModeloCorte.dart';
 import 'package:gestion_indumentaria/models/RolloCorte.dart';
 import 'package:gestion_indumentaria/models/TipoProducto.dart';
 import 'package:gestion_indumentaria/models/Tela.dart';
 import 'package:gestion_indumentaria/models/observacion.dart';
 import 'package:gestion_indumentaria/models/talleRepetecion.dart';
+import 'package:gestion_indumentaria/pages/TipoProducto/nuevoRegistro.dart';
 import 'package:gestion_indumentaria/pages/Tizadas/CreacionTizadasPage.dart';
 import 'package:gestion_indumentaria/pages/principal.dart';
 import 'package:gestion_indumentaria/widgets/HomePage.dart';
@@ -53,7 +53,6 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
   List<ObservacionModel>? observaciones;
   String tituloObservacion = "Sin titulo";
   String descripcionObservacion = "Sin descripción";
-  List<ModeloCorte> modelosCorteListado = [];
 
   @override
   void initState() {
@@ -69,11 +68,27 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       setState(() {
-        modelosACortar = data.map((json) => Modelo.fromJson(json)).toList();
+        modelosACortar =
+            List<Modelo>.from(data.map((item) => Modelo.fromJson(item)));
       });
-      print(modelosACortar);
+      print('Modelos cargados: $modelosACortar'); // Verifica el contenido
     } else {
       print('Error al cargar los modelos');
+    }
+  }
+
+  Modelo? getModeloCompleto(int id) {
+    print('MODELO ID SELECCIONADO DENTRO DE GET MODELO: $id');
+    try {
+      final modeloSeleccionadoCompleto = modelosACortar.firstWhere(
+        (m) => m.id == id,
+        orElse: () =>
+            throw ('Modelo no encontrado'), // Manejo de error si no se encuentra
+      );
+      return modeloSeleccionadoCompleto;
+    } catch (e) {
+      print('Error: $e');
+      return null; // Cambia esto si necesitas manejar el error de otra manera
     }
   }
 
@@ -108,19 +123,6 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
     }
   }
 
-  Modelo getModeloCompleto(int id) {
-    print('MODELO ID SELECCIONADO DENTRO DE GET MODELO: $selectedModeloId');
-    try {
-      final modeloSeleccionadoCompleto = modelosACortar.firstWhere(
-        (m) => m.id == id,
-      );
-      return modeloSeleccionadoCompleto;
-    } catch (e) {
-      print('Tipo de modelo no encontrado: $modeloSeleccionadoCompleto');
-      throw ('Modelo no encontrado');
-    }
-  }
-
   Future<void> fetchTipoProductos() async {
     const url =
         'https://maria-chucena-api-production.up.railway.app/tipo-producto';
@@ -143,36 +145,67 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
     }
   }
 
+  TipoProducto? getTipoProductoCompleto(int id) {
+    print('tipo Producto ID SELECCIONADO DENTRO DE GET MODELO: $id');
+    try {
+      final produto = tipoProductos.firstWhere(
+        (m) => m.id == id,
+        orElse: () =>
+            throw ('Modelo no encontrado'), // Manejo de error si no se encuentra
+      );
+      return produto;
+    } catch (e) {
+      print('Error: $e');
+      return null; // Cambia esto si necesitas manejar el error de otra manera
+    }
+  }
+
   Future<void> createOrdenDeCorte() async {
     print(
-        'DENTRO DE CREAR ORDEN: telaID: $selectedTelaId   - MODELO $selectedModeloId   -  CATEGORIA: $selectedCategoriaTela   -  listado: ${modelosCorteListado.toString()}');
+        'DENTRO DE CREAR ORDEN: telaID: $selectedTelaId   - MODELO $selectedModeloId   -  TALLES $selectedTalle');
 
-    if (modelosCorteListado.isEmpty) {
+    if ((selectedTelaId) == null ||
+        (selectedModeloId) == null ||
+        selectedTalle.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Por favor, complete todos los campos.')),
       );
       return;
     }
 
-    print('LISTADO DE MODELOS CORTE EN CREATE ORDEN: ');
-    for (int i = 0; i < modelosCorteListado.length; i++) {
-      print(modelosCorteListado[i]);
-    }
-
-    final modelosCorteListadoJson =
-        (modelosCorteListado as List).map((modelo) => modelo.toJson()).toList();
-
-    print('JSON: $modelosCorteListadoJson');
+    // Mapear los talles seleccionados (selectedTalle) a la estructura de corte
+    // Mapear los talles seleccionados
+    final talleRepeticionList = selectedTalle.map((talleRepeticion) {
+      return {
+        'talleId': talleRepeticion.talleId,
+        'repeticion': talleRepeticion.repeticion,
+      };
+    }).toList();
 
     final orderData = {
-      'modelos': modelosCorteListadoJson,
+      'modelos': [
+        {
+          'modeloId': selectedModeloId,
+          'totalPrendas': 1,
+          'esParaEstampar': false,
+          'usaTelaSecundaria': false,
+          'usaTelaAuxiliar': false,
+          'observaciones': [
+            {
+              'titulo': tituloObservacion,
+              'descripcion': descripcionObservacion,
+            }
+          ],
+          'curva': talleRepeticionList, // Aquí insertamos la lista de talles
+        },
+      ],
       'rollos': [
         {
           'rolloId': selectedTelaId,
-          'cantidadUtilizada': cantidadUtilizada,
           'categoria': selectedCategoriaTela.toString().split('.').last,
-        }
-      ]
+          'cantidadUtilizada': cantidadUtilizada,
+        },
+      ],
     };
     print(' PREVIO AL TRYCATCH $orderData');
     try {
@@ -194,18 +227,18 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
       } else {
         final responseBody = json.decode(response.body);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error al crear la orden de corte.')),
+          SnackBar(
+              content: Text(
+                  'Error al crear la orden de corte: ${responseBody['message'] ?? 'Error desconocido'}')),
         );
         print(
-            'Error al crear la orden de corte: ${responseBody['message']} ${response.statusCode.toString()}');
+            'Error al crear la orden de corte: ${responseBody['message'] + response.statusCode ?? 'Error desconocido'}');
       }
-    } catch (e, stackTrace) {
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Error de conexión interno del servidor.')),
+        SnackBar(content: Text('Error de conexión: $e')),
       );
       print('Error de conexión: $e');
-      print("StackTrace: $stackTrace");
     }
   }
 
@@ -302,6 +335,20 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
                 });
               }),
               const SizedBox(height: 20),
+              buildDropdownField(
+                'Categoría',
+                CategoriaTela.values
+                    .map((e) => e.toString().split('.').last)
+                    .toList(),
+                context,
+                (value) {
+                  setState(() {
+                    selectedCategoriaTela = CategoriaTela.values.firstWhere(
+                        (e) => e.toString().split('.').last == value);
+                  });
+                },
+              ),
+              const SizedBox(height: 20),
               // Sección: Modelo a Cortar
               _buildSectionTitle('Modelo'),
 
@@ -337,21 +384,6 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
               const SizedBox(height: 10),
 
               // Sección: Categoría
-              _buildSectionTitle('Categoría'),
-              buildDropdownField(
-                'Categoría',
-                CategoriaTela.values
-                    .map((e) => e.toString().split('.').last)
-                    .toList(),
-                context,
-                (value) {
-                  setState(() {
-                    selectedCategoriaTela = CategoriaTela.values.firstWhere(
-                        (e) => e.toString().split('.').last == value);
-                  });
-                },
-              ),
-              const SizedBox(height: 10),
 
               // Sección: Talle y Repetición
               _buildSectionTitle('Talle y Repetición'),
@@ -483,60 +515,7 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
               ),
             );
           },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.grey,
-          ),
           child: const Text('Cancelar'),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            print(
-                'BOTON AGREGAR MODELO - modelo: $selectedModeloId, genero: $selectedGenero, talles:  $selectedTalle, observacion: $tituloObservacion  -  $descripcionObservacion}}');
-            if (selectedModeloId != null) {
-              final Modelo modeloCompleto =
-                  getModeloCompleto(selectedModeloId!);
-              print('pMODELO COMPLETO : $modeloCompleto');
-
-              ObservacionModel observacionCreada = ObservacionModel(
-                  id: 0,
-                  titulo: tituloObservacion,
-                  descripcion: descripcionObservacion);
-              List<ObservacionModel> obLista = [];
-              obLista.add(observacionCreada);
-
-              // ignore: unnecessary_null_comparison
-              if (modeloCompleto != null) {
-                setState(() {
-                  modelosCorteListado.add(ModeloCorte(
-                    id: 0,
-                    esParaEstampar: false,
-                    usaTelaSecundaria: false,
-                    usaTelaAuxiliar: false,
-                    modeloId: modeloCompleto.id,
-                    curvas: selectedTalle
-                        .map((talle) => TalleRepeticion(
-                              talleId: talle.talleId,
-                              repeticion: talle.repeticion,
-                              id: 0,
-                            ))
-                        .toList(),
-                    observacion: obLista,
-                  ));
-                });
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text('Por favor, complete todos los campos.')),
-                );
-              }
-              // Resto del código
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Seleccione un modelo válido.')),
-              );
-            }
-          },
-          child: const Text('Agregar Modelo'),
         ),
         const SizedBox(width: 10),
         ElevatedButton(
@@ -544,19 +523,6 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
           child: const Text('Crear Orden'),
         ),
         const SizedBox(width: 10),
-        ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => CreacionTizadasPage(
-                  idCorte: 3,
-                ),
-              ),
-            );
-          }, // Lógica para crear tizadas
-          child: const Text('Crear Tizadas'),
-        ),
       ],
     );
   }
@@ -689,9 +655,15 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
                 ? Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Modelo seleccionado: $selectedModeloId'),
+                      const Text(
+                        'Rollo:',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                       Text(
-                          'Tipo de tela: ${selectedTipoDeTela?.descripcion ?? 'Ninguno'}'),
+                          'rollo seleccionado: ${getTelaCompleto(selectedTelaId!)?.descripcion}'),
+                      Text('color: ${getTelaCompleto(selectedTelaId!)?.color}'),
+                      Text(
+                          'Tipo de tela: ${getTipoProductoCompleto(selectedTipoProductoId!)?.nombre ?? 'Ninguno'}'),
                       Text(
                           'Cantidad utilizada: ${cantidadUtilizada ?? 'No especificada'}'),
                       Text(
@@ -709,13 +681,13 @@ class _OrdenDeCorteScreenState extends State<OrdenDeCorteScreen> {
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       Text(
-                          'Código: ${modeloSeleccionadoCompleto?.codigo ?? 'No disponible'}'),
+                          'Código: ${getModeloCompleto(selectedModeloId!)?.codigo}'),
                       Text(
-                          'Nombre: ${modeloSeleccionadoCompleto?.nombre ?? 'No disponible'}'),
+                          'Nombre: ${getModeloCompleto(selectedModeloId!)?.nombre}'),
                       Text(
-                          'Categoría: ${modeloSeleccionadoCompleto?.categoriaTipo ?? 'No disponible'}'),
+                          'Categoría: ${getModeloCompleto(selectedModeloId!)?.categoriaTipo}'),
                       Text(
-                          'Género: ${modeloSeleccionadoCompleto?.genero ?? 'No disponible'}'),
+                          'Género: ${getModeloCompleto(selectedModeloId!)?.genero}'),
                       const SizedBox(height: 10),
                       const Text(
                         'Talles seleccionados:',
